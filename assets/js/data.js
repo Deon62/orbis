@@ -1,5 +1,5 @@
 /* ==========================================================================
-   orbisflow — mock data set. Swap for API responses when the backend lands.
+   orbisflow, mock data set. Swap for API responses when the backend lands.
    Asset marks: country flags from flagcdn.com, coin marks from Simple Icons.
    ========================================================================== */
 (function (global) {

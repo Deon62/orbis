@@ -30,7 +30,9 @@ vercel dev            # or any static server with clean-URL support
 
 | File | What it is |
 |---|---|
-| `index.html` | Marketing landing page. On laptops it scrolls section-by-section. |
+| `index.html` | Marketing landing page. Rotating tagline, then the chart, then the rest. Scrolls section-by-section. |
+| `academy.html` | Free trading courses. |
+| `about.html` | Who builds it and how it makes money. |
 | `login.html` / `signup.html` | Centred cards, "Continue with Google" below the email form. Signup takes one Trader name; country is set later in the profile. |
 | `trade.html` | Chart + ticket. The row above the chart is the duration picker; the ticket is Manual/Auto, a stake stepper, and two CTAs. |
 | `markets.html` | The instrument list, searchable and filterable. Nothing above it but the search row. |
@@ -65,6 +67,17 @@ between. The five tab destinations keep it, `profile-details` included.
 Sub-pages carry no page title or description of their own: they set `data-title`
 (shown in the header, with a back chevron) and `data-nav="account"` so the Profile tab
 stays lit. The list pages are lists — no headers, no blurbs.
+
+## Scripts
+
+No build step, but two generators live in `scripts/`:
+
+- `node scripts/build-icons.js` rebuilds `assets/js/icons.js` from the lucide CDN,
+  keeping only the icons the repo references. **Run it after using a new icon name**,
+  or that glyph renders as nothing.
+- `node scripts/dedash.js` strips em and en dashes from the copy: a comma where the
+  dash joined clauses, a hyphen where it spanned a range. `--check` lists offenders
+  without changing anything.
 
 ## Country picker
 

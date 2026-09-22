@@ -1,5 +1,5 @@
 /* ==========================================================================
-   orbisflow — modals
+   orbisflow, modals
    Short flows (deposit, withdraw, refer) happen in place instead of on a page.
    Triggered by data-modal="deposit|withdraw|refer" anywhere in the markup.
    ========================================================================== */
@@ -13,7 +13,7 @@
   }
   function toast(m, i) { if (global.orbisToast) global.orbisToast(m, i); }
 
-  /* saved details — would come from the account service */
+  /* saved details, would come from the account service */
   var SAVED = {
     mpesa: { label: 'M-Pesa', masked: '+254 7•• ••• 412', icon: 'smartphone' },
     card:  { label: 'Visa ••••4417', masked: 'Expires 09/28', icon: 'credit-card' },
@@ -77,7 +77,7 @@
   var DEPOSIT_METHODS = [
     { k: 'mpesa', name: 'M-Pesa',        note: 'Instant · no fee',           tag: 'Instant' },
     { k: 'card',  name: 'Card',          note: 'Visa / Mastercard · 1.5%',   tag: 'Instant' },
-    { k: 'bank',  name: 'Bank transfer', note: '1 – 2 business days',        tag: '1–2 days' },
+    { k: 'bank',  name: 'Bank transfer', note: '1-2 business days',        tag: '1-2 days' },
     { k: 'usdt',  name: 'Crypto',        note: 'USDT, BTC, ETH',             tag: '~10 min' }
   ];
 
@@ -165,7 +165,7 @@
   /* ========================================================== withdraw == */
   var WITHDRAW_METHODS = [
     { k: 'mpesa', name: 'M-Pesa',        note: 'Same day' },
-    { k: 'bank',  name: 'Bank transfer', note: '1 – 3 business days' },
+    { k: 'bank',  name: 'Bank transfer', note: '1-3 business days' },
     { k: 'usdt',  name: 'USDT (TRC-20)', note: '~10 minutes' }
   ];
 
@@ -343,7 +343,7 @@
     open('Add a method', html, function (root) {
       root.querySelector('#mAdd').addEventListener('click', function () {
         close();
-        toast(m.name + ' added — pending verification', 'check-circle-2');
+        toast(m.name + ' added, pending verification', 'check-circle-2');
       });
     }, addPaymentStep1);
   }

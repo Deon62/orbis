@@ -1,4 +1,4 @@
-/* orbisflow — ISO 3166-1 alpha-2 codes, matching the flagcdn codes used elsewhere. */
+/* orbisflow, ISO 3166-1 alpha-2 codes, matching the flagcdn codes used elsewhere. */
 (function (g) {
   g.OrbisCountries = [
     ['af','Afghanistan'],

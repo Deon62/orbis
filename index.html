@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>orbisflow — Binary trading, stripped back</title>
+<title>orbisflow · Binary trading, stripped back</title>
 <meta name="description" content="Pick a market, pick a direction, set your stake. A deliberately simple binary options platform.">
 <meta name="theme-color" content="#1C1C1C">
 <link rel="icon" href="/assets/img/favicon.svg">
@@ -25,10 +25,13 @@
   <img class="hero-skyline" src="/assets/img/skyline.svg" alt="" aria-hidden="true">
   <div class="wrap hero-in">
     <div class="hero-copy">
-      <h1>Two directions. One decision.</h1>
+      <h1 class="hero-title">
+        Trading for<br>
+        <span class="rotator" id="rotator" aria-live="polite">anyone</span>
+      </h1>
       <p class="lead">
-        Market, direction, stake, duration, payout, go. That is the whole screen —
-        nothing else between you and the trade.
+        Sixty markets, contracts from five seconds, and one screen that holds the whole
+        trade. Nothing else between you and the decision.
       </p>
       <div class="hero-cta">
         <a class="btn btn-primary btn-lg" href="/signup">Create free account</a>
@@ -127,7 +130,7 @@
           <span class="step-n">2</span>
           <div>
             <b>Set your stake and duration</b>
-            <p>From $1 and from five seconds. The payout is shown before you commit — no surprises after the fact.</p>
+            <p>From $1 and from five seconds. The payout is shown before you commit, no surprises after the fact.</p>
           </div>
         </div>
         <div class="step">
@@ -176,7 +179,7 @@
 <section class="wrap snap-section" style="padding-block:40px">
   <div class="cta">
     <h2>Start on the demo. Move over when it clicks.</h2>
-    <p>No deposit needed to try it. $10,000 in simulated funds, the same screen real traders use.</p>
+    <p>No deposit needed to try it. $10,000 in virtual funds, the same screen real traders use.</p>
     <a class="btn btn-lg" href="/signup">Create free account</a>
   </div>
 </section>
@@ -188,6 +191,24 @@
 <script src="/assets/js/data.js"></script>
 <script src="/assets/js/app.js"></script>
 <script>
+/* the tagline cycles through who it is for */
+(function () {
+  var words = ['anyone', 'anywhere', 'anytime'];
+  var el = document.getElementById('rotator');
+  var i = 0;
+  var still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  setInterval(function () {
+    i = (i + 1) % words.length;
+    if (still) { el.textContent = words[i]; return; }
+    el.classList.add('out');
+    setTimeout(function () {
+      el.textContent = words[i];
+      el.classList.remove('out');
+    }, 220);
+  }, 2400);
+})();
+
 /* hero chart */
 (function () {
   var priceEl = document.getElementById('heroPrice');

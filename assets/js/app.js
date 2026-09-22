@@ -1,5 +1,5 @@
 /* ==========================================================================
-   orbisflow — shared shell
+   orbisflow, shared shell
      shell="app"    → icon rail (desktop) + drawer & 6-tab bar (mobile),
                       edge-to-edge, no footer
      shell="public" → marketing header + footer
@@ -26,7 +26,7 @@
   }
   window.orbisBrandIcon = brandIcon;
 
-  /* the mark is a wordmark, so it is type — not an image */
+  /* the mark is a wordmark, so it is type, not an image */
   function logo(cls) {
     return '<a class="logo ' + (cls || '') + '" href="' + href(SHELL === 'app' ? '/trade' : '/') +
            '" aria-label="orbisflow"><span class="logo-word">orbis<span class="flow">flow</span></span></a>';
@@ -47,7 +47,7 @@
     });
   }
 
-  /* short synthesised tones — no audio files to ship or fail to load */
+  /* short synthesised tones, no audio files to ship or fail to load */
   function beep(kind) {
     if (!soundOn()) return;
     try {
@@ -96,7 +96,7 @@
   }
   window.orbisSetTheme = setTheme;
 
-  /* desktop only — on phones the switch lives in the drawer */
+  /* desktop only, on phones the switch lives in the drawer */
   function themeBtn() {
     return '<button class="icon-btn hide-mobile" data-theme-toggle data-theme-icon aria-label="Switch theme">' +
            ic(currentTheme() === 'dark' ? 'sun' : 'moon') + '</button>';
@@ -136,7 +136,7 @@
   window.orbisSetAccount = setAccount;
 
   /* ============================================================== nav ==== */
-  /* these six are the bottom tab bar and the desktop rail — and so are
+  /* these six are the bottom tab bar and the desktop rail, and so are
      deliberately absent from the drawer, which carries everything else */
   var NAV = [
     { id: 'trade',     label: 'Trade',     icon: 'chart-candlestick', url: '/trade' },
@@ -185,8 +185,32 @@
 
   var PUBLIC_NAV = [
     { label: 'Markets',      url: '/markets' },
+    { label: 'Academy',      url: '/academy' },
     { label: 'How it works', url: '/#how' },
-    { label: 'Refer & earn', url: '/referrals' }
+    { label: 'Refer & earn', url: '/referrals' },
+    { label: 'About',        url: '/about' }
+  ];
+
+  /* the phone header carries a menu button instead of a row of links */
+  var PUBLIC_DRAWER = [
+    { h: 'Platform', items: [
+      ['Markets',      'layers',      '/markets'],
+      ['How it works', 'list-checks', '/#how'],
+      ['Refer & earn', 'gift',        '/referrals']
+    ]},
+    { h: 'Learn', items: [
+      ['Academy',     'graduation-cap', '/academy'],
+      ['Help centre', 'life-buoy',      '/help-centre']
+    ]},
+    { h: 'Company', items: [
+      ['About',      'building-2', '/about'],
+      ['Contact us', 'mail',       '/contact']
+    ]},
+    { h: 'Legal', items: [
+      ['Terms',           'scroll-text',    '/terms'],
+      ['Privacy policy',  'lock',           '/privacy'],
+      ['Risk disclosure', 'triangle-alert', '/risk-disclosure']
+    ]}
   ];
 
   /* ============================================================= rail ==== */
@@ -250,6 +274,34 @@
       '</aside>';
   }
 
+  function publicDrawerHTML() {
+    var groups = PUBLIC_DRAWER.map(function (g) {
+      return '<div class="drawer-grp"><h4>' + g.h + '</h4>' + g.items.map(function (it) {
+        return '<a href="' + it[2] + '">' + ic(it[1]) + it[0] + '</a>';
+      }).join('') + '</div>';
+    }).join('');
+
+    return '<div class="scrim" data-drawer-close hidden></div>' +
+      '<aside class="drawer" id="drawer" aria-label="Menu" aria-hidden="true">' +
+        '<div class="drawer-hd">' + logo() +
+          '<button class="icon-btn" data-drawer-close aria-label="Close menu">' + ic('x') + '</button>' +
+        '</div>' +
+        '<div class="drawer-cta">' +
+          '<a class="btn btn-primary btn-block" href="/signup">Create free account</a>' +
+          '<a class="btn btn-ghost btn-block" href="/login">Log in</a>' +
+        '</div>' +
+        '<div class="drawer-scroll">' + groups + '</div>' +
+        '<div class="drawer-foot">' +
+          '<button class="drawer-act" data-theme-toggle>' +
+            '<span data-theme-icon>' + ic(currentTheme() === 'dark' ? 'sun' : 'moon') + '</span>' +
+            '<span>Dark mode</span>' +
+            '<span class="switch' + (currentTheme() === 'dark' ? ' on' : '') +
+              '" data-theme-switch role="switch" aria-checked="' + (currentTheme() === 'dark') + '"></span>' +
+          '</button>' +
+        '</div>' +
+      '</aside>';
+  }
+
   /* =========================================================== header ==== */
   function headerHTML() {
     if (SHELL === 'bare') return '';
@@ -261,8 +313,9 @@
       return '<header class="hdr"><div class="wrap hdr-in">' + logo() +
         '<nav class="hdr-nav">' + nav + '</nav>' +
         '<div class="hdr-right">' + themeBtn() +
-          '<a class="btn btn-quiet btn-sm" href="' + href('/login') + '">Log in</a>' +
+          '<a class="btn btn-quiet btn-sm hide-mobile" href="' + href('/login') + '">Log in</a>' +
           '<a class="btn btn-primary btn-sm hide-mobile" href="' + href('/signup') + '">Create account</a>' +
+          '<button class="icon-btn hide-desk" data-drawer-open aria-label="Open menu">' + ic('menu', 'i-lg') + '</button>' +
         '</div></div></header>';
     }
 
@@ -351,6 +404,8 @@
   if (SHELL === 'app') {
     BODY.classList.add('app-shell');
     BODY.insertAdjacentHTML('afterbegin', railHTML() + drawerHTML());
+  } else if (SHELL === 'public') {
+    BODY.insertAdjacentHTML('afterbegin', publicDrawerHTML());
   }
   mount('#site-header', headerHTML());
   mount('#site-footer', footerHTML());
@@ -401,7 +456,7 @@
     if (e.target.closest('[data-drawer-open]')) { setDrawer(true); return; }
     if (e.target.closest('[data-drawer-close]')) { setDrawer(false); return; }
 
-    /* "Continue with Google" — signs straight into the demo account */
+    /* "Continue with Google", signs straight into the demo account */
     var g = e.target.closest('[data-login]');
     if (g) {
       e.preventDefault();
@@ -411,7 +466,7 @@
     }
 
     var m = e.target.closest('[data-mock]');
-    if (m) { e.preventDefault(); toast(m.dataset.mock + ' — not wired up yet', 'construction'); return; }
+    if (m) { e.preventDefault(); toast(m.dataset.mock + ', not wired up yet', 'construction'); return; }
 
     var c = e.target.closest('[data-copy]');
     if (c) {
@@ -471,7 +526,7 @@
 
   /* ======================================================== navigation == */
   /* The bar is created synchronously on click, because the browser tears down
-     this document's scripting as soon as the navigation starts — a deferred
+     this document's scripting as soon as the navigation starts, a deferred
      timer never runs. The "only when it is slow" part is a CSS animation-delay:
      nothing is painted for the first 150ms, so a quick switch shows nothing. */
   var navBar;
