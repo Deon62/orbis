@@ -114,15 +114,15 @@
       ['Refer & earn',        'gift',               'modal:refer']
     ]},
     { h: 'Trading tools', items: [
-      ['Economic calendar', 'calendar-days', null],
-      ['Market news',       'newspaper',     null],
-      ['Price alerts',      'bell-ring',     null],
-      ['Watchlists',        'star',          null]
+      ['Economic calendar', 'calendar-days', '/economic-calendar'],
+      ['Market news',       'newspaper',     '/market-news'],
+      ['Price alerts',      'bell-ring',     '/price-alerts'],
+      ['Watchlists',        'star',          '/watchlists']
     ]},
     { h: 'Reports', items: [
       ['Statements',          'file-text',  '/positions'],
-      ['Profit table',        'table',      null],
-      ['Trade confirmations', 'file-check', null]
+      ['Profit table',        'table',      '/profit-table'],
+      ['Trade confirmations', 'file-check', '/trade-confirmations']
     ]},
     { h: 'Account', items: [
       ['Verification',    'badge-check', '/verification'],
@@ -131,14 +131,14 @@
       ['Preferences',     'settings',    '/preferences']
     ]},
     { h: 'Support', items: [
-      ['Help centre', 'life-buoy',      null],
-      ['Live chat',   'message-square', null],
-      ['Contact us',  'mail',           null]
+      ['Help centre', 'life-buoy',      '/help-centre'],
+      ['Live chat',   'message-square', '/live-chat'],
+      ['Contact us',  'mail',           '/contact']
     ]},
     { h: 'Legal', items: [
-      ['Terms',           'scroll-text',    null],
-      ['Privacy policy',  'lock',           null],
-      ['Risk disclosure', 'triangle-alert', null]
+      ['Terms',           'scroll-text',    '/terms'],
+      ['Privacy policy',  'lock',           '/privacy'],
+      ['Risk disclosure', 'triangle-alert', '/risk-disclosure']
     ]}
   ];
 
@@ -307,7 +307,10 @@
   }
   mount('#site-header', headerHTML());
   mount('#site-footer', footerHTML());
-  if (SHELL === 'app') BODY.insertAdjacentHTML('beforeend', tabbarHTML());
+  if (SHELL === 'app') {
+    if (BODY.dataset.tabbar === 'hide') BODY.classList.add('no-tabbar');
+    else BODY.insertAdjacentHTML('beforeend', tabbarHTML());
+  }
 
   /* ============================================================ toast ==== */
   var toastEl;

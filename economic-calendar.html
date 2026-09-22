@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Economic calendar · orbisflow</title>
+<meta name="description" content="Scheduled releases that move the markets.">
+<meta name="theme-color" content="#1C1C1C">
+<link rel="icon" href="/assets/img/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/css/styles.css">
+<script>(function(){try{var t=localStorage.getItem("orbisflow-theme")||(matchMedia("(prefers-color-scheme:dark)").matches?"dark":"light");document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body data-page="economic-calendar" data-title="Economic calendar" data-tabbar="hide" data-shell="app">
+
+<div id="site-header"></div>
+
+<main class="wrap page-body">
+  <div class="toolbar" style="padding-top:0">
+    <div class="pills" style="padding:0">
+      <button class="pill active">Today</button>
+      <button class="pill" data-mock="Tomorrow">Tomorrow</button>
+      <button class="pill" data-mock="This week">This week</button>
+    </div>
+    <span class="grow"></span>
+    <span class="dim" style="font-size:12.5px">All times UTC</span>
+  </div>
+
+  <div class="card card-flat">
+    <div class="tbl-scroll">
+      <table class="tbl" style="min-width:760px">
+        <thead><tr><th>Time</th><th>Currency</th><th>Event</th><th>Impact</th><th class="r">Forecast</th><th class="r">Previous</th><th class="r">Actual</th></tr></thead>
+        <tbody><tr><td><span class="mono">12:30</span></td><td><img src="https://flagcdn.com/w40/us.png" alt="" class="acct-flag" style="width:18px;height:18px"> USD</td><td><b>CPI y/y</b></td><td><span class="tag tag-down">High</span></td><td class="r">3.2%</td><td class="r">3.4%</td><td class="r"><span class="dim">—</span></td></tr><tr><td><span class="mono">14:00</span></td><td><img src="https://flagcdn.com/w40/us.png" alt="" class="acct-flag" style="width:18px;height:18px"> USD</td><td><b>Fed speech</b></td><td><span class="tag tag-wait">Medium</span></td><td class="r">—</td><td class="r">—</td><td class="r"><span class="dim">—</span></td></tr><tr><td><span class="mono">08:00</span></td><td><img src="https://flagcdn.com/w40/gb.png" alt="" class="acct-flag" style="width:18px;height:18px"> GBP</td><td><b>GDP q/q</b></td><td><span class="tag tag-down">High</span></td><td class="r">0.2%</td><td class="r">0.1%</td><td class="r">0.3%</td></tr><tr><td><span class="mono">07:00</span></td><td><img src="https://flagcdn.com/w40/de.png" alt="" class="acct-flag" style="width:18px;height:18px"> EUR</td><td><b>Factory orders</b></td><td><span class="tag tag-wait">Medium</span></td><td class="r">1.1%</td><td class="r">-0.4%</td><td class="r">0.9%</td></tr><tr><td><span class="mono">23:50</span></td><td><img src="https://flagcdn.com/w40/jp.png" alt="" class="acct-flag" style="width:18px;height:18px"> JPY</td><td><b>Trade balance</b></td><td><span class="tag">Low</span></td><td class="r">-0.4T</td><td class="r">-0.6T</td><td class="r"><span class="dim">—</span></td></tr></tbody>
+      </table>
+    </div>
+  </div>
+</main>
+
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script src="/assets/js/chart.js"></script>
+<script src="/assets/js/data.js"></script>
+<script src="/assets/js/app.js"></script>
+<script src="/assets/js/modals.js"></script>
+
+</body>
+</html>

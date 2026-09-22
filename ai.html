@@ -20,26 +20,6 @@
 <main class="wrap page-body">
   <div class="stack">
 
-    <!-- market read ----------------------------------------------------- -->
-    <div class="grid g4 scan-strip">
-      <div class="stat">
-        <span><i data-lucide="gauge" class="i-sm"></i>Market sentiment</span>
-        <b>Risk-on</b><em class="up">62% bullish</em>
-      </div>
-      <div class="stat">
-        <span><i data-lucide="activity" class="i-sm"></i>Volatility</span>
-        <b>Elevated</b><em class="dim">above 30-day average</em>
-      </div>
-      <div class="stat">
-        <span><i data-lucide="target" class="i-sm"></i>Signal accuracy</span>
-        <b class="num">64%</b><em class="dim">last 200 signals</em>
-      </div>
-      <div class="stat">
-        <span><i data-lucide="calendar-days" class="i-sm"></i>Next event</span>
-        <b>US CPI</b><em class="dim">in 3h 20m · high impact</em>
-      </div>
-    </div>
-
     <!-- signals --------------------------------------------------------- -->
     <div>
       <div class="toolbar" style="border-bottom:0;padding-top:0">
@@ -49,7 +29,10 @@
           <button class="pill" data-f="Fall">Fall</button>
         </div>
         <span class="grow"></span>
-        <button class="btn btn-ghost btn-sm" data-mock="Rescan markets">
+        <button class="icon-btn" data-modal="market-read" aria-label="Market read">
+          <i data-lucide="info" class="i"></i>
+        </button>
+        <button class="btn btn-primary btn-sm" data-mock="Rescan markets">
           <i data-lucide="radar" class="i-sm"></i>Rescan
         </button>
       </div>

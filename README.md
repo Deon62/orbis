@@ -33,14 +33,25 @@ vercel dev            # or any static server with clean-URL support
 | `login.html` / `signup.html` | Centred cards, "Continue with Google" below the email form. |
 | `trade.html` | Chart + ticket. The row above the chart is the duration picker; the ticket is Manual/Auto, a stake stepper, and two CTAs. |
 | `markets.html` | The instrument list, searchable and filterable. Nothing above it but the search row. |
-| `ai.html` | Market scan: signals with confidence and a pattern watch. Each signal hands its market, direction, duration and stake to the ticket via query params. |
+| `ai.html` | Market scan: signals with confidence and a pattern watch. Each signal hands its market, direction, duration and stake to the ticket via query params. The market read (sentiment, volatility, accuracy, next event) is behind the info icon. |
 | `positions.html` | Open, settled and statistics tabs — the list and nothing else. |
-| `cashier.html` | Transaction history. Deposit and withdraw are modals, not pages. |
+| `cashier.html` | Transaction history — the list alone. Deposit and withdraw are modals. |
 | `referrals.html` | The referral list, nothing else. |
 | `referral-earnings.html` | Weekly payouts and accruals. |
 | `account.html` | The old profile hub. **No longer linked** — Profile goes straight to `profile-details`, and the drawer covers everything the hub listed. Kept on disk, safe to delete. |
 | `profile-details.html` | The profile page — what the Profile tab and the avatar open. |
 | `verification.html`, `security.html`, `payments.html`, `preferences.html` | One concern each, reached from the drawer. |
+| `economic-calendar`, `market-news`, `price-alerts`, `watchlists` | Trading tools. |
+| `profit-table`, `trade-confirmations` | Reports. |
+| `help-centre`, `live-chat`, `contact` | Support. |
+| `terms`, `privacy`, `risk-disclosure` | Legal. |
+
+Every link in the drawer now leads to a real page — nothing in it falls back to a
+"not wired up" toast.
+
+**Tab bar:** pages reached from the panel set `data-tabbar="hide"` and drop the bottom
+bar, because they are dead ends you return from rather than destinations you switch
+between. The five tab destinations keep it, `profile-details` included.
 
 Sub-pages carry no page title or description of their own: they set `data-title`
 (shown in the header, with a back chevron) and `data-nav="account"` so the Profile tab
@@ -59,6 +70,8 @@ Flows too short to deserve a page live in `assets/js/modals.js`, opened by
   *Your referrals* and *Referral earnings*.
 
 - **Switch account** — Demo / Real with balances, tick on the active one.
+- **Add a method** — payment type, then its one field; opened from Payment methods.
+- **Market read** — the AI page's sentiment/volatility/accuracy figures.
 
 Saved destinations are the `SAVED` map at the top of `modals.js`; accounts come from
 `window.orbisAccounts` in `app.js`. Swap both for the account service.

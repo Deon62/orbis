@@ -289,6 +289,81 @@
     });
   }
 
+  /* ==================================================== add a payment === */
+  var ADD_METHODS = [
+    { k: 'mpesa', name: 'Mobile money', note: 'M-Pesa, Airtel Money', icon: 'smartphone',
+      field: 'Phone number', placeholder: '+254 7XX XXX XXX' },
+    { k: 'card',  name: 'Card',  note: 'Visa, Mastercard', icon: 'credit-card',
+      field: 'Card number', placeholder: '•••• •••• •••• ••••' },
+    { k: 'bank',  name: 'Bank account', note: 'Local transfer', icon: 'building-2',
+      field: 'Account number', placeholder: '0100 1234 5678' },
+    { k: 'usdt',  name: 'Crypto wallet', note: 'USDT, BTC, ETH', icon: 'bitcoin',
+      field: 'Wallet address', placeholder: 'T…' }
+  ];
+
+  function addPaymentStep1() {
+    var html = '<div class="modal-bd stack-sm">' + ADD_METHODS.map(function (m) {
+      return '<button class="method" data-add="' + m.k + '">' +
+        '<span class="method-ic">' + ic(m.icon) + '</span>' +
+        '<span style="flex:1"><b>' + m.name + '</b><span>' + m.note + '</span></span>' +
+        ic('chevron-right', 'i-sm') + '</button>';
+    }).join('') + '</div>';
+    open('Add a method', html, function (root) {
+      root.querySelectorAll('[data-add]').forEach(function (b) {
+        b.addEventListener('click', function () { addPaymentStep2(b.dataset.add); });
+      });
+    });
+  }
+
+  function addPaymentStep2(key) {
+    var m = ADD_METHODS.filter(function (x) { return x.k === key; })[0];
+    var html =
+      '<div class="modal-bd">' +
+        '<div class="saved" style="margin-bottom:16px">' +
+          '<span class="method-ic">' + ic(m.icon) + '</span>' +
+          '<span class="saved-tx"><b>' + m.name + '</b><span>' + m.note + '</span></span>' +
+        '</div>' +
+        '<div class="field">' +
+          '<label class="label" for="mField">' + m.field + '</label>' +
+          '<input class="input" id="mField" placeholder="' + m.placeholder + '">' +
+        '</div>' +
+        '<div class="field">' +
+          '<label class="label" for="mName">Name on the account</label>' +
+          '<input class="input" id="mName" value="Amara Otieno">' +
+        '</div>' +
+        '<p class="hint">The name must match your verified identity, or withdrawals are held.</p>' +
+      '</div>' +
+      '<div class="modal-ft">' +
+        '<button class="btn btn-primary btn-block btn-lg" id="mAdd">Add method</button>' +
+      '</div>';
+    open('Add a method', html, function (root) {
+      root.querySelector('#mAdd').addEventListener('click', function () {
+        close();
+        toast(m.name + ' added — pending verification', 'check-circle-2');
+      });
+    }, addPaymentStep1);
+  }
+
+  /* ================================================= market read (AI) === */
+  var MARKET_READ = [
+    ['Market sentiment', 'Risk-on', '62% of open contracts are Rise', 'gauge'],
+    ['Volatility', 'Elevated', 'Above the 30-day average', 'activity'],
+    ['Signal accuracy', '64%', 'Across the last 200 signals', 'target'],
+    ['Next event', 'US CPI', 'In 3h 20m · high impact', 'calendar-days']
+  ];
+
+  function marketReadModal() {
+    var html = '<div class="modal-bd">' + MARKET_READ.map(function (r) {
+      return '<div class="read-row">' +
+        '<span class="lr-ic">' + ic(r[3]) + '</span>' +
+        '<span class="lr-tx"><b>' + r[0] + '</b><span>' + r[2] + '</span></span>' +
+        '<b class="read-val">' + r[1] + '</b></div>';
+    }).join('') +
+      '<p class="hint" style="margin-top:14px">Recomputed on every scan. Simulated in this prototype.</p>' +
+      '</div>';
+    open('Market read', html);
+  }
+
   /* =========================================================== triggers = */
   document.addEventListener('click', function (e) {
     var t = e.target.closest('[data-modal]');
@@ -299,8 +374,11 @@
     else if (kind === 'withdraw') withdrawStep1();
     else if (kind === 'refer') referModal();
     else if (kind === 'account') accountModal();
+    else if (kind === 'add-payment') addPaymentStep1();
+    else if (kind === 'market-read') marketReadModal();
   });
 
   global.orbisModal = { open: open, close: close, deposit: depositStep1,
-                      withdraw: withdrawStep1, refer: referModal, account: accountModal };
+                      withdraw: withdrawStep1, refer: referModal, account: accountModal,
+                      addPayment: addPaymentStep1, marketRead: marketReadModal };
 })(window);

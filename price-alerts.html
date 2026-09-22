@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Your referrals · orbisflow</title>
-<meta name="description" content="Everyone you have referred.">
+<title>Price alerts · orbisflow</title>
+<meta name="description" content="Get told when a market hits your level.">
 <meta name="theme-color" content="#1C1C1C">
 <link rel="icon" href="/assets/img/favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -13,20 +13,17 @@
 <link rel="stylesheet" href="/assets/css/styles.css">
 <script>(function(){try{var t=localStorage.getItem("orbisflow-theme")||(matchMedia("(prefers-color-scheme:dark)").matches?"dark":"light");document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
 </head>
-<body data-page="referrals" data-nav="account" data-title="Your referrals" data-back-to="/trade" data-tabbar="hide" data-shell="app">
+<body data-page="price-alerts" data-title="Price alerts" data-tabbar="hide" data-shell="app">
 
 <div id="site-header"></div>
 
 <main class="wrap page-body">
-  <div class="card card-flat" style="max-width:780px">
-    <div class="tbl-scroll">
-      <table class="tbl">
-        <thead>
-          <tr><th>User</th><th>Joined</th><th>Status</th><th class="r">Volume</th><th class="r">Earned</th></tr>
-        </thead>
-        <tbody id="refBody"></tbody>
-      </table>
-    </div>
+  <div class="card card-flat"><div class="row-line"><div><b>EUR/USD</b><span>Price rises above 1.0900</span></div><span class="tag tag-up">Active</span></div><div class="row-line"><div><b>BTC/USD</b><span>Price falls below 65,000.00</span></div><span class="tag tag-up">Active</span></div><div class="row-line"><div><b>XAU/USD</b><span>Price rises above 2,350.00</span></div><span class="tag tag-wait">Paused</span></div><div class="row-line"><div><b>US 100</b><span>Daily change exceeds 1.5%</span></div><span class="tag tag-down">Triggered</span></div></div>
+
+  <div class="center-action">
+    <button class="btn btn-primary" data-mock="New alert">
+      <i data-lucide="plus" class="i-sm"></i>New alert
+    </button>
   </div>
 </main>
 
@@ -35,18 +32,6 @@
 <script src="/assets/js/data.js"></script>
 <script src="/assets/js/app.js"></script>
 <script src="/assets/js/modals.js"></script>
-<script>
-document.getElementById('refBody').innerHTML = OrbisData.referrals.map(function (r) {
-  var cls = r.status === 'Active' ? 'tag-up' : (r.status === 'Pending' ? 'tag-wait' : '');
-  return '<tr>' +
-    '<td class="mono">' + r.user + '</td>' +
-    '<td class="dim">' + r.joined + '</td>' +
-    '<td><span class="tag ' + cls + '">' + r.status + '</span></td>' +
-    '<td class="r mono">' + OrbisData.money(r.volume) + '</td>' +
-    '<td class="r mono ' + (r.earned > 0 ? 'up' : 'dim') + '">' + OrbisData.money(r.earned) + '</td>' +
-  '</tr>';
-}).join('');
-window.orbisIcons();
-</script>
+
 </body>
 </html>

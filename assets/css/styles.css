@@ -766,8 +766,8 @@ body.app-shell .hdr-right{ margin-left:auto; }
 .link-row:hover{ background:var(--panel-2); }
 .link-row .lr-ic{ width:36px; height:36px; border:1px solid var(--line); display:grid; place-items:center; flex:none; color:var(--ink-2); }
 .link-row .lr-tx{ flex:1; min-width:0; }
-.link-row .lr-tx > b{ display:block; font-size:14px; font-weight:600; }
-.link-row .lr-tx > span{ display:block; font-size:12.5px; color:var(--ink-3); }
+.lr-tx > b{ display:block; font-size:14px; font-weight:600; }
+.lr-tx > span{ display:block; font-size:12.5px; color:var(--ink-3); }
 
 .back-link{
   display:inline-flex; align-items:center; gap:6px; font-size:13px;
@@ -983,3 +983,69 @@ input:focus-visible,select:focus-visible{ outline:2px solid var(--brand); outlin
 
 /* the scan readings are a header strip, not four loose tiles */
 .scan-strip{ padding-bottom:16px; border-bottom:1px solid var(--line); }
+
+/* ==========================================================================
+   Phones: the chart header earns its vertical space back
+   One line for market + price, a tighter duration row.
+   ========================================================================== */
+@media(max-width:1039px){
+  .chart-top{ padding:5px 9px; gap:8px; flex-wrap:nowrap; }
+  .chart-top .mkt-trigger{ padding:3px 7px; gap:8px; }
+  .chart-top .mkt-trigger .nm span{ display:none; }   /* the asset class line */
+  .chart-top .mkt-trigger .nm b{ font-size:14px; }
+  .chart-top .asset{ width:26px; height:26px; }
+  .chart-top .asset-pair img{ width:17px; height:17px; border-width:1.2px; }
+
+  /* price and change sit side by side instead of stacked */
+  .sym-price{ display:flex; align-items:baseline; gap:7px; }
+  .sym-price b{ font-size:17px; }
+  .sym-price span{ font-size:11.5px; }
+
+  .tf{ padding:4px 7px; }
+  .tf button{ height:26px; padding:0 9px; font-size:11.5px; }
+  .tf-sep{ margin:4px 5px; }
+}
+
+
+/* pages opened from the panel are dead ends, not tab destinations */
+body.app-shell.no-tabbar{ padding-bottom:0; }
+
+/* a centred primary action under a list */
+.center-action{ display:flex; justify-content:center; padding:20px 0 4px; }
+
+/* news list */
+.news-row{
+  display:flex; align-items:center; gap:12px; padding:13px 16px;
+  border-bottom:1px solid var(--line-soft);
+}
+.news-row:last-child{ border-bottom:0; }
+.news-row:hover{ background:var(--panel-2); }
+.news-tx{ flex:1; min-width:0; }
+.news-tx b{ display:block; font-size:14px; font-weight:600; }
+.news-tx span{ display:block; font-size:12.5px; color:var(--ink-3); margin-top:2px; }
+
+/* market-read modal rows */
+.read-row{ display:flex; align-items:center; gap:12px; padding:11px 0; border-bottom:1px solid var(--line-soft); }
+.read-row:last-of-type{ border-bottom:0; }
+.read-val{ font-size:14px; font-weight:600; white-space:nowrap; }
+
+/* live chat */
+.chat{ border:1px solid var(--line); background:var(--panel); display:flex; flex-direction:column; max-width:640px; }
+.chat-hd{ display:flex; align-items:center; gap:11px; padding:13px 16px; border-bottom:1px solid var(--line); }
+.chat-log{ padding:16px; display:flex; flex-direction:column; gap:10px; }
+.bubble{ max-width:78%; padding:10px 13px; font-size:14px; }
+.bubble p{ margin:0; }
+.bubble time{ display:block; font-size:10.5px; margin-top:5px; opacity:.6; }
+.bubble-in{ align-self:flex-start; background:var(--panel-2); color:var(--ink); }
+.bubble-out{ align-self:flex-end; background:var(--ink); color:var(--bg); }
+.composer{ display:flex; gap:8px; padding:12px 16px; border-top:1px solid var(--line); }
+.composer .input{ flex:1; }
+
+/* legal prose */
+.prose{ max-width:68ch; }
+.prose h2{ font-size:16px; margin:26px 0 8px; }
+.prose h2:first-of-type{ margin-top:18px; }
+.prose p{ font-size:14.5px; color:var(--ink-2); margin-bottom:10px; line-height:1.65; }
+
+/* flags sit inline inside table cells */
+.tbl .acct-flag{ display:inline-block; vertical-align:-4px; margin-right:6px; }

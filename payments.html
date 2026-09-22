@@ -13,7 +13,7 @@
 <link rel="stylesheet" href="/assets/css/styles.css">
 <script>(function(){try{var t=localStorage.getItem("orbisflow-theme")||(matchMedia("(prefers-color-scheme:dark)").matches?"dark":"light");document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
 </head>
-<body data-page="payments" data-nav="account" data-title="Payment methods" data-shell="app">
+<body data-page="payments" data-nav="account" data-title="Payment methods" data-tabbar="hide" data-shell="app">
 
 <div id="site-header"></div>
 
@@ -43,9 +43,11 @@
       </div>
     </div>
 
-    <button class="btn btn-primary" data-mock="Add payment method" style="justify-self:start">
-      <i data-lucide="plus" class="i-sm"></i>Add a method
-    </button>
+    <div class="center-action">
+      <button class="btn btn-primary" data-modal="add-payment">
+        <i data-lucide="plus" class="i-sm"></i>Add a method
+      </button>
+    </div>
   </div>
 </main>
 
