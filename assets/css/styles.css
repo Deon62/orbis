@@ -1407,3 +1407,40 @@ main{ animation:pageIn .18s ease both; }
 .share-row{ justify-content:center; }
 .qr-wrap{ display:flex; flex-direction:column; align-items:center; gap:8px; margin-top:18px; }
 .qr-wrap canvas{ border:1px solid var(--line); padding:8px; background:#FFFFFF; border-radius:2px; }
+
+
+/* the support agent, with presence */
+.agent{ position:relative; display:inline-grid; place-items:center; flex:none; width:52px; height:52px; }
+.agent img{ width:100%; height:100%; object-fit:contain; }
+.agent-dot{
+  position:absolute; right:2px; bottom:2px; width:11px; height:11px; border-radius:50%;
+  background:var(--up); border:2px solid var(--panel);
+}
+.agent-sm{ width:38px; height:38px; }
+.agent-sm .agent-dot{ width:9px; height:9px; right:0; bottom:0; }
+.chat-hd{ justify-content:flex-start; }
+
+
+/* the chart tools were too small to aim at */
+.tf button.tf-tool{ width:36px; height:32px; padding:0; display:grid; place-items:center; }
+.tf button.tf-tool .i{ width:20px; height:20px; stroke-width:1.9; }
+@media(max-width:980px){ .tf button.tf-tool{ width:34px; height:30px; } }
+
+/* the chart, taking the whole screen */
+.chart-panel.chart-full{
+  position:fixed; inset:0; z-index:110;   /* over the rail and tab bar, under a modal */
+  border:0; background:var(--panel); display:flex; flex-direction:column;
+}
+.chart-panel.chart-full .chart-stage{ flex:1; height:auto; min-height:0; }
+/* main carries its own stacking context, so it has to be lifted with the
+   panel, or the sticky header paints straight over a fullscreen chart */
+body:has(.chart-full) main{ position:relative; z-index:110; }
+
+/* nothing else competes for the screen while the chart owns it */
+body:has(.chart-full) .trade-btns,
+body:has(.chart-full) .tabbar{ display:none; }
+
+.modal-sub{
+  font-size:10px; letter-spacing:.13em; text-transform:uppercase;
+  color:var(--ink-3); font-weight:600; margin:0 0 8px;
+}

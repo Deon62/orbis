@@ -324,9 +324,12 @@
             (BODY.dataset.hdrLabel || 'Details') + '">' + ic(BODY.dataset.hdrIcon || 'info') + '</button>'
           : '') +
         /* a page can put a person in the corner instead, the way live chat does */
-        (BODY.dataset.hdrPerson
+        (BODY.dataset.hdrPerson || BODY.dataset.hdrPersonImg
           ? '<span class="hdr-person">' +
-              '<span class="avatar">' + BODY.dataset.hdrPerson + '</span>' +
+              (BODY.dataset.hdrPersonImg
+                ? '<span class="agent agent-sm"><img src="' + BODY.dataset.hdrPersonImg +
+                  '" alt=""><i class="agent-dot"></i></span>'
+                : '<span class="avatar">' + BODY.dataset.hdrPerson + '</span>') +
               '<span class="hdr-person-tx"><b>' + (BODY.dataset.hdrPersonName || '') + '</b>' +
                 '<span><i class="dotlive"></i>' + (BODY.dataset.hdrPersonStatus || 'Online') + '</span></span>' +
             '</span>'

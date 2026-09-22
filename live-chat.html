@@ -17,7 +17,7 @@
 <script>(function(){try{var t=localStorage.getItem("orbisflow-theme")||(matchMedia("(prefers-color-scheme:dark)").matches?"dark":"light");document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
 </head>
 <body data-page="live-chat" data-title="Live chat" data-tabbar="hide"
-      data-hdr-person="SM" data-hdr-person-name="Sam" data-hdr-person-status="Online"
+      data-hdr-person-img="/assets/img/support.png" data-hdr-person-name="Sam" data-hdr-person-status="Online"
       data-shell="app">
 
 <div id="site-header"></div>
@@ -25,8 +25,10 @@
 <main class="wrap page-body">
   <div class="chat">
     <div class="chat-hd">
-      <span class="avatar" style="background:var(--brand-strong)">SM</span>
-      <div class="lr-tx"><b>Sam · Support</b><span><i class="dotlive"></i>Online · replies in ~2 min</span></div>
+      <span class="agent">
+        <img src="/assets/img/support.png" alt="Support agent">
+        <i class="agent-dot" title="Online"></i>
+      </span>
     </div>
     <div class="chat-log"><div class="bubble bubble-in"><p>Hi Amara, you are through to support. How can I help?</p><time>11:02</time></div><div class="bubble bubble-out"><p>My withdrawal from yesterday is still pending.</p><time>11:03</time></div><div class="bubble bubble-in"><p>Let me check that. I can see WD-40027 for $150.00, submitted 21 Sep 17:31.</p><time>11:03</time></div><div class="bubble bubble-in"><p>It is waiting on proof of address. Once that is uploaded it releases same day.</p><time>11:04</time></div><div class="bubble bubble-out"><p>Ah, I will upload it now.</p><time>11:05</time></div></div>
     <form class="composer" data-mock-submit="Message sent">

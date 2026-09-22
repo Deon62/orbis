@@ -135,7 +135,13 @@ Flows too short to deserve a page live in `assets/js/modals.js`, opened by
 - **Deposit** — step 1 picks the method, step 2 prefills the saved destination masked
   (`+254 7•• ••• 412`) with a **Use another** toggle, then the CTA reads
   *Send STK push · $100.00* for M-Pesa. The back chevron returns to step 1.
-- **Withdraw** — same shape, against the available balance.
+- **Withdraw** — same shape, against the available balance, minus a flat $1.00 platform
+  fee. The modal shows the fee and what actually lands; below $1.00 the CTA disables
+  and says so rather than offering a withdrawal that nets nothing.
+- **Indicators** — chart type (candles or line) and SMA 20 / 50 overlays, driving the
+  chart through `window.orbisChartState / orbisChartType / orbisChartSma`, which
+  `trade.html` defines. The overlay colours come from `--viz-2` and `--ink-3`, read at
+  draw time so they follow the theme.
 - **Refer & earn** — the link with a copy button, share row, and two rows out to
   *Your referrals* and *Referral earnings*.
 
@@ -220,7 +226,16 @@ The phone CTA bar is fixed, so `body[data-page="trade"]` reserves
 
 The chart has its own `+` / `−` in the bottom-left corner: they change how many candles
 are drawn (`Chart.view`, 24–140) rather than relying on browser zoom, which would scale
-the entire page. Back arrows step through history when there is any, falling back to
+the entire page.
+
+The three tools to the right of the durations are 36×32 with a 20px glyph — the first
+pass reused the text-button padding, which squeezed the icon to 12px through
+`svg{max-width:100%}`. They toggle candles / line, open **Indicators**, and take the
+chart fullscreen. Fullscreen is a class on `.chart-panel`, not the Fullscreen API, so
+the modal layer still works over it; `main` has to be lifted with it, because `main`
+carries its own stacking context and the sticky header would otherwise paint over a
+`position:fixed` child of it. Escape leaves fullscreen, unless a modal is open — that
+takes the key first. Back arrows step through history when there is any, falling back to
 `data-back-to` or `/trade`. On phones the theme switch and Log out are pinned to the bottom of the
 drawer so they never need scrolling to, and the Deposit button only appears on the
 trading surfaces — not on settings sub-pages.

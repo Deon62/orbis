@@ -44,9 +44,9 @@
         <button>1t</button><button>15s</button><button class="active">1m</button>
         <button>5m</button><button>15m</button><button>1h</button><button>1d</button>
         <span class="tf-sep"></span>
-        <button data-mock="Chart type"><i data-lucide="chart-candlestick" class="i-sm"></i></button>
-        <button data-mock="Indicators"><i data-lucide="sliders-horizontal" class="i-sm"></i></button>
-        <button data-mock="Fullscreen"><i data-lucide="maximize-2" class="i-sm"></i></button>
+        <button class="tf-tool" id="typeBtn" aria-label="Chart type"><i data-lucide="chart-candlestick" class="i"></i></button>
+        <button class="tf-tool" data-modal="indicators" aria-label="Indicators"><i data-lucide="sliders-horizontal" class="i"></i></button>
+        <button class="tf-tool" id="fullBtn" aria-label="Fullscreen chart"><i data-lucide="maximize-2" class="i"></i></button>
       </div>
 
       <div class="chart-stage">
@@ -200,6 +200,55 @@
 
   $('#zoomIn').addEventListener('click', function () { chart.zoom(1); });
   $('#zoomOut').addEventListener('click', function () { chart.zoom(-1); });
+
+  /* ------------------------------------------------------ chart tools -- */
+  var SMA_VARS = { 20: '--viz-2', 50: '--ink-3' };
+  var smaOn = [];
+
+  function applySmas() {
+    var css = getComputedStyle(document.documentElement);
+    chart.setSmas(smaOn.map(function (n) {
+      return { period: n, color: css.getPropertyValue(SMA_VARS[n]).trim() };
+    }));
+  }
+  function toolIcon(id, name) {
+    $(id).innerHTML = '<i data-lucide="' + name + '" class="i"></i>';
+    if (window.orbisIcons) window.orbisIcons();
+  }
+
+  /* the indicators modal reads and drives the chart through these */
+  window.orbisChartState = function () { return { type: chart.type, smas: smaOn }; };
+  window.orbisChartType = function (t) {
+    chart.setType(t);
+    toolIcon('#typeBtn', t === 'line' ? 'chart-line' : 'chart-candlestick');
+  };
+  window.orbisChartSma = function (period, on) {
+    smaOn = smaOn.filter(function (n) { return n !== period; });
+    if (on) smaOn.push(period);
+    applySmas();
+  };
+
+  $('#typeBtn').addEventListener('click', function () {
+    window.orbisChartType(chart.type === 'candle' ? 'line' : 'candle');
+  });
+
+  $('#fullBtn').addEventListener('click', function () {
+    var panel = document.querySelector('.chart-panel');
+    var on = panel.classList.toggle('chart-full');
+    document.documentElement.style.overflow = on ? 'hidden' : '';
+    toolIcon('#fullBtn', on ? 'minimize-2' : 'maximize-2');
+    setTimeout(function () { chart.resize(); chart.draw(); }, 60);
+  });
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key !== 'Escape') return;
+    /* a modal takes the escape first, it is the thing on top */
+    var scrim = document.querySelector('.modal-scrim');
+    if (scrim && !scrim.hidden) return;
+    if (document.querySelector('.chart-panel').classList.contains('chart-full')) {
+      $('#fullBtn').click();
+    }
+  });
 
   /* ------------------------------------------------- custom dropdown -- */
   var menu = $('#pickMenu'), btn = $('#pickBtn');

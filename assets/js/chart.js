@@ -63,6 +63,8 @@
     this.ticks = 0;
     this.barTicks = opts.barTicks || 6;
     this.C = themeColors(canvas);
+    this.type = opts.type || 'candle';     /* 'candle' or 'line' */
+    this.smas = [];                        /* moving-average overlays */
 
     this.resize();
     var self = this;
@@ -76,6 +78,9 @@
   Chart.prototype.retheme = function () { this.C = themeColors(this.cv); this.draw(); };
 
   Chart.prototype.visible = function () { return this.data.slice(-this.view); };
+
+  Chart.prototype.setType = function (t) { this.type = t; this.draw(); };
+  Chart.prototype.setSmas = function (list) { this.smas = list || []; this.draw(); };
 
   /* dir > 0 zooms in (fewer, wider candles), dir < 0 zooms out */
   Chart.prototype.zoom = function (dir) {
@@ -147,18 +152,51 @@
     var series = this.visible();
     var step = plotW / series.length;
     var bw = Math.max(2, Math.min(18, step * 0.62));
-    for (var i = 0; i < series.length; i++) {
-      var d = series[i];
-      var cx = Math.round(step * i + step / 2);
-      ctx.strokeStyle = ctx.fillStyle = d.c >= d.o ? C.up : C.down;
+
+    if (this.type === 'line') {
+      ctx.strokeStyle = series[series.length - 1].c >= series[0].c ? C.up : C.down;
+      ctx.lineWidth = 2;
+      ctx.lineJoin = ctx.lineCap = 'round';
       ctx.beginPath();
-      ctx.moveTo(cx + 0.5, y(d.h));
-      ctx.lineTo(cx + 0.5, y(d.l));
+      for (var li = 0; li < series.length; li++) {
+        var lx = step * li + step / 2, lyy = y(series[li].c);
+        li ? ctx.lineTo(lx, lyy) : ctx.moveTo(lx, lyy);
+      }
       ctx.stroke();
-      var top = y(Math.max(d.o, d.c));
-      var bh = Math.max(1, Math.abs(y(d.o) - y(d.c)));
-      ctx.fillRect(Math.round(cx - bw / 2), Math.round(top), Math.round(bw), Math.round(bh));
+      ctx.lineWidth = 1;
+    } else {
+      for (var i = 0; i < series.length; i++) {
+        var d = series[i];
+        var cx = Math.round(step * i + step / 2);
+        ctx.strokeStyle = ctx.fillStyle = d.c >= d.o ? C.up : C.down;
+        ctx.beginPath();
+        ctx.moveTo(cx + 0.5, y(d.h));
+        ctx.lineTo(cx + 0.5, y(d.l));
+        ctx.stroke();
+        var top = y(Math.max(d.o, d.c));
+        var bh = Math.max(1, Math.abs(y(d.o) - y(d.c)));
+        ctx.fillRect(Math.round(cx - bw / 2), Math.round(top), Math.round(bw), Math.round(bh));
+      }
     }
+
+    /* moving averages ride over whichever mark type is showing */
+    this.smas.forEach(function (sma) {
+      var pts = [];
+      for (var i = sma.period - 1; i < series.length; i++) {
+        var sum = 0;
+        for (var k = i + 1 - sma.period; k <= i; k++) sum += series[k].c;
+        pts.push([step * i + step / 2, y(sum / sma.period)]);
+      }
+      if (pts.length < 2) return;
+      ctx.strokeStyle = sma.color;
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      for (var j = 0; j < pts.length; j++) {
+        j ? ctx.lineTo(pts[j][0], pts[j][1]) : ctx.moveTo(pts[j][0], pts[j][1]);
+      }
+      ctx.stroke();
+      ctx.lineWidth = 1;
+    });
 
     var last = this.data[this.data.length - 1];
     var ly = Math.round(y(last.c)) + 0.5;

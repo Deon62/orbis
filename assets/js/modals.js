@@ -21,6 +21,7 @@
     usdt:  { label: 'USDT (TRC-20)', masked: 'T••••••••••••x92', icon: 'bitcoin' }
   };
 
+  var WITHDRAW_FEE = 1;          /* flat platform fee on every withdrawal */
   var REF_LINK = 'https://orbisflow.com/r/ORBIS-4K92';
 
   /* ============================================================= shell == */
@@ -210,8 +211,8 @@
         '</div>' +
 
         '<div class="kv"><span>Available</span><b class="mono">' + money(AVAILABLE) + '</b></div>' +
-        '<div class="kv"><span>Fee</span><b class="mono">$0.00</b></div>' +
-        '<div class="kv"><span>You receive</span><b class="mono" id="mNet">$250.00</b></div>' +
+        '<div class="kv"><span>Platform fee</span><b class="mono">' + money(WITHDRAW_FEE) + '</b></div>' +
+        '<div class="kv"><span>You receive</span><b class="mono" id="mNet">$249.00</b></div>' +
       '</div>' +
       '<div class="modal-ft">' +
         '<button class="btn btn-dark btn-block btn-lg" id="mGo">Request $250.00</button>' +
@@ -222,8 +223,10 @@
       var go = root.querySelector('#mGo');
       function sync() {
         var v = Number(amt.value) || 0;
-        root.querySelector('#mNet').textContent = money(v);
-        go.textContent = 'Request ' + money(v);
+        var ok = v > WITHDRAW_FEE;
+        root.querySelector('#mNet').textContent = money(Math.max(0, v - WITHDRAW_FEE));
+        go.disabled = !ok;
+        go.textContent = ok ? 'Request ' + money(v) : 'More than ' + money(WITHDRAW_FEE) + ' please';
       }
       amt.addEventListener('input', sync);
       root.querySelectorAll('[data-amt]').forEach(function (c) {
@@ -238,6 +241,7 @@
         close();
         toast('Withdrawal submitted for review', 'check-circle-2');
       });
+      sync();
     }, withdrawStep1);
   }
 
@@ -629,6 +633,57 @@
 
   global.orbisAuto = { start: autoStart, update: autoUpdate, stop: autoStop };
 
+  /* ======================================================= indicators == */
+  function indicatorsModal() {
+    var state = (global.orbisChartState && global.orbisChartState()) ||
+                { type: 'candle', smas: [] };
+
+    var html =
+      '<div class="modal-bd">' +
+        '<h4 class="modal-sub">Chart type</h4>' +
+        '<div class="stack-sm" style="margin-bottom:18px">' +
+          ['candle', 'line'].map(function (t) {
+            var on = state.type === t;
+            return '<button class="method' + (on ? ' active' : '') + '" data-ctype="' + t + '">' +
+              '<span class="method-ic">' +
+                ic(t === 'candle' ? 'chart-candlestick' : 'chart-line', 'i-sm') + '</span>' +
+              '<span style="flex:1;text-align:left"><b>' +
+                (t === 'candle' ? 'Candles' : 'Line') + '</b><span>' +
+                (t === 'candle' ? 'Open, high, low and close' : 'Closing price only') +
+              '</span></span>' + (on ? ic('check', 'i-sm') : '') + '</button>';
+          }).join('') +
+        '</div>' +
+
+        '<h4 class="modal-sub">Overlays</h4>' +
+        [20, 50].map(function (n) {
+          var on = state.smas.indexOf(n) > -1;
+          return '<div class="auto-row">' +
+            '<span class="lr-tx"><b>Moving average ' + n + '</b>' +
+              '<span>Mean close over the last ' + n + ' candles</span></span>' +
+            '<button class="switch' + (on ? ' on' : '') + '" data-sma="' + n +
+              '" role="switch" aria-checked="' + on + '"></button></div>';
+        }).join('') +
+      '</div>';
+
+    open('Indicators', html, function (root) {
+      root.querySelectorAll('[data-ctype]').forEach(function (b) {
+        b.addEventListener('click', function () {
+          if (global.orbisChartType) global.orbisChartType(b.dataset.ctype);
+          close();
+          toast(b.dataset.ctype === 'line' ? 'Line chart' : 'Candlestick chart', 'check');
+        });
+      });
+      root.querySelectorAll('[data-sma]').forEach(function (b) {
+        b.addEventListener('click', function () {
+          var on = !b.classList.contains('on');
+          b.classList.toggle('on', on);
+          b.setAttribute('aria-checked', on);
+          if (global.orbisChartSma) global.orbisChartSma(Number(b.dataset.sma), on);
+        });
+      });
+    });
+  }
+
   /* =========================================================== triggers = */
   document.addEventListener('click', function (e) {
     var t = e.target.closest('[data-modal]');
@@ -641,6 +696,7 @@
     else if (kind === 'account') accountModal();
     else if (kind === 'add-payment') addPaymentStep1();
     else if (kind === 'market-read') marketReadModal();
+    else if (kind === 'indicators') indicatorsModal();
     else if (kind === 'country') countryModal(t);
     else if (kind === 'copy') copyModal(t.dataset.provider);
   });
