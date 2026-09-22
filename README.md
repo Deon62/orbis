@@ -65,6 +65,12 @@ Sub-pages carry no page title or description of their own: they set `data-title`
 (shown in the header, with a back chevron) and `data-nav="account"` so the Profile tab
 stays lit. The list pages are lists — no headers, no blurbs.
 
+## Sound
+
+Short synthesised tones (Web Audio, no audio files) on placing a contract and on its
+result. Muted from the panel's **Sound** switch, stored in `localStorage` under
+`orbisflow-sound`. `window.orbisBeep('place'|'win'|'lose')`.
+
 ## Filters
 
 Every filter is a dropdown, not a row of pills — six categories in a horizontal row
@@ -93,6 +99,9 @@ Flows too short to deserve a page live in `assets/js/modals.js`, opened by
 - **Add a method** — payment type, then its one field; opened from Payment methods.
 - **Market read** — the AI page's sentiment/volatility/accuracy figures.
 - **Copy <provider>** — allocation stepper, minimum enforced, fee and exit terms.
+- **Contract running → Won/Lost** — placing a trade opens a running card with a
+  countdown and progress bar, then settles into a result. Settlement is compressed to
+  six seconds and the card says so; the outcome is a coin flip.
 
 Saved destinations are the `SAVED` map at the top of `modals.js`; accounts come from
 `window.orbisAccounts` in `app.js`. Swap both for the account service.

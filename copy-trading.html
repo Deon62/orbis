@@ -19,7 +19,7 @@
 
 <main class="wrap page-body">
   <div class="toolbar" style="padding-top:0">
-    <div class="fdrop" data-fdrop>
+    <div class="fdrop" id="sortDrop" data-fdrop>
       <button class="fdrop-btn" aria-haspopup="listbox" aria-expanded="false"><span class="fdrop-lbl">Sort by</span><span class="fdrop-val">Return</span><i data-lucide="chevron-down" class="i-sm chev"></i></button>
       <div class="fdrop-menu" hidden role="listbox">
         <button class="fdrop-opt" role="option" data-v="ret" aria-selected="true"><span class="fdrop-tx">Return</span></button>
@@ -28,7 +28,16 @@
       </div>
     </div>
     <span class="grow"></span>
-    <span class="dim" style="font-size:12.5px">Last 30 days</span>
+    <div class="fdrop" id="rangeDrop" data-fdrop>
+      <button class="fdrop-btn" aria-haspopup="listbox" aria-expanded="false"><span class="fdrop-lbl">Last</span><span class="fdrop-val">30 days</span><i data-lucide="chevron-down" class="i-sm chev"></i></button>
+      <div class="fdrop-menu" hidden role="listbox" style="left:auto;right:0">
+        <button class="fdrop-opt" role="option" data-v="1h" aria-selected="false"><span class="fdrop-tx">Hour</span></button>
+        <button class="fdrop-opt" role="option" data-v="12h" aria-selected="false"><span class="fdrop-tx">12 hours</span></button>
+        <button class="fdrop-opt" role="option" data-v="24h" aria-selected="false"><span class="fdrop-tx">24 hours</span></button>
+        <button class="fdrop-opt" role="option" data-v="7d" aria-selected="false"><span class="fdrop-tx">Week</span></button>
+        <button class="fdrop-opt" role="option" data-v="30d" aria-selected="true"><span class="fdrop-tx">30 days</span></button>
+      </div>
+    </div>
   </div>
 
   <div class="card card-flat" id="providers"></div>
@@ -47,6 +56,9 @@
 <script>
 (function () {
   var host = document.getElementById('providers');
+  /* the headline figure is a 30-day number, scaled down for shorter windows */
+  var SCALE = { '1h': 0.015, '12h': 0.09, '24h': 0.16, '7d': 0.42, '30d': 1 };
+  var sortBy = 'ret', range = '30d';
 
   function render(sort) {
     var list = OrbisData.providers.slice().sort(function (a, b) {
@@ -54,6 +66,8 @@
     });
 
     host.innerHTML = list.map(function (p) {
+      var ret = (p.ret * SCALE[range]);
+      ret = (ret >= 10 ? ret.toFixed(1) : ret.toFixed(2));
       return '<div class="prov">' +
         '<span class="avatar">' + p.initials + '</span>' +
         '<span class="prov-id">' +
@@ -61,20 +75,24 @@
           '<span>' + p.style + ' · ' + p.copiers.toLocaleString('en-US') + ' copiers</span>' +
         '</span>' +
         '<span class="prov-stats">' +
-          '<span><small>Return</small><b class="mono up">+' + p.ret + '%</b></span>' +
-          '<span><small>Win rate</small><b class="mono">' + p.win + '%</b></span>' +
-          '<span><small>Max drawdown</small><b class="mono">' + p.dd + '%</b></span>' +
+          '<span><small>Return</small><b class="mono up">+' + ret + '%</b></span>' +
+          '<span><small>Win rate</small><b class="mono brandtxt">' + p.win + '%</b></span>' +
+          '<span><small>Max drawdown</small><b class="mono down">' + p.dd + '%</b></span>' +
           '<span><small>Minimum</small><b class="mono">' + OrbisData.money(p.min) + '</b></span>' +
         '</span>' +
-        '<button class="btn btn-ghost btn-sm prov-cta" data-modal="copy" data-provider="' + p.id + '">Copy</button>' +
+        '<button class="btn btn-dark btn-sm prov-cta" data-modal="copy" data-provider="' + p.id + '">Copy</button>' +
       '</div>';
     }).join('');
     window.orbisIcons();
   }
 
-  document.addEventListener('fdrop:change', function (e) { render(e.detail.value); });
+  document.addEventListener('fdrop:change', function (e) {
+    if (e.target.id === 'rangeDrop') range = e.detail.value;
+    else sortBy = e.detail.value;
+    render(sortBy);
+  });
 
-  render('ret');
+  render(sortBy);
 })();
 </script>
 </body>

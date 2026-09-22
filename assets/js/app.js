@@ -32,6 +32,46 @@
            '" aria-label="orbisflow"><span class="logo-word">orbis<span class="flow">flow</span></span></a>';
   }
 
+  /* ============================================================= sound === */
+  var SOUND_KEY = 'orbisflow-sound';
+  var audio;
+
+  function soundOn() {
+    try { return localStorage.getItem(SOUND_KEY) !== 'off'; } catch (e) { return true; }
+  }
+  function setSound(on) {
+    try { localStorage.setItem(SOUND_KEY, on ? 'on' : 'off'); } catch (e) {}
+    document.querySelectorAll('[data-sound-switch]').forEach(function (sw) {
+      sw.classList.toggle('on', on);
+      sw.setAttribute('aria-checked', String(on));
+    });
+  }
+
+  /* short synthesised tones — no audio files to ship or fail to load */
+  function beep(kind) {
+    if (!soundOn()) return;
+    try {
+      audio = audio || new (window.AudioContext || window.webkitAudioContext)();
+      if (audio.state === 'suspended') audio.resume();
+      var notes = kind === 'win'  ? [[660, 0], [880, 0.12]]
+                : kind === 'lose' ? [[400, 0], [300, 0.14]]
+                : [[760, 0]];
+      notes.forEach(function (n) {
+        var o = audio.createOscillator(), g = audio.createGain();
+        o.type = 'sine';
+        o.frequency.value = n[0];
+        var t = audio.currentTime + n[1];
+        g.gain.setValueAtTime(0.0001, t);
+        g.gain.exponentialRampToValueAtTime(0.16, t + 0.012);
+        g.gain.exponentialRampToValueAtTime(0.0001, t + 0.16);
+        o.connect(g); g.connect(audio.destination);
+        o.start(t); o.stop(t + 0.18);
+      });
+    } catch (e) {}
+  }
+  window.orbisBeep = beep;
+  window.orbisSoundOn = soundOn;
+
   /* ============================================================= theme === */
   var THEME_KEY = 'orbisflow-theme';
   function currentTheme() {
@@ -114,7 +154,6 @@
       ['Refer & earn',        'gift',               'modal:refer']
     ]},
     { h: 'Account', items: [
-      ['Personal details', 'user-round',  '/profile-details'],
       ['Verification',     'badge-check', '/verification'],
       ['Security',         'shield',      '/security'],
       ['Payment methods',  'credit-card', '/payments'],
@@ -194,6 +233,12 @@
         '<div class="drawer-scroll">' + groups + '</div>' +
         /* pinned, so log out and the theme switch never need scrolling to */
         '<div class="drawer-foot">' +
+          '<button class="drawer-act" data-sound-toggle>' +
+            ic('volume-2') +
+            '<span>Sound</span>' +
+            '<span class="switch' + (soundOn() ? ' on' : '') +
+              '" data-sound-switch role="switch" aria-checked="' + soundOn() + '"></span>' +
+          '</button>' +
           '<button class="drawer-act" data-theme-toggle>' +
             '<span data-theme-icon>' + ic(currentTheme() === 'dark' ? 'sun' : 'moon') + '</span>' +
             '<span>Dark mode</span>' +
@@ -234,16 +279,13 @@
     return '<header class="hdr"><div class="hdr-in">' + lead +
       '<span class="hdr-page' + (full ? '' : ' hdr-page-always') + '">' + title + '</span>' +
       '<div class="hdr-right">' +
-        (full
-          ? accountCardHTML() +
-            '<button class="btn btn-primary btn-sm hide-mobile" data-modal="deposit">' +
-              ic('plus', 'i-sm') + 'Deposit</button>'
-          : '') +
+        (full ? accountCardHTML() : '') +
         (BODY.dataset.hdrAction
           ? '<button class="icon-btn" data-modal="' + BODY.dataset.hdrAction + '" aria-label="' +
             (BODY.dataset.hdrLabel || 'Details') + '">' + ic(BODY.dataset.hdrIcon || 'info') + '</button>'
           : '') +
-        '<a class="avatar" href="/profile-details" aria-label="Profile">AO</a>' +
+        '<button class="hdr-deposit" data-modal="deposit" aria-label="Deposit">' +
+          ic('arrow-down-to-line') + '</button>' +
       '</div></div></header>';
   }
 
@@ -356,6 +398,7 @@
       history.back();
       return;
     }
+    if (e.target.closest('[data-sound-toggle]')) { setSound(!soundOn()); return; }
     if (e.target.closest('[data-drawer-open]')) { setDrawer(true); return; }
     if (e.target.closest('[data-drawer-close]')) { setDrawer(false); return; }
 

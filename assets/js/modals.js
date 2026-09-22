@@ -63,7 +63,11 @@
     if (f) f.focus({ preventScroll: true });
   }
 
+  var running;
+
   function close() {
+    clearInterval(running);
+    running = null;
     if (!scrim) return;
     scrim.hidden = true;
     document.documentElement.style.overflow = '';
@@ -427,6 +431,86 @@
     });
   }
 
+  /* ====================================================== trade ticket == */
+  /* Settlement is compressed to a few seconds so the flow can be seen end to
+     end; the contract's real duration is stated on the card. */
+  var SETTLE_SECONDS = 6;
+
+  function tradeModal(c) {
+    var up = c.dir === 'Rise';
+    var payout = c.stake + c.stake * (c.payout / 100);
+
+    var html =
+      '<div class="modal-bd">' +
+        '<div class="run-head">' +
+          '<span class="run-dir ' + (up ? 'up' : 'down') + '">' +
+            ic(up ? 'arrow-up' : 'arrow-down') + '</span>' +
+          '<span class="lr-tx"><b>' + c.dir + ' · ' + c.sym + '</b>' +
+            '<span>' + money(c.stake) + ' · ' + c.duration + ' contract</span></span>' +
+        '</div>' +
+
+        '<div class="run-bar"><i id="tProg"></i></div>' +
+        '<div class="run-meta">' +
+          '<span>Settles in <b id="tLeft" class="mono">' + SETTLE_SECONDS + 's</b></span>' +
+          '<span>Entry <b class="mono">' + c.entry + '</b></span>' +
+        '</div>' +
+
+        '<div class="kv"><span>Payout if correct</span><b class="mono">' + money(payout) + '</b></div>' +
+        '<div class="kv"><span>At risk</span><b class="mono">' + money(c.stake) + '</b></div>' +
+        '<p class="hint" style="margin-top:12px">Settlement is accelerated for this prototype — a real ' +
+          c.duration + ' contract runs its full term.</p>' +
+      '</div>';
+
+    open('Contract running', html, function (root) {
+      var left = SETTLE_SECONDS;
+      var bar = root.querySelector('#tProg');
+      var cd = root.querySelector('#tLeft');
+      bar.style.width = '0%';
+
+      running = setInterval(function () {
+        left--;
+        cd.textContent = Math.max(0, left) + 's';
+        bar.style.width = ((SETTLE_SECONDS - left) / SETTLE_SECONDS * 100) + '%';
+        if (left <= 0) {
+          clearInterval(running);
+          running = null;
+          settleModal(c);
+        }
+      }, 1000);
+    });
+
+    if (global.orbisBeep) global.orbisBeep('place');
+  }
+
+  function settleModal(c) {
+    var won = Math.random() < 0.5;          /* a coin flip, like the contract */
+    var profit = c.stake * (c.payout / 100);
+    var delta = won ? profit : -c.stake;
+
+    var html =
+      '<div class="modal-bd center">' +
+        '<div class="result ' + (won ? 'result-won' : 'result-lost') + '">' +
+          ic(won ? 'check' : 'x', 'i-lg') + '</div>' +
+        '<h3 style="margin-top:14px">' + (won ? 'Contract won' : 'Contract lost') + '</h3>' +
+        '<p class="run-amount ' + (won ? 'up' : 'down') + ' mono">' +
+          (won ? '+' : '') + money(delta) + '</p>' +
+        '<div style="text-align:left;margin-top:18px">' +
+          '<div class="kv"><span>Market</span><b>' + c.sym + '</b></div>' +
+          '<div class="kv"><span>Direction</span><b>' + c.dir + '</b></div>' +
+          '<div class="kv"><span>Stake</span><b class="mono">' + money(c.stake) + '</b></div>' +
+          '<div class="kv"><span>Returned</span><b class="mono">' +
+            money(won ? c.stake + profit : 0) + '</b></div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="modal-ft" style="display:grid;grid-template-columns:1fr 1fr;gap:8px">' +
+        '<button class="btn btn-ghost" data-close>Close</button>' +
+        '<a class="btn btn-primary" href="/positions">See positions</a>' +
+      '</div>';
+
+    open(won ? 'Won' : 'Lost', html);
+    if (global.orbisBeep) global.orbisBeep(won ? 'win' : 'lose');
+  }
+
   /* =========================================================== triggers = */
   document.addEventListener('click', function (e) {
     var t = e.target.closest('[data-modal]');
@@ -444,5 +528,6 @@
 
   global.orbisModal = { open: open, close: close, deposit: depositStep1,
                       withdraw: withdrawStep1, refer: referModal, account: accountModal,
-                      addPayment: addPaymentStep1, marketRead: marketReadModal, copy: copyModal };
+                      addPayment: addPaymentStep1, marketRead: marketReadModal, copy: copyModal,
+                      trade: tradeModal };
 })(window);

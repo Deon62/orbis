@@ -281,8 +281,11 @@
       });
       var n = $('#openN');
       if (n) n.textContent = OrbisData.openTrades.length;
-      window.orbisToast(b.dataset.dir + ' · ' + OrbisData.money(stake) + ' on ' +
-        current.sym + ' · ' + duration(), 'check-circle-2');
+
+      window.orbisModal.trade({
+        sym: current.sym, dir: b.dataset.dir, stake: stake,
+        payout: current.payout, duration: duration(), entry: $('#price').textContent
+      });
     });
   });
 
