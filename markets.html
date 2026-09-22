@@ -23,27 +23,10 @@
       <input class="input" id="search" type="search" placeholder="Search markets" aria-label="Search markets">
       <span class="input-affix" style="pointer-events:none"><i data-lucide="search" class="i-sm"></i></span>
     </div>
+    <span class="grow"></span>
+    <span class="dim" id="listCount" style="font-size:12.5px"></span>
   </div>
 
-
-  <div class="grid g4" style="margin-bottom:18px">
-    <div class="stat">
-      <span><i data-lucide="flame" class="i-sm"></i>Most traded</span>
-      <b>Volatility 75</b><em class="up">+2.41%</em>
-    </div>
-    <div class="stat">
-      <span><i data-lucide="trending-up" class="i-sm"></i>Top gainer</span>
-      <b>BTC/USD</b><em class="up">+1.92%</em>
-    </div>
-    <div class="stat">
-      <span><i data-lucide="trending-down" class="i-sm"></i>Top loser</span>
-      <b>ETH/USD</b><em class="down">-1.07%</em>
-    </div>
-    <div class="stat">
-      <span><i data-lucide="percent" class="i-sm"></i>Best payout</span>
-      <b>92%</b><em class="dim">Volatility 75</em>
-    </div>
-  </div>
 
   <div class="pills" id="cats">
     <button class="pill active" data-cat="all"><i data-lucide="layers" class="i-sm"></i>All markets</button>
@@ -54,17 +37,7 @@
     <button class="pill" data-cat="synthetics"><i data-lucide="waves" class="i-sm"></i>Synthetics</button>
   </div>
 
-  <div class="card card-flat">
-    <div class="card-hd">
-      <h3 id="listTitle">All markets</h3>
-      <span class="dim" style="font-size:12.5px">Payout shown is the maximum for a 5-minute contract</span>
-    </div>
-    <div id="list"></div>
-  </div>
-
-  <p class="hint" style="margin-top:14px">
-    Prices are simulated for this prototype. A live feed will replace them in the real build.
-  </p>
+  <div class="card card-flat" id="list"></div>
 </main>
 
 <div id="site-footer"></div>
@@ -77,7 +50,7 @@
 <script>
 (function () {
   var listEl = document.getElementById('list');
-  var titleEl = document.getElementById('listTitle');
+  var countEl = document.getElementById('listCount');
   var cat = 'all', term = '';
 
   function render() {
@@ -92,8 +65,7 @@
       : '<div class="empty"><i data-lucide="search-x" class="i-lg"></i>' +
         '<b>No markets match that</b><p>Try a different name, or clear the filters.</p></div>';
 
-    titleEl.textContent = (cat === 'all' ? 'All markets' : OrbisData.cats[cat]) +
-      ' · ' + rows.length + (rows.length === 1 ? ' instrument' : ' instruments');
+    countEl.textContent = rows.length + (rows.length === 1 ? ' instrument' : ' instruments');
     OrbisData.drawSparklines();
     window.orbisIcons();
   }

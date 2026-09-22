@@ -101,7 +101,7 @@
   var NAV = [
     { id: 'trade',     label: 'Trade',     icon: 'chart-candlestick', url: '/trade' },
     { id: 'markets',   label: 'Markets',   icon: 'layers',            url: '/markets' },
-    { id: 'ai',        label: 'AI',        icon: 'sparkles',          url: '/ai' },
+    { id: 'ai',        label: 'AI',        icon: 'bot',               url: '/ai' },
     { id: 'positions', label: 'Positions', icon: 'receipt-text',      url: '/positions' },
     { id: 'account',   label: 'Profile',   icon: 'user-round',        url: '/profile-details' }
   ];
@@ -227,7 +227,7 @@
       ? '<button class="icon-btn hide-desk" data-drawer-open aria-label="Open menu">' + ic('menu', 'i-lg') + '</button>' +
         '<span class="hide-desk">' + logo() + '</span>'
       : '<a class="icon-btn" data-back-nav href="' + (BODY.dataset.backTo || '/trade') + '" aria-label="Back">' +
-        ic('chevron-left', 'i-lg') + '</a>';
+        ic('arrow-left', 'i-lg') + '</a>';
 
     return '<header class="hdr"><div class="hdr-in">' + lead +
       '<span class="hdr-page' + (full ? '' : ' hdr-page-always') + '">' + title + '</span>' +

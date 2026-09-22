@@ -132,7 +132,8 @@
   var M = OrbisData.markets;
   var $ = function (s) { return document.querySelector(s); };
 
-  var q = new URLSearchParams(location.search).get('symbol');
+  var params = new URLSearchParams(location.search);
+  var q = params.get('symbol');
   var idx = Math.max(0, M.findIndex(function (m) { return m.sym === q; }));
   var current = M[idx];
 
@@ -284,6 +285,36 @@
         current.sym + ' · ' + duration(), 'check-circle-2');
     });
   });
+
+  /* ------------------------------------------- signal handed over by /ai -- */
+  (function applySignal() {
+    var tf = params.get('tf');
+    var stake = params.get('stake');
+    var dir = params.get('dir');
+    if (!tf && !stake && !dir) return;
+
+    if (tf) {
+      document.querySelectorAll('.tf button').forEach(function (b) {
+        if (b.textContent.trim() === tf) {
+          document.querySelectorAll('.tf button').forEach(function (x) { x.classList.remove('active'); });
+          b.classList.add('active');
+        }
+      });
+    }
+    if (stake) {
+      $('#stake').value = stake;
+      document.querySelectorAll('[data-stake]').forEach(function (c) {
+        c.classList.toggle('active', c.dataset.stake === stake);
+      });
+    }
+    calc();
+
+    if (dir) {
+      var btn = document.querySelector('[data-dir="' + dir + '"]');
+      if (btn) btn.classList.add('suggested');
+      window.orbisToast('AI signal loaded · ' + dir + ' ' + current.sym + (tf ? ' · ' + tf : ''), 'bot');
+    }
+  })();
 
   setInterval(function () {
     $('#clock').textContent = new Date().toUTCString().slice(17, 25) + ' UTC';

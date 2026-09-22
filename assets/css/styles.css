@@ -976,3 +976,10 @@ input:focus-visible,select:focus-visible{ outline:2px solid var(--brand); outlin
   .ticket-seg{ padding:8px; }
   .ticket-body{ padding:12px 14px 4px; }
 }
+
+
+/* the direction an AI signal suggested, once handed to the ticket */
+.btn-up.suggested,.btn-down.suggested{ outline:2px solid var(--ink); outline-offset:2px; }
+
+/* the scan readings are a header strip, not four loose tiles */
+.scan-strip{ padding-bottom:16px; border-bottom:1px solid var(--line); }

@@ -47,7 +47,7 @@
     ensure();
     box.innerHTML =
       '<div class="modal-hd">' +
-        (backFn ? '<button class="icon-btn" data-back aria-label="Back">' + ic('chevron-left') + '</button>' : '') +
+        (backFn ? '<button class="icon-btn" data-back aria-label="Back">' + ic('arrow-left') + '</button>' : '') +
         '<b>' + title + '</b>' +
         '<button class="icon-btn" data-close aria-label="Close">' + ic('x') + '</button>' +
       '</div>' + bodyHTML;

@@ -32,9 +32,9 @@ vercel dev            # or any static server with clean-URL support
 | `index.html` | Marketing landing page. On laptops it scrolls section-by-section. |
 | `login.html` / `signup.html` | Centred cards, "Continue with Google" below the email form. |
 | `trade.html` | Chart + ticket. The row above the chart is the duration picker; the ticket is Manual/Auto, a stake stepper, and two CTAs. |
-| `markets.html` | 17 instruments across 5 asset classes, searchable and filterable. |
-| `ai.html` | Signals with confidence, pattern watch, ask box. |
-| `positions.html` | Open, settled and statistics tabs. |
+| `markets.html` | The instrument list, searchable and filterable. Nothing above it but the search row. |
+| `ai.html` | Market scan: signals with confidence and a pattern watch. Each signal hands its market, direction, duration and stake to the ticket via query params. |
+| `positions.html` | Open, settled and statistics tabs — the list and nothing else. |
 | `cashier.html` | Transaction history. Deposit and withdraw are modals, not pages. |
 | `referrals.html` | The referral list, nothing else. |
 | `referral-earnings.html` | Weekly payouts and accruals. |

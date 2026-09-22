@@ -20,22 +20,8 @@
 <main class="wrap page-body">
   <div class="stack">
 
-    <!-- ask ------------------------------------------------------------ -->
-    <div class="card card-flat card-pad" style="padding-inline:0">
-      <form class="ai-ask" data-mock-submit="AI assistant — not wired up yet">
-        <input class="input" placeholder="Ask about a market — e.g. why is gold up today?" aria-label="Ask the assistant">
-        <button class="btn btn-primary" type="submit"><i data-lucide="sparkles" class="i-sm"></i><span class="lbl">Ask</span></button>
-      </form>
-      <div class="ai-chips">
-        <button class="pill" data-mock="Suggested prompt">What's driving EUR/USD?</button>
-        <button class="pill" data-mock="Suggested prompt">Safest 5-minute trade now</button>
-        <button class="pill" data-mock="Suggested prompt">Explain my last 10 losses</button>
-        <button class="pill" data-mock="Suggested prompt">Is volatility high today?</button>
-      </div>
-    </div>
-
     <!-- market read ----------------------------------------------------- -->
-    <div class="grid g4">
+    <div class="grid g4 scan-strip">
       <div class="stat">
         <span><i data-lucide="gauge" class="i-sm"></i>Market sentiment</span>
         <b>Risk-on</b><em class="up">62% bullish</em>
@@ -56,10 +42,16 @@
 
     <!-- signals --------------------------------------------------------- -->
     <div>
-      <div class="pills" id="sigFilter">
-        <button class="pill active" data-f="all">All signals</button>
-        <button class="pill" data-f="Rise">Rise</button>
-        <button class="pill" data-f="Fall">Fall</button>
+      <div class="toolbar" style="border-bottom:0;padding-top:0">
+        <div class="pills" id="sigFilter" style="padding:0">
+          <button class="pill active" data-f="all">All signals</button>
+          <button class="pill" data-f="Rise">Rise</button>
+          <button class="pill" data-f="Fall">Fall</button>
+        </div>
+        <span class="grow"></span>
+        <button class="btn btn-ghost btn-sm" data-mock="Rescan markets">
+          <i data-lucide="radar" class="i-sm"></i>Rescan
+        </button>
       </div>
       <div class="grid g3" id="signals"></div>
     </div>
@@ -91,12 +83,12 @@
 <script>
 (function () {
   var SIGNALS = [
-    { sym:'EUR/USD',       dir:'Rise', conf:78, tf:'5 minutes',  why:'Holding above the session VWAP with rising volume; dollar softening into the New York open.' },
-    { sym:'BTC/USD',       dir:'Rise', conf:71, tf:'15 minutes', why:'Broke the overnight range high and retested it as support. Funding still neutral.' },
-    { sym:'XAU/USD',       dir:'Fall', conf:66, tf:'5 minutes',  why:'Rejected the 2,320 level three times. Real yields ticking up ahead of CPI.' },
-    { sym:'USD/JPY',       dir:'Rise', conf:63, tf:'1 hour',     why:'Carry demand intact; no intervention rhetoric in the last two sessions.' },
-    { sym:'ETH/USD',       dir:'Fall', conf:59, tf:'15 minutes', why:'Lower highs against bitcoin for six hours. Momentum fading on the hourly.' },
-    { sym:'Volatility 75', dir:'Rise', conf:54, tf:'1 minute',   why:'Mean-reversion setup after a two-sigma move down. Low conviction — size small.' }
+    { sym:'EUR/USD',       dir:'Rise', conf:78, tf:'5m',  stake:25, why:'Holding above the session VWAP with rising volume; dollar softening into the New York open.' },
+    { sym:'BTC/USD',       dir:'Rise', conf:71, tf:'15m', stake:50, why:'Broke the overnight range high and retested it as support. Funding still neutral.' },
+    { sym:'XAU/USD',       dir:'Fall', conf:66, tf:'5m',  stake:25, why:'Rejected the 2,320 level three times. Real yields ticking up ahead of CPI.' },
+    { sym:'USD/JPY',       dir:'Rise', conf:63, tf:'1h',  stake:25, why:'Carry demand intact; no intervention rhetoric in the last two sessions.' },
+    { sym:'ETH/USD',       dir:'Fall', conf:59, tf:'15m', stake:25, why:'Lower highs against bitcoin for six hours. Momentum fading on the hourly.' },
+    { sym:'Volatility 75', dir:'Rise', conf:54, tf:'1m',  stake:10, why:'Mean-reversion setup after a two-sigma move down. Low conviction — size small.' }
   ];
 
   var PATTERNS = [
@@ -114,7 +106,7 @@
       var up = s.dir === 'Rise';
       return '<div class="signal">' +
         '<div class="signal-hd">' + OrbisData.assetHTML(m) +
-          '<span class="nm"><b>' + s.sym + '</b><span>' + s.tf + ' contract</span></span>' +
+          '<span class="nm"><b>' + s.sym + '</b><span>' + s.tf + ' contract · $' + s.stake + '</span></span>' +
           '<span class="tag ' + (up ? 'tag-up' : 'tag-down') + '">' +
           '<i data-lucide="' + (up ? 'trending-up' : 'trending-down') + '" class="i-sm"></i>' + s.dir + '</span>' +
         '</div>' +
@@ -123,8 +115,9 @@
         '<div class="conf"><i style="width:' + s.conf + '%;background:' +
           (up ? 'var(--up)' : 'var(--down)') + '"></i></div>' +
         '<p>' + s.why + '</p>' +
-        '<a class="btn btn-ghost btn-sm" style="margin-top:12px" href="/trade?symbol=' +
-          encodeURIComponent(s.sym) + '">Open on chart<i data-lucide="arrow-right" class="i-sm"></i></a>' +
+        '<a class="btn btn-ghost btn-sm btn-block" style="margin-top:12px" href="/trade?symbol=' +
+          encodeURIComponent(s.sym) + '&dir=' + s.dir + '&tf=' + s.tf + '&stake=' + s.stake +
+          '">Trade this signal<i data-lucide="arrow-right" class="i-sm"></i></a>' +
       '</div>';
     }).join('');
     window.orbisIcons();
