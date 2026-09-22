@@ -458,8 +458,8 @@
     var g = e.target.closest('[data-login]');
     if (g) {
       e.preventDefault();
-      toast('Signed in with Google', 'check-circle-2');
-      setTimeout(function () { window.location.href = href(g.dataset.login); }, 650);
+      veil(g.dataset.loading || 'Signing you in');
+      setTimeout(function () { window.location.href = href(g.dataset.login); }, 1100);
       return;
     }
 
@@ -517,8 +517,14 @@
     var f = e.target.closest('form[data-mock-submit]');
     if (f) {
       e.preventDefault();
-      toast(f.dataset.mockSubmit, 'check-circle-2');
-      if (f.dataset.go) setTimeout(function () { window.location.href = href(f.dataset.go); }, 700);
+      /* work that ends on another page gets the loader, work that ends here
+         gets a toast: a veil you cannot leave is worse than no feedback */
+      if (f.dataset.go) {
+        veil(f.dataset.loading || f.dataset.mockSubmit);
+        setTimeout(function () { window.location.href = href(f.dataset.go); }, 1200);
+      } else {
+        toast(f.dataset.mockSubmit, 'check-circle-2');
+      }
     }
   });
 
@@ -612,5 +618,18 @@
   }
   if (window.lucide) drawIcons();
   else window.addEventListener('load', drawIcons);
+  /* ============================================================= veil == */
+  function veil(label) {
+    var el = document.createElement('div');
+    el.className = 'veil';
+    el.setAttribute('role', 'status');
+    el.setAttribute('aria-live', 'polite');
+    el.innerHTML = '<span class="loader"></span><p class="veil-tx">' + label + '</p>';
+    document.body.appendChild(el);
+    document.documentElement.style.overflow = 'hidden';
+    return el;
+  }
+
+  window.orbisVeil = veil;
   window.orbisIcons = drawIcons;
 })();

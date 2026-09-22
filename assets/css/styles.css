@@ -1476,3 +1476,149 @@ body:has(.chart-full) .tabbar{ display:none; }
   justify-content:center; gap:8px;
 }
 .addr button:hover{ background:var(--line); }
+
+
+/* the deposit-address modal has to be read in one screen on a small phone,
+   scrolling past an address is how people paste half of one */
+@media(max-height:820px){
+  .modal .addr code{ padding:10px 12px; font-size:12.5px; line-height:1.5; }
+  .modal .addr button{ height:38px; }
+  .modal .qr-wrap{ margin-top:13px; gap:6px; }
+  .modal .note-warn{ margin:13px 0 0; padding:9px 11px; font-size:12px; }
+  .modal .saved{ padding:10px 12px; }
+}
+
+
+/* ============================================================ Academy == */
+.course{
+  border:1px solid var(--line); background:var(--panel);
+  display:flex; flex-direction:column;
+}
+.course-in{ padding:22px 20px; display:flex; flex-direction:column; flex:1; }
+.course-full{ border-color:var(--line-strong); }
+
+.course-hd{ display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
+.course-price{ font-size:21px; font-weight:600; letter-spacing:-.02em; }
+.course h3{ font-size:21px; letter-spacing:-.02em; margin-bottom:6px; }
+.course-lead{ color:var(--ink-2); font-size:13.5px; line-height:1.55; margin-bottom:16px; }
+.course-meta{
+  margin-top:14px; padding-top:12px; border-top:1px solid var(--line-soft);
+  font-size:12px; color:var(--ink-3);
+}
+.course-ft{ margin-top:16px; display:grid; gap:8px; }
+/* the three cards carry different numbers of benefits, so the footers are
+   pushed down to a common line rather than floating at three heights */
+@media(min-width:760px){ .course-meta{ margin-top:auto; } }
+
+/* a benefit list, ticked */
+.ticks{ list-style:none; display:grid; gap:9px; }
+.ticks li{
+  display:flex; gap:9px; align-items:flex-start;
+  font-size:13.5px; line-height:1.5; color:var(--ink-2);
+}
+.ticks svg{ color:var(--up); margin-top:2px; flex:none; }
+
+/* the free download reads as a file, not as a second call to action */
+.btn-file{
+  border:1px solid var(--line); font-size:12.5px; font-weight:500;
+  color:var(--ink-2); gap:8px; padding-inline:10px;
+}
+.btn-file:hover{ border-color:var(--line-strong); color:var(--ink); background:var(--panel-2); }
+
+/* on a phone each course owns the screen, so they are compared one at a time */
+@media(max-width:759px) and (prefers-reduced-motion:no-preference){
+  .course-sec{ padding-block:0 0; }
+  .course-h{ padding-top:34px; margin-bottom:2px; }
+  .course{
+    /* the sticky header eats the top of a snapped screen, so the card is
+       short by exactly that much and scrolls to just below it */
+    min-height:calc(100svh - var(--nav-h)); scroll-snap-align:start;
+    scroll-margin-top:var(--nav-h); justify-content:center;
+    border-width:1px 0 0; padding-block:20px;
+  }
+  .course:last-child{ border-bottom:1px solid var(--line); margin-bottom:34px; }
+  .course-in{ padding-inline:0; flex:0; }
+}
+@media(max-width:759px){ .course-grid{ gap:0; } }
+
+
+/* ========================================================== the loader ==
+   cssloaders.github.io diamond, re-coloured onto our own tokens: the source
+   ships a pure lime (#20DE00) on near-black, which is neither our green nor
+   readable on a light panel. --color-2 is the well, so it has to match
+   whatever sits behind the loader or the middle stops reading as a hole. */
+.loader{
+  --color-1: var(--line-strong);      /* the track */
+  --color-2: var(--bg);               /* the well, matched to the veil */
+  --color-3: var(--brand-strong);     /* the sweep */
+  --size: 1px;
+
+  position:relative;
+  width:calc(64 * var(--size)); height:calc(64 * var(--size));
+  background-color:var(--color-1);
+  transform:rotate(45deg);
+  overflow:hidden;
+}
+.loader::after{
+  content:''; position:absolute; inset:calc(8 * var(--size));
+  margin:auto; background:var(--color-2);
+}
+.loader::before{
+  content:''; position:absolute; inset:calc(-15 * var(--size));
+  margin:auto; background:var(--color-3);
+  animation:diamondLoader 2s linear infinite;
+}
+@keyframes diamondLoader{
+  0%, 10%{ transform:translate(calc(-64 * var(--size)), calc(-64 * var(--size))) rotate(-45deg); }
+  90%, 100%{ transform:translate(0,0) rotate(-45deg); }
+}
+/* a moving block this large is exactly what reduced motion is asking about */
+@media(prefers-reduced-motion:reduce){
+  .loader::before{ animation:none; transform:translate(0,0) rotate(-45deg); }
+}
+
+/* the screen a pending action takes over */
+.veil{
+  position:fixed; inset:0; z-index:400; background:var(--bg);
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:34px;
+  opacity:0; animation:veilIn .18s ease forwards;
+}
+.veil-tx{ font-size:13.5px; color:var(--ink-2); letter-spacing:.01em; }
+.veil-tx::after{ content:'\2026'; }
+@keyframes veilIn{ to{ opacity:1; } }
+@media(prefers-reduced-motion:reduce){ .veil{ animation:none; opacity:1; } }
+
+/* the darker brand green holds up on paper; on a dark page the lighter one
+   is the one that reads */
+:root[data-theme="dark"] .loader{ --color-3: var(--brand); }
+
+/* on a dark panel the well is the panel, not the page */
+.modal .loader{ --color-2: var(--panel); }
+
+
+/* four feature tiles have to share one phone screen with a heading, so they
+   run compact below 600px rather than pushing the section past the fold */
+@media(max-width:599px){
+  .g4 .feat{ padding:14px 15px; }
+  .g4 .feat-ic{ width:32px; height:32px; margin-bottom:10px; }
+  .g4 .feat h3{ font-size:15px; }
+  .g4 .feat p{ font-size:13px; line-height:1.5; }
+  .g4{ gap:8px; }
+}
+
+
+/* prose that owns a whole screen carries a section heading, not a run-in one:
+   the 16px of a terms page looks lost in the middle of a phone screen */
+.snap-section .prose{ max-width:60ch; }
+.snap-section .prose h2{
+  font-size:clamp(23px,6vw,32px); letter-spacing:-.025em; line-height:1.15;
+  margin:0 0 16px;
+}
+.snap-section .prose p{ font-size:15.5px; margin-bottom:14px; }
+@media(min-width:900px){ .snap-section .prose p{ font-size:16px; } }
+
+
+/* a coin mark carries its own brand colour, and half of those are near-black
+   or navy. The chip stays light in both themes so every one of them reads,
+   which is also how an exchange draws a coin list. */
+.asset-coin{ background:#F1F0EC; }

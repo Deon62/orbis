@@ -19,9 +19,30 @@
     { sym:'GBP/USD', name:'Pound / US Dollar', cat:'forex',       icon:{pair:['gb','us']}, price:'1.27140', chg:-0.24, payout:87, vol:0.0019, base:1.2714, dp:5 },
     { sym:'USD/JPY', name:'US Dollar / Yen',   cat:'forex',       icon:{pair:['us','jp']}, price:'151.380', chg: 0.31, payout:86, vol:0.18,   base:151.38, dp:3 },
     { sym:'AUD/USD', name:'Aussie / US Dollar',cat:'forex',       icon:{pair:['au','us']}, price:'0.66280', chg:-0.09, payout:86, vol:0.0014, base:0.6628, dp:5 },
+    { sym:'USD/CHF', name:'US Dollar / Franc', cat:'forex',       icon:{pair:['us','ch']}, price:'0.90420', chg:-0.14, payout:86, vol:0.0012, base:0.9042, dp:5 },
+    { sym:'USD/CAD', name:'US Dollar / Loonie',cat:'forex',       icon:{pair:['us','ca']}, price:'1.36840', chg: 0.11, payout:86, vol:0.0015, base:1.3684, dp:5 },
+    { sym:'NZD/USD', name:'Kiwi / US Dollar',  cat:'forex',       icon:{pair:['nz','us']}, price:'0.61240', chg:-0.21, payout:85, vol:0.0013, base:0.6124, dp:5 },
+    { sym:'EUR/GBP', name:'Euro / Pound',      cat:'forex',       icon:{pair:['eu','gb']}, price:'0.85280', chg: 0.07, payout:85, vol:0.0009, base:0.8528, dp:5 },
+    { sym:'EUR/JPY', name:'Euro / Yen',        cat:'forex',       icon:{pair:['eu','jp']}, price:'164.120', chg: 0.42, payout:85, vol:0.21,   base:164.12, dp:3 },
+    { sym:'GBP/JPY', name:'Pound / Yen',       cat:'forex',       icon:{pair:['gb','jp']}, price:'192.460', chg: 0.58, payout:84, vol:0.28,   base:192.46, dp:3 },
+    { sym:'AUD/JPY', name:'Aussie / Yen',      cat:'forex',       icon:{pair:['au','jp']}, price:'100.340', chg:-0.17, payout:84, vol:0.16,   base:100.34, dp:3 },
+    { sym:'EUR/CHF', name:'Euro / Franc',      cat:'forex',       icon:{pair:['eu','ch']}, price:'0.98040', chg: 0.05, payout:84, vol:0.0008, base:0.9804, dp:5 },
+    { sym:'USD/ZAR', name:'US Dollar / Rand',  cat:'forex',       icon:{pair:['us','za']}, price:'18.4120', chg: 0.64, payout:80, vol:0.06,   base:18.412, dp:4 },
+    { sym:'USD/KES', name:'US Dollar / Shilling', cat:'forex',    icon:{pair:['us','ke']}, price:'129.240', chg:-0.08, payout:79, vol:0.24,   base:129.24, dp:3 },
+    { sym:'USD/MXN', name:'US Dollar / Peso',  cat:'forex',       icon:{pair:['us','mx']}, price:'16.8420', chg: 0.29, payout:80, vol:0.05,   base:16.842, dp:4 },
     { sym:'BTC/USD', name:'Bitcoin',           cat:'crypto',      icon:{img:coin('bitcoin','F7931A')},  price:'67,240.00', chg: 1.92, payout:84, vol:120, base:67240, dp:2 },
     { sym:'ETH/USD', name:'Ethereum',          cat:'crypto',      icon:{img:coin('ethereum','627EEA')}, price:'3,412.60',  chg:-1.07, payout:83, vol:9,   base:3412.6, dp:2 },
-    { sym:'SOL/USD', name:'Solana',            cat:'crypto',      icon:{img:coin('solana','14F195')},   price:'168.42',    chg: 2.64, payout:82, vol:1.4, base:168.42, dp:2 },
+    { sym:'SOL/USD', name:'Solana',            cat:'crypto',      icon:{img:coin('solana','9945FF')},   price:'168.42',    chg: 2.64, payout:82, vol:1.4, base:168.42, dp:2 },
+    { sym:'XRP/USD', name:'XRP',               cat:'crypto',      icon:{img:coin('xrp','23292F')},      price:'0.5284',    chg: 1.34, payout:80, vol:0.012, base:0.5284, dp:4 },
+    { sym:'BNB/USD', name:'BNB',               cat:'crypto',      icon:{img:coin('binance','F3BA2F')},  price:'592.40',    chg: 0.86, payout:81, vol:7,   base:592.4, dp:2 },
+    { sym:'ADA/USD', name:'Cardano',           cat:'crypto',      icon:{img:coin('cardano','0033AD')},  price:'0.4612',    chg:-1.42, payout:79, vol:0.011, base:0.4612, dp:4 },
+    { sym:'DOGE/USD',name:'Dogecoin',          cat:'crypto',      icon:{img:coin('dogecoin','C2A633')}, price:'0.15820',   chg: 3.18, payout:78, vol:0.006, base:0.1582, dp:5 },
+    { sym:'LTC/USD', name:'Litecoin',          cat:'crypto',      icon:{img:coin('litecoin','345D9D')}, price:'84.260',    chg:-0.74, payout:80, vol:1.2, base:84.26, dp:3 },
+    { sym:'DOT/USD', name:'Polkadot',          cat:'crypto',      icon:{img:coin('polkadot','E6007A')}, price:'6.8420',    chg: 1.05, payout:79, vol:0.14, base:6.842, dp:4 },
+    { sym:'LINK/USD',name:'Chainlink',         cat:'crypto',      icon:{img:coin('chainlink','375BD2')},price:'17.284',    chg: 2.07, payout:80, vol:0.32, base:17.284, dp:3 },
+    { sym:'MATIC/USD',name:'Polygon',          cat:'crypto',      icon:{img:coin('polygon','7B3FE4')},  price:'0.7142',    chg:-0.88, payout:78, vol:0.015, base:0.7142, dp:4 },
+    { sym:'XLM/USD', name:'Stellar',           cat:'crypto',      icon:{img:coin('stellar','7D00FF')},  price:'0.11240',   chg: 0.92, payout:77, vol:0.004, base:0.1124, dp:5 },
+    { sym:'XMR/USD', name:'Monero',            cat:'crypto',      icon:{img:coin('monero','FF6600')},   price:'162.84',    chg:-1.18, payout:78, vol:2.1, base:162.84, dp:2 },
     { sym:'XAU/USD', name:'Gold spot',         cat:'commodities', icon:{text:'Au'},        price:'2,318.40', chg: 0.46, payout:85, vol:3.4,  base:2318.4, dp:2 },
     { sym:'XAG/USD', name:'Silver spot',       cat:'commodities', icon:{text:'Ag'},        price:'27.412',   chg:-0.62, payout:82, vol:0.06, base:27.412, dp:3 },
     { sym:'WTI',     name:'Crude oil WTI',     cat:'commodities', icon:{lucide:'fuel'},    price:'78.930',   chg: 0.88, payout:81, vol:0.12, base:78.93,  dp:3 },
@@ -48,7 +69,7 @@
              '</span>';
     }
     if (i.flag) return '<span class="asset"><img src="' + flag(i.flag) + '" alt="" loading="lazy"></span>';
-    if (i.img)  return '<span class="asset" style="background:var(--panel-2)"><img src="' + i.img +
+    if (i.img)  return '<span class="asset asset-coin"><img src="' + i.img +
                        '" alt="" width="18" height="18" style="width:18px;height:18px;object-fit:contain" loading="lazy"></span>';
     if (i.lucide) return '<span class="asset"><i data-lucide="' + i.lucide + '" class="i-sm"></i></span>';
     return '<span class="asset">' + (i.text || m.sym.slice(0, 2)) + '</span>';

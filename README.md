@@ -70,11 +70,15 @@ stays lit. The list pages are lists — no headers, no blurbs.
 
 ## Scripts
 
-No build step, but two generators live in `scripts/`:
+No build step, but three generators live in `scripts/`:
 
 - `node scripts/build-icons.js` rebuilds `assets/js/icons.js` from the lucide CDN,
   keeping only the icons the repo references. **Run it after using a new icon name**,
   or that glyph renders as nothing.
+- `node scripts/build-pdfs.js` prints the Academy's free course introductions to
+  `assets/pdf/` with Chrome. It is the only generator with a dependency
+  (`npm i puppeteer-core`); the PDFs are committed, so it runs only when the copy
+  changes. `CHROME=...` points it at another browser binary.
 - `node scripts/dedash.js` strips em and en dashes from the copy: a comma where the
   dash joined clauses, a hyphen where it spanned a range. `--check` lists offenders
   without changing anything.
@@ -86,6 +90,35 @@ separation against both surfaces: green/indigo, not green/gold (green and gold r
 as the same colour to a protanope, ΔE 4.3). Referral earnings uses a horizontal
 stacked bar rather than a donut, because pending is 6% of the total and a 6% slice of
 a donut is a sliver.
+
+## The Academy, and its PDFs
+
+Three courses in increasing order: Foundations ($19), Practitioner ($59),
+Professional ($149). Each card carries its benefits and a free introduction in PDF,
+and those PDFs are real: `scripts/build-pdfs.js` prints them from a branded HTML
+template with Chrome, so they are typeset rather than hand-assembled. Regenerate with
+`node scripts/build-pdfs.js`; they land in `assets/pdf/`.
+
+On a phone each course card owns a screen (`min-height:calc(100svh - var(--nav-h))`,
+with `scroll-margin-top` for the sticky header) so the three are compared one at a
+time rather than scrolled past as a wall. Above 760px they return to a three-column
+grid, and the footers are pushed to a common line because the benefit lists differ in
+length.
+
+## Loading
+
+`window.orbisVeil(label)` paints a full-screen veil with the
+[cssloaders](https://cssloaders.github.io/#rect) diamond. Work that ends on another
+page gets it — signup, login, Google, the Paystack redirect — because a toast does not
+survive the navigation it is announcing. Work that finishes on the same page keeps
+its toast.
+
+The loader is the upstream geometry with our own colours: `--color-1` is the track
+(`--line-strong`), `--color-3` the sweep (`--brand-strong` on light, the lighter
+`--brand` on dark, which is the one that reads there), and `--color-2` is the well,
+which has to match whatever sits behind it or the middle stops looking like a hole.
+The source ships `#20DE00` on `#060706`, a pure lime on near-black: off-brand, and a
+black square in the middle of a light page.
 
 ## QR codes
 
@@ -271,6 +304,12 @@ Markets carry real marks rather than initials: country flags from `flagcdn.com`
 (currency pairs show both sides overlapped) and coin logos from Simple Icons. The spec
 lives per-market in `data.js` under `icon`, rendered by `assetHTML()` — which also feeds
 the market picker, so the flags appear in the dropdown too.
+
+Thirty-eight markets: 15 forex (the majors, the yen and franc crosses, and ZAR, KES and
+MXN), 13 crypto, 3 commodities, 4 indices, 3 synthetics. A coin mark sits on a fixed
+light chip in both themes, because half of those brand colours are near-black or navy
+and would vanish against a dark panel. Two Simple Icons slugs that look obvious do not
+exist: `bnb` (it is `binance`) and `tron`.
 
 ## Trade screen notes
 

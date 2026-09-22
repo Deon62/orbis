@@ -112,7 +112,7 @@
           '<span class="tag">~10 min</span>' +
         '</div>' +
 
-        '<p class="hint" style="margin:16px 0 7px">Send to this address</p>' +
+        '<p class="hint" style="margin:13px 0 6px">Send to this address</p>' +
         /* an address has to be readable whole, so it wraps rather than scrolls
            out of a one-line input */
         '<div class="addr">' +
@@ -126,11 +126,11 @@
         '</div>' +
 
         '<div class="note-warn">' + ic('triangle-alert', 'i-sm') +
-          '<span>Send only USDT on TRON (TRC-20). Coins sent on another network, ' +
-          'or another coin sent here, cannot be recovered.</span></div>' +
+          '<span>USDT on TRON (TRC-20) only. Another network or another coin ' +
+          'cannot be recovered.</span></div>' +
 
-        '<div class="kv"><span>Minimum</span><b class="mono">$10.00</b></div>' +
-        '<div class="kv"><span>Credited</span><b>After 1 network confirmation</b></div>' +
+        '<p class="hint center" style="margin-top:12px">' +
+          'Minimum $10.00 · credited after 1 network confirmation</p>' +
       '</div>' +
       '<div class="modal-ft">' +
         '<button class="btn btn-primary btn-block btn-lg" id="mGo">I have sent it</button>' +
@@ -140,7 +140,9 @@
       var cv = root.querySelector('#mQr');
       if (cv && global.OrbisQR) {
         /* dark-on-light whatever the theme, an inverted QR fails most wallets */
-        global.OrbisQR.render(cv, USDT_ADDRESS, { size: 150, dark: '#1C1C1C', light: '#FFFFFF' });
+        var small = Math.min(innerHeight, innerWidth) < 820;
+        global.OrbisQR.render(cv, USDT_ADDRESS,
+          { size: small ? 118 : 148, dark: '#1C1C1C', light: '#FFFFFF' });
       }
       root.querySelector('#mGo').addEventListener('click', function () {
         close();
@@ -231,9 +233,10 @@
             ? root.querySelector('#mDest').textContent
             : (root.querySelector('#mOtherInput').value || s.masked));
         close();
-        toast(card ? 'Opening Paystack checkout'
-            : mpesa ? 'STK push sent to ' + dest
-            : 'Deposit started', card ? 'external-link' : 'check-circle-2');
+        /* leaving for the processor is a wait with nothing on screen, so it
+           gets the loader rather than a toast that outlives the page */
+        if (card && global.orbisVeil) global.orbisVeil('Opening Paystack checkout');
+        else toast(mpesa ? 'STK push sent to ' + dest : 'Deposit started', 'check-circle-2');
       });
     }, depositStep1);
   }

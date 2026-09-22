@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" class="snap">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -20,15 +20,15 @@
 
 <div id="site-header"></div>
 
-<section class="page-hero">
+<section class="page-hero snap-section">
   <div class="wrap">
     <h1>Six inputs, not four hundred.</h1>
     <p class="sec-lead">A trading platform that grew by subtraction.</p>
   </div>
 </section>
 
-<main class="wrap sec" style="padding-top:36px">
-  <div class="split" style="align-items:start">
+<section class="sec snap-section">
+  <div class="wrap">
     <div class="prose">
       <h2>Why we built it</h2>
       <p>Most trading platforms grow by addition. Every release adds another panel, another
@@ -37,58 +37,84 @@
       <p>orbisflow went the other way. A binary contract needs six inputs: the market, the
         direction, the stake, the duration, the payout and your confirmation. We built the
         screen around those six and put everything else behind a menu.</p>
+    </div>
+  </div>
+</section>
 
+<section class="sec snap-section" style="background:var(--surface);border-block:1px solid var(--line)">
+  <div class="wrap">
+    <div class="prose">
       <h2>How we make money</h2>
       <p>From the spread built into each contract's payout, and nothing else. We do not sell
         order flow, we do not sell your data, and we do not take the other side of your trade
         as a position we want to win.</p>
+      <p>It is a deliberately boring business model. It means the only way we grow is if you
+        keep trading, and the only way you keep trading is if the platform treats you fairly.</p>
+    </div>
+  </div>
+</section>
 
+<section class="sec snap-section">
+  <div class="wrap">
+    <div class="prose">
       <h2>Client money</h2>
       <p>Funds are held in segregated accounts, separate from the money that runs the company.
-        Withdrawals go to a verified method in your own name.</p>
+        Withdrawals go to a verified method in your own name, never to a third party.</p>
+      <p>Trading carries risk, and a binary contract can lose its whole stake. Nothing here is
+        advice, and the demo account exists so that the first lesson costs nothing.</p>
     </div>
+  </div>
+</section>
 
-    <div class="stack">
-      <div class="list">
-        <div class="link-row">
-          <span class="lr-ic"><i data-lucide="calendar" class="i"></i></span>
-          <span class="lr-tx"><b>Founded</b><span>2024</span></span>
-        </div>
-        <div class="link-row">
-          <span class="lr-ic"><i data-lucide="map-pin" class="i"></i></span>
-          <span class="lr-tx"><b>Head office</b><span>Nairobi, Kenya</span></span>
-        </div>
-        <div class="link-row">
-          <span class="lr-ic"><i data-lucide="users" class="i"></i></span>
-          <span class="lr-tx"><b>Team</b><span>38 across four countries</span></span>
-        </div>
-        <div class="link-row">
-          <span class="lr-ic"><i data-lucide="layers" class="i"></i></span>
-          <span class="lr-tx"><b>Markets</b><span>Forex, crypto, commodities, indices, synthetics</span></span>
-        </div>
+<section class="sec snap-section">
+  <div class="wrap">
+    <h2>The company</h2>
+    <div class="list" style="margin-top:18px">
+      <div class="link-row">
+        <span class="lr-ic"><i data-lucide="calendar" class="i"></i></span>
+        <span class="lr-tx"><b>Founded</b><span>2024</span></span>
       </div>
-
-      <div class="list">
-        <a class="link-row" href="#" data-mock="Careers">
-          <span class="lr-ic"><i data-lucide="briefcase" class="i"></i></span>
-          <span class="lr-tx"><b>Careers</b><span>We are hiring across engineering and support</span></span>
-          <i data-lucide="chevron-right" class="i-sm dim"></i>
-        </a>
-        <a class="link-row" href="#" data-mock="Newsroom">
-          <span class="lr-ic"><i data-lucide="newspaper" class="i"></i></span>
-          <span class="lr-tx"><b>Newsroom</b><span>Announcements and product notes</span></span>
-          <i data-lucide="chevron-right" class="i-sm dim"></i>
-        </a>
-        <a class="link-row" href="/contact">
-          <span class="lr-ic"><i data-lucide="mail" class="i"></i></span>
-          <span class="lr-tx"><b>Contact</b><span>Talk to the team</span></span>
-          <i data-lucide="chevron-right" class="i-sm dim"></i>
-        </a>
+      <div class="link-row">
+        <span class="lr-ic"><i data-lucide="map-pin" class="i"></i></span>
+        <span class="lr-tx"><b>Head office</b><span>Nairobi, Kenya</span></span>
+      </div>
+      <div class="link-row">
+        <span class="lr-ic"><i data-lucide="users" class="i"></i></span>
+        <span class="lr-tx"><b>Team</b><span>38 across four countries</span></span>
+      </div>
+      <div class="link-row">
+        <span class="lr-ic"><i data-lucide="layers" class="i"></i></span>
+        <span class="lr-tx"><b>Markets</b><span>Forex, crypto, commodities, indices, synthetics</span></span>
       </div>
     </div>
   </div>
+</section>
 
-</main>
+<section class="sec snap-section" style="background:var(--surface);border-block:1px solid var(--line)">
+  <div class="wrap">
+    <h2>Talk to us</h2>
+    <div class="list" style="margin-top:18px">
+      <a class="link-row" href="#" data-mock="Careers">
+        <span class="lr-ic"><i data-lucide="briefcase" class="i"></i></span>
+        <span class="lr-tx"><b>Careers</b><span>We are hiring across engineering and support</span></span>
+        <i data-lucide="chevron-right" class="i-sm dim"></i>
+      </a>
+      <a class="link-row" href="#" data-mock="Newsroom">
+        <span class="lr-ic"><i data-lucide="newspaper" class="i"></i></span>
+        <span class="lr-tx"><b>Newsroom</b><span>Announcements and product notes</span></span>
+        <i data-lucide="chevron-right" class="i-sm dim"></i>
+      </a>
+      <a class="link-row" href="/contact">
+        <span class="lr-ic"><i data-lucide="mail" class="i"></i></span>
+        <span class="lr-tx"><b>Contact</b><span>Talk to the team</span></span>
+        <i data-lucide="chevron-right" class="i-sm dim"></i>
+      </a>
+    </div>
+    <div class="center-action" style="justify-content:flex-start">
+      <a class="btn btn-primary btn-lg" href="/signup">Create a free account</a>
+    </div>
+  </div>
+</section>
 
 <div id="site-footer"></div>
 
