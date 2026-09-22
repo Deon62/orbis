@@ -9,6 +9,9 @@
 <link rel="icon" href="/assets/img/favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://cdn.simpleicons.org" crossorigin>
+<link rel="preload" as="script" href="/assets/js/app.js">
+<link rel="preload" as="script" href="/assets/js/data.js">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/assets/css/styles.css">
 <script>(function(){try{var t=localStorage.getItem("orbisflow-theme")||(matchMedia("(prefers-color-scheme:dark)").matches?"dark":"light");document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
@@ -18,14 +21,14 @@
 <div id="site-header"></div>
 
 <main class="wrap page-body">
-  <div class="toolbar">
-    <div class="input-wrap grow" style="max-width:320px">
-      <input class="input" id="search" type="search" placeholder="Search markets" aria-label="Search markets">
+  <div class="toolbar mkt-bar">
+    <div class="input-wrap grow">
+      <input class="input input-lg" id="search" type="search" placeholder="Search markets" aria-label="Search markets">
       <span class="input-affix" style="pointer-events:none"><i data-lucide="search" class="i-sm"></i></span>
     </div>
     <div class="fdrop" data-fdrop>
-      <button class="fdrop-btn" aria-haspopup="listbox" aria-expanded="false"><span class="fdrop-val"><i data-lucide="layers" class="i-sm"></i>All markets</span><i data-lucide="chevron-down" class="i-sm chev"></i></button>
-      <div class="fdrop-menu" hidden role="listbox">
+      <button class="fdrop-btn fdrop-lg" aria-haspopup="listbox" aria-expanded="false"><span class="fdrop-val"><i data-lucide="layers" class="i-sm"></i>All markets</span><i data-lucide="chevron-down" class="i-sm chev"></i></button>
+      <div class="fdrop-menu" hidden role="listbox" style="left:auto;right:0">
         <button class="fdrop-opt" role="option" data-v="all" aria-selected="true"><span class="fdrop-tx"><i data-lucide="layers" class="i-sm"></i>All markets</span></button>
         <button class="fdrop-opt" role="option" data-v="forex" aria-selected="false"><span class="fdrop-tx"><i data-lucide="banknote" class="i-sm"></i>Forex</span></button>
         <button class="fdrop-opt" role="option" data-v="crypto" aria-selected="false"><span class="fdrop-tx"><i data-lucide="bitcoin" class="i-sm"></i>Crypto</span></button>
@@ -34,17 +37,14 @@
         <button class="fdrop-opt" role="option" data-v="synthetics" aria-selected="false"><span class="fdrop-tx"><i data-lucide="waves" class="i-sm"></i>Synthetics</span></button>
       </div>
     </div>
-    <span class="grow"></span>
-    <span class="dim" id="listCount" style="font-size:12.5px"></span>
   </div>
-
 
   <div class="card card-flat" id="list"></div>
 </main>
 
 <div id="site-footer"></div>
 
-<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script src="/assets/js/icons.js"></script>
 <script src="/assets/js/chart.js"></script>
 <script src="/assets/js/data.js"></script>
 <script src="/assets/js/app.js"></script>
@@ -52,7 +52,6 @@
 <script>
 (function () {
   var listEl = document.getElementById('list');
-  var countEl = document.getElementById('listCount');
   var cat = 'all', term = '';
 
   function render() {
@@ -67,7 +66,6 @@
       : '<div class="empty"><i data-lucide="search-x" class="i-lg"></i>' +
         '<b>No markets match that</b><p>Try a different name, or clear the filters.</p></div>';
 
-    countEl.textContent = rows.length + (rows.length === 1 ? ' instrument' : ' instruments');
     OrbisData.drawSparklines();
     window.orbisIcons();
   }

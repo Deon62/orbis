@@ -60,13 +60,13 @@
       assetHTML(m) +
       '<span class="mkt-name"><b>' + m.sym + '</b><span>' + m.name + '</span></span>' +
       '<canvas class="spark" data-seed="' + (idx * 13 + 5) + '" data-up="' + up + '" ' +
-        'style="width:78px;height:28px;margin-left:auto" width="78" height="28"></canvas>' +
-      '<span class="mkt-val" style="margin-left:16px;min-width:94px">' +
+        'width="78" height="28"></canvas>' +
+      '<span class="mkt-val">' +
         '<b class="mono">' + m.price + '</b>' +
         '<span class="' + (up ? 'up' : 'down') + '">' + (up ? '+' : '') + m.chg.toFixed(2) + '%</span>' +
       '</span>' +
-      '<span class="tag" style="margin-left:14px">' + m.payout + '%</span>' +
-      '<i data-lucide="chevron-right" class="i-sm dim" style="margin-left:8px"></i>' +
+      '<span class="tag mkt-payout">' + m.payout + '%</span>' +
+      '<i data-lucide="chevron-right" class="i-sm dim"></i>' +
     '</a>';
   }
 

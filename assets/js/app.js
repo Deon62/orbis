@@ -470,6 +470,36 @@
     }
   });
 
+  /* ======================================================== navigation == */
+  /* The bar is created synchronously on click, because the browser tears down
+     this document's scripting as soon as the navigation starts — a deferred
+     timer never runs. The "only when it is slow" part is a CSS animation-delay:
+     nothing is painted for the first 150ms, so a quick switch shows nothing. */
+  var navBar;
+
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest('a[href]');
+    if (!a || a.target || a.hasAttribute('download')) return;
+    if (e.defaultPrevented || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+    var to = a.getAttribute('href');
+    if (!to || to.charAt(0) === '#' || /^[a-z]+:/i.test(to)) return;
+    if (to === location.pathname + location.search) return;
+
+    if (!navBar) {
+      navBar = document.createElement('div');
+      navBar.className = 'nav-progress';
+      document.body.appendChild(navBar);
+    }
+    navBar.classList.remove('go');
+    void navBar.offsetWidth;            /* restart the animation */
+    navBar.classList.add('go');
+  });
+
+  /* coming back through the bfcache should not leave the bar stranded */
+  window.addEventListener('pageshow', function () {
+    if (navBar) navBar.classList.remove('go');
+  });
+
   /* ==================================================== filter dropdown == */
   /* One horizontal row of choices was fine with three options and cramped with
      six. Every filter is a dropdown now; pages listen for 'fdrop:change'. */

@@ -71,6 +71,15 @@ Short synthesised tones (Web Audio, no audio files) on placing a contract and on
 result. Muted from the panel's **Sound** switch, stored in `localStorage` under
 `orbisflow-sound`. `window.orbisBeep('place'|'win'|'lose')`.
 
+## Page transitions
+
+Each page's `main` fades and lifts in over 180ms (pure CSS, so it survives a JS
+failure). A 2px progress bar is created **synchronously** on an internal link click —
+a deferred timer is no use, because the browser tears down the old document's scripting
+as soon as the navigation starts. The "only when it is slow" behaviour comes from a
+150ms `animation-delay`: a quick switch is gone before anything paints, a slow one gets
+the bar. Both respect `prefers-reduced-motion`.
+
 ## Filters
 
 Every filter is a dropdown, not a row of pills — six categories in a horizontal row
@@ -177,7 +186,12 @@ trading surfaces — not on settings sub-pages.
 
 ## Icons
 
-[Lucide](https://lucide.dev) via CDN, rendered from `data-lucide="name"` attributes.
+[Lucide](https://lucide.dev), but **self-hosted and subsetted**: `assets/js/icons.js`
+carries only the ~90 icons this site uses (17 KB) instead of the full 436 KB UMD build
+from a CDN, and ships a `createIcons()` with the same call signature. Regenerate it with
+`scratchpad/subset.js` after using a new icon name — the generator keeps every quoted
+kebab token that matches a real icon, because names also reach the DOM through
+ternaries and concatenation.
 Lucide dropped brand logos, so X / Facebook / Instagram / Telegram / YouTube come from
 [Simple Icons](https://simpleicons.org) (`cdn.simpleicons.org`). Note LinkedIn is not
 served by that CDN.
