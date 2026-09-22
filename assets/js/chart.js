@@ -19,6 +19,8 @@
       axis: v('--chart-axis', '#93928C'),
       up:   v('--up', '#00A861'),
       down: v('--down', '#E0413F'),
+      line: v('--chart-line', '#00994F'),
+      fill: v('--chart-fill', 'rgba(28,28,28,.06)'),
       on:   v('--panel', '#FFFFFF')
     };
   }
@@ -154,15 +156,26 @@
     var bw = Math.max(2, Math.min(18, step * 0.62));
 
     if (this.type === 'line') {
-      ctx.strokeStyle = series[series.length - 1].c >= series[0].c ? C.up : C.down;
-      ctx.lineWidth = 2;
-      ctx.lineJoin = ctx.lineCap = 'round';
-      ctx.beginPath();
+      /* one colour for the whole line, the way every real platform draws it.
+         Red or green belongs to a single candle, not to a run of them. */
+      var path = new Path2D();
       for (var li = 0; li < series.length; li++) {
         var lx = step * li + step / 2, lyy = y(series[li].c);
-        li ? ctx.lineTo(lx, lyy) : ctx.moveTo(lx, lyy);
+        li ? path.lineTo(lx, lyy) : path.moveTo(lx, lyy);
       }
-      ctx.stroke();
+
+      /* the area under it, a flat wash the skyline still shows through */
+      var area = new Path2D(path);
+      area.lineTo(step * (series.length - 1) + step / 2, this.padT + plotH);
+      area.lineTo(step / 2, this.padT + plotH);
+      area.closePath();
+      ctx.fillStyle = C.fill;
+      ctx.fill(area);
+
+      ctx.strokeStyle = C.line;
+      ctx.lineWidth = 2;
+      ctx.lineJoin = ctx.lineCap = 'round';
+      ctx.stroke(path);
       ctx.lineWidth = 1;
     } else {
       for (var i = 0; i < series.length; i++) {

@@ -231,7 +231,11 @@ the entire page.
 The three tools to the right of the durations are 36×32 with a 20px glyph — the first
 pass reused the text-button padding, which squeezed the icon to 12px through
 `svg{max-width:100%}`. They toggle candles / line, open **Indicators**, and take the
-chart fullscreen. Fullscreen is a class on `.chart-panel`, not the Fullscreen API, so
+chart fullscreen. The line is one steady colour (`--chart-line`) rather than red or
+green by direction — direction belongs to a single candle, and a whole line that
+repaints on every tick is not what a real platform does. Under it is a flat wash
+(`--chart-fill`, ~5.5% ink) thin enough that the skyline still reads through, and the
+panel lifts `--sky-opacity` while the line is showing so it does. Fullscreen is a class on `.chart-panel`, not the Fullscreen API, so
 the modal layer still works over it; `main` has to be lifted with it, because `main`
 carries its own stacking context and the sticky header would otherwise paint over a
 `position:fixed` child of it. Escape leaves fullscreen, unless a modal is open — that

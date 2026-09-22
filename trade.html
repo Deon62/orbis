@@ -220,6 +220,9 @@
   window.orbisChartState = function () { return { type: chart.type, smas: smaOn }; };
   window.orbisChartType = function (t) {
     chart.setType(t);
+    /* the wash under the line dims the skyline, so the panel lifts it back */
+    document.querySelector('.chart-panel').classList.toggle('chart-as-line', t === 'line');
+    chart.draw();
     toolIcon('#typeBtn', t === 'line' ? 'chart-line' : 'chart-candlestick');
   };
   window.orbisChartSma = function (period, on) {

@@ -31,6 +31,8 @@
   --chart-grid: #EDEBE6;
   --chart-axis: #93928C;
   --sky-opacity: .04;
+  --chart-line: #00994F;                 /* the line chart, one steady colour */
+  --chart-fill: rgba(28,28,28,.055);     /* the wash under it */
 
   /* fixed dark surfaces used by the marketing hero */
   --black:      #1C1C1C;
@@ -70,6 +72,8 @@
   --chart-grid: #2C2C2A;
   --chart-axis: #78776F;
   --sky-opacity: .05;
+  --chart-line: #00BF63;
+  --chart-fill: rgba(255,255,255,.055);
 }
 
 *,*::before,*::after{ box-sizing:border-box; }
@@ -1444,3 +1448,8 @@ body:has(.chart-full) .tabbar{ display:none; }
   font-size:10px; letter-spacing:.13em; text-transform:uppercase;
   color:var(--ink-3); font-weight:600; margin:0 0 8px;
 }
+
+
+/* a line chart washes the lower half, so the skyline has to come up to meet it */
+.chart-panel.chart-as-line{ --sky-opacity:.10; }
+:root[data-theme="dark"] .chart-panel.chart-as-line{ --sky-opacity:.12; }
