@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Profile · orbisflow</title>
+<meta name="description" content="Your orbisflow account.">
+<meta name="theme-color" content="#1C1C1C">
+<link rel="icon" href="assets/img/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/styles.css">
+<script>(function(){try{var t=localStorage.getItem("orbisflow-theme")||(matchMedia("(prefers-color-scheme:dark)").matches?"dark":"light");document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body data-page="account" data-shell="app">
+
+<div id="site-header"></div>
+
+<div class="page-hd">
+  <div class="wrap" style="display:flex;align-items:center;gap:14px">
+    <span class="avatar" style="width:48px;height:48px;font-size:16px">AO</span>
+    <div style="flex:1;min-width:0">
+      <h1 style="font-size:21px">Amara Otieno</h1>
+      <p style="margin-top:2px">ceo@ardena.co.ke · <span class="mono">CR-4829117</span></p>
+    </div>
+    <span class="tag tag-wait"><i data-lucide="clock" class="i-sm"></i>Verification 1 of 2</span>
+  </div>
+</div>
+
+<main class="wrap page-body">
+  <div class="stack" style="max-width:760px">
+
+    <div class="grid g2">
+      <div class="stat">
+        <span><i data-lucide="wallet" class="i-sm"></i>Real balance</span>
+        <b class="num">$1,384.40</b><em class="dim">USD</em>
+      </div>
+      <div class="stat">
+        <span><i data-lucide="flask-conical" class="i-sm"></i>Demo balance</span>
+        <b class="num">$10,000.00</b><em class="dim"><a href="#" data-mock="Reset demo balance" style="font-weight:600">Reset</a></em>
+      </div>
+    </div>
+
+    <div class="list">
+      <a class="link-row" href="profile-details.html">
+        <span class="lr-ic"><i data-lucide="user-round" class="i"></i></span>
+        <span class="lr-tx"><b>Personal details</b><span>Name, email, phone, currency</span></span>
+        <i data-lucide="chevron-right" class="i-sm dim"></i>
+      </a>
+      <a class="link-row" href="verification.html">
+        <span class="lr-ic"><i data-lucide="badge-check" class="i"></i></span>
+        <span class="lr-tx"><b>Verification</b><span>1 of 2 complete</span></span>
+        <span class="tag tag-wait">Action needed</span>
+        <i data-lucide="chevron-right" class="i-sm dim"></i>
+      </a>
+      <a class="link-row" href="security.html">
+        <span class="lr-ic"><i data-lucide="shield" class="i"></i></span>
+        <span class="lr-tx"><b>Security</b><span>Password, 2FA, active sessions</span></span>
+        <i data-lucide="chevron-right" class="i-sm dim"></i>
+      </a>
+      <a class="link-row" href="payments.html">
+        <span class="lr-ic"><i data-lucide="credit-card" class="i"></i></span>
+        <span class="lr-tx"><b>Payment methods</b><span>3 saved</span></span>
+        <i data-lucide="chevron-right" class="i-sm dim"></i>
+      </a>
+      <a class="link-row" href="preferences.html">
+        <span class="lr-ic"><i data-lucide="settings" class="i"></i></span>
+        <span class="lr-tx"><b>Preferences</b><span>Defaults, notifications, limits</span></span>
+        <i data-lucide="chevron-right" class="i-sm dim"></i>
+      </a>
+    </div>
+
+    <div class="list">
+      <a class="link-row" href="cashier.html">
+        <span class="lr-ic"><i data-lucide="receipt" class="i"></i></span>
+        <span class="lr-tx"><b>Transaction history</b><span>Deposits, withdrawals, settlements</span></span>
+        <i data-lucide="chevron-right" class="i-sm dim"></i>
+      </a>
+      <a class="link-row" href="positions.html">
+        <span class="lr-ic"><i data-lucide="file-text" class="i"></i></span>
+        <span class="lr-tx"><b>Statements</b><span>Contracts and settlements</span></span>
+        <i data-lucide="chevron-right" class="i-sm dim"></i>
+      </a>
+      <a class="link-row" href="#" data-modal="refer">
+        <span class="lr-ic"><i data-lucide="gift" class="i"></i></span>
+        <span class="lr-tx"><b>Refer &amp; earn</b><span>Up to 35% revenue share</span></span>
+        <i data-lucide="chevron-right" class="i-sm dim"></i>
+      </a>
+      <a class="link-row" href="#" data-mock="Help centre">
+        <span class="lr-ic"><i data-lucide="life-buoy" class="i"></i></span>
+        <span class="lr-tx"><b>Help centre</b><span>Guides and contact</span></span>
+        <i data-lucide="chevron-right" class="i-sm dim"></i>
+      </a>
+    </div>
+
+    <a class="btn btn-ghost" href="index.html" style="justify-self:start">
+      <i data-lucide="log-out" class="i-sm"></i>Log out
+    </a>
+  </div>
+</main>
+
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script src="assets/js/app.js"></script>
+<script src="assets/js/modals.js"></script>
+</body>
+</html>

@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Trade · orbisflow</title>
+<meta name="description" content="The orbisflow trade terminal.">
+<meta name="theme-color" content="#1C1C1C">
+<link rel="icon" href="assets/img/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/styles.css">
+<script>(function(){try{var t=localStorage.getItem("orbisflow-theme")||(matchMedia("(prefers-color-scheme:dark)").matches?"dark":"light");document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body data-page="trade" data-shell="app">
+
+<div id="site-header"></div>
+
+<main class="wrap" style="padding-top:12px;padding-bottom:28px">
+  <div class="terminal">
+
+    <!-- ===================================================== chart ----- -->
+    <section class="chart-panel">
+      <div class="chart-top">
+        <div class="mkt-picker" id="picker">
+          <button class="mkt-trigger" id="pickBtn" aria-haspopup="listbox" aria-expanded="false">
+            <span id="pickMark"></span>
+            <span class="nm"><b id="pickSym">EUR/USD</b><span id="pickCat">Forex</span></span>
+            <i data-lucide="chevron-down" class="i-sm"></i>
+          </button>
+          <div class="mkt-menu" id="pickMenu" hidden role="listbox" aria-label="Markets"></div>
+        </div>
+        <div class="sym-price">
+          <b class="mono" id="price">1.08420</b>
+          <span id="chg" class="up">+0.18%</span>
+        </div>
+      </div>
+
+      <div class="tf" role="group" aria-label="Timeframe">
+        <button>1t</button><button>15s</button><button class="active">1m</button>
+        <button>5m</button><button>15m</button><button>1h</button><button>1d</button>
+        <span class="tf-sep"></span>
+        <button data-mock="Chart type"><i data-lucide="chart-candlestick" class="i-sm"></i></button>
+        <button data-mock="Indicators"><i data-lucide="sliders-horizontal" class="i-sm"></i></button>
+        <button data-mock="Fullscreen"><i data-lucide="maximize-2" class="i-sm"></i></button>
+      </div>
+
+      <div class="chart-stage">
+        <img class="chart-skyline sky-on-light" src="assets/img/skyline-ink.svg" alt="" aria-hidden="true">
+        <img class="chart-skyline sky-on-dark" src="assets/img/skyline.svg" alt="" aria-hidden="true">
+        <canvas id="mainChart"></canvas>
+      </div>
+
+      <div class="chart-foot">
+        <span><i class="dotlive"></i>Live</span>
+        <span>Spread <b class="mono" style="color:var(--ink)">0.8</b></span>
+        <span>Payout <b class="mono brandtxt" id="footPayout">88%</b></span>
+        <span style="margin-left:auto" id="clock" class="mono"></span>
+      </div>
+    </section>
+
+    <!-- ==================================================== ticket ----- -->
+    <aside class="stack">
+      <div class="ticket">
+        <div class="ticket-seg">
+          <button class="active">Rise / Fall</button>
+          <button data-mock="Higher / Lower">Higher / Lower</button>
+        </div>
+
+        <div class="ticket-body">
+          <div class="field">
+            <label class="label" for="dur">Duration</label>
+            <div style="display:grid;grid-template-columns:1fr 104px;gap:8px">
+              <input class="input" id="dur" type="number" value="5" min="1" max="60">
+              <select class="select" id="durUnit">
+                <option>ticks</option><option>seconds</option>
+                <option selected>minutes</option><option>hours</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="field" style="margin-bottom:10px">
+            <label class="label" for="stake">Stake</label>
+            <div class="input-wrap">
+              <span class="input-prefix">$</span>
+              <input class="input" id="stake" type="number" value="25" min="1" step="1">
+            </div>
+            <div class="stake-row">
+              <button class="chip" data-stake="10">10</button>
+              <button class="chip active" data-stake="25">25</button>
+              <button class="chip" data-stake="50">50</button>
+              <button class="chip" data-stake="100">100</button>
+            </div>
+          </div>
+
+          <div class="payout">
+            <div><span>Payout</span><b class="mono" id="payoutAmt">$47.00</b></div>
+            <div style="text-align:right"><span>Profit</span><b class="mono up" id="profitAmt">+$22.00</b></div>
+          </div>
+
+          <!-- on phones this row is fixed just above the tab bar -->
+          <div class="trade-btns">
+            <button class="btn-up" data-dir="Rise"><i data-lucide="trending-up" class="i-sm"></i>Rise</button>
+            <button class="btn-down" data-dir="Fall"><i data-lucide="trending-down" class="i-sm"></i>Fall</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- desktop-only extra -->
+      <a class="card card-flat link-row trade-extra" href="positions.html">
+        <span class="lr-ic"><i data-lucide="receipt-text" class="i"></i></span>
+        <span class="lr-tx">
+          <b>Open positions</b>
+          <span><span id="openN">4</span> contracts · $100.00 at risk</span>
+        </span>
+        <i data-lucide="chevron-right" class="i-sm dim"></i>
+      </a>
+    </aside>
+  </div>
+</main>
+
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script src="assets/js/chart.js"></script>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/app.js"></script>
+<script src="assets/js/modals.js"></script>
+<script>
+(function () {
+  var M = OrbisData.markets;
+  var $ = function (s) { return document.querySelector(s); };
+
+  var q = new URLSearchParams(location.search).get('symbol');
+  var idx = Math.max(0, M.findIndex(function (m) { return m.sym === q; }));
+  var current = M[idx];
+
+  var chart = OrbisChart.create($('#mainChart'), {
+    start: current.base, vol: current.vol, seed: 11, count: 72, onPrice: onPrice
+  });
+
+  /* ------------------------------------------------- custom dropdown -- */
+  var menu = $('#pickMenu'), btn = $('#pickBtn');
+
+  function buildMenu(filter) {
+    filter = (filter || '').toLowerCase();
+    var html = '<div class="mkt-menu-search">' +
+      '<input class="input" id="pickSearch" type="search" placeholder="Search markets" aria-label="Search markets">' +
+      '</div>';
+    var shown = 0;
+    Object.keys(OrbisData.cats).forEach(function (cat) {
+      var rows = M.map(function (m, i) { return { m: m, i: i }; })
+        .filter(function (x) {
+          return x.m.cat === cat &&
+            (!filter || (x.m.sym + ' ' + x.m.name).toLowerCase().indexOf(filter) > -1);
+        });
+      if (!rows.length) return;
+      shown += rows.length;
+      html += '<h5>' + OrbisData.cats[cat] + '</h5>';
+      html += rows.map(function (x) {
+        var up = x.m.chg >= 0;
+        return '<button class="mkt-opt" role="option" data-i="' + x.i + '" aria-selected="' +
+          (x.i === idx) + '">' + OrbisData.assetHTML(x.m) +
+          '<span class="nm"><b>' + x.m.sym + '</b><span>' + x.m.name + '</span></span>' +
+          '<span class="px"><b class="mono">' + x.m.price + '</b>' +
+          '<span class="' + (up ? 'up' : 'down') + '">' + (up ? '+' : '') + x.m.chg.toFixed(2) + '%</span></span>' +
+          '</button>';
+      }).join('');
+    });
+    if (!shown) html += '<div class="empty"><b>Nothing matches</b></div>';
+    menu.innerHTML = html;
+    window.orbisIcons();
+  }
+
+  function openMenu(open) {
+    menu.hidden = !open;
+    btn.setAttribute('aria-expanded', String(open));
+    if (open) {
+      buildMenu('');
+      var s = $('#pickSearch');
+      if (s) s.focus();
+    }
+  }
+
+  btn.addEventListener('click', function (e) {
+    e.stopPropagation();
+    openMenu(menu.hidden);
+  });
+
+  menu.addEventListener('click', function (e) {
+    e.stopPropagation();
+    var opt = e.target.closest('.mkt-opt');
+    if (!opt) return;
+    idx = Number(opt.dataset.i);
+    applyMarket(idx);
+    openMenu(false);
+  });
+
+  menu.addEventListener('input', function (e) {
+    if (e.target.id === 'pickSearch') {
+      var v = e.target.value;
+      buildMenu(v);
+      var s = $('#pickSearch');
+      if (s) { s.value = v; s.focus(); }
+    }
+  });
+
+  document.addEventListener('click', function () { if (!menu.hidden) openMenu(false); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') openMenu(false); });
+
+  /* ------------------------------------------------------------ chart -- */
+  function onPrice(p) {
+    $('#price').textContent = p.toLocaleString('en-US', {
+      minimumFractionDigits: current.dp, maximumFractionDigits: current.dp
+    });
+    var pct = ((p - current.base) / current.base) * 100;
+    var el = $('#chg');
+    el.textContent = (pct >= 0 ? '+' : '') + pct.toFixed(2) + '%';
+    el.className = pct >= 0 ? 'up' : 'down';
+  }
+
+  function applyMarket(i) {
+    current = M[i];
+    $('#pickMark').innerHTML = OrbisData.assetHTML(current);
+    $('#pickSym').textContent = current.sym;
+    $('#pickCat').textContent = OrbisData.cats[current.cat] + ' · ' + current.name;
+    $('#footPayout').textContent = current.payout + '%';
+    chart.reseed({ start: current.base, vol: current.vol });
+    calc();
+    window.orbisIcons();
+  }
+  applyMarket(idx);
+
+  /* ----------------------------------------------------------- ticket -- */
+  function calc() {
+    var stake = Number($('#stake').value) || 0;
+    var profit = stake * (current.payout / 100);
+    $('#payoutAmt').textContent = OrbisData.money(stake + profit);
+    $('#profitAmt').textContent = '+' + OrbisData.money(profit);
+  }
+  $('#stake').addEventListener('input', calc);
+  document.querySelectorAll('[data-stake]').forEach(function (b) {
+    b.addEventListener('click', function () { $('#stake').value = b.dataset.stake; calc(); });
+  });
+  calc();
+
+  document.querySelectorAll('[data-dir]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var stake = Number($('#stake').value) || 0;
+      OrbisData.openTrades.unshift({
+        id: 'OB-' + (948000 + Math.floor(Math.random() * 900)),
+        sym: current.sym, dir: b.dataset.dir, stake: stake,
+        entry: $('#price').textContent, now: $('#price').textContent,
+        ends: '0' + $('#dur').value + ':00', pl: 0
+      });
+      var n = $('#openN');
+      if (n) n.textContent = OrbisData.openTrades.length;
+      window.orbisToast(b.dataset.dir + ' · ' + OrbisData.money(stake) + ' on ' + current.sym, 'check-circle-2');
+    });
+  });
+
+  setInterval(function () {
+    $('#clock').textContent = new Date().toUTCString().slice(17, 25) + ' UTC';
+  }, 1000);
+})();
+</script>
+</body>
+</html>

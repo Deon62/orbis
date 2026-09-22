@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>AI · orbisflow</title>
+<meta name="description" content="AI signals and market read.">
+<meta name="theme-color" content="#1C1C1C">
+<link rel="icon" href="assets/img/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/styles.css">
+<script>(function(){try{var t=localStorage.getItem("orbisflow-theme")||(matchMedia("(prefers-color-scheme:dark)").matches?"dark":"light");document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body data-page="ai" data-shell="app">
+
+<div id="site-header"></div>
+
+<main class="wrap page-body">
+  <div class="stack">
+
+    <!-- ask ------------------------------------------------------------ -->
+    <div class="card card-flat card-pad" style="padding-inline:0">
+      <form class="ai-ask" data-mock-submit="AI assistant — not wired up yet">
+        <input class="input" placeholder="Ask about a market — e.g. why is gold up today?" aria-label="Ask the assistant">
+        <button class="btn btn-primary" type="submit"><i data-lucide="sparkles" class="i-sm"></i><span class="lbl">Ask</span></button>
+      </form>
+      <div class="ai-chips">
+        <button class="pill" data-mock="Suggested prompt">What's driving EUR/USD?</button>
+        <button class="pill" data-mock="Suggested prompt">Safest 5-minute trade now</button>
+        <button class="pill" data-mock="Suggested prompt">Explain my last 10 losses</button>
+        <button class="pill" data-mock="Suggested prompt">Is volatility high today?</button>
+      </div>
+    </div>
+
+    <!-- market read ----------------------------------------------------- -->
+    <div class="grid g4">
+      <div class="stat">
+        <span><i data-lucide="gauge" class="i-sm"></i>Market sentiment</span>
+        <b>Risk-on</b><em class="up">62% bullish</em>
+      </div>
+      <div class="stat">
+        <span><i data-lucide="activity" class="i-sm"></i>Volatility</span>
+        <b>Elevated</b><em class="dim">above 30-day average</em>
+      </div>
+      <div class="stat">
+        <span><i data-lucide="target" class="i-sm"></i>Signal accuracy</span>
+        <b class="num">64%</b><em class="dim">last 200 signals</em>
+      </div>
+      <div class="stat">
+        <span><i data-lucide="calendar-days" class="i-sm"></i>Next event</span>
+        <b>US CPI</b><em class="dim">in 3h 20m · high impact</em>
+      </div>
+    </div>
+
+    <!-- signals --------------------------------------------------------- -->
+    <div>
+      <div class="pills" id="sigFilter">
+        <button class="pill active" data-f="all">All signals</button>
+        <button class="pill" data-f="Rise">Rise</button>
+        <button class="pill" data-f="Fall">Fall</button>
+      </div>
+      <div class="grid g3" id="signals"></div>
+    </div>
+
+    <!-- pattern watch ---------------------------------------------------- -->
+    <div class="card card-flat">
+      <div class="card-hd"><h3>Pattern watch</h3><span class="dim" style="font-size:12.5px">Detected in the last hour</span></div>
+      <div class="tbl-scroll">
+        <table class="tbl">
+          <thead><tr><th>Market</th><th>Pattern</th><th>Timeframe</th><th>Bias</th><th class="r">Detected</th></tr></thead>
+          <tbody id="patterns"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <p class="ai-note">
+      <i data-lucide="info" class="i-sm"></i>
+      <span>Signals are model output, not advice. They are wrong roughly a third of the time.
+      In this prototype they are generated, not computed from real data.</span>
+    </p>
+  </div>
+</main>
+
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script src="assets/js/chart.js"></script>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/app.js"></script>
+<script src="assets/js/modals.js"></script>
+<script>
+(function () {
+  var SIGNALS = [
+    { sym:'EUR/USD',       dir:'Rise', conf:78, tf:'5 minutes',  why:'Holding above the session VWAP with rising volume; dollar softening into the New York open.' },
+    { sym:'BTC/USD',       dir:'Rise', conf:71, tf:'15 minutes', why:'Broke the overnight range high and retested it as support. Funding still neutral.' },
+    { sym:'XAU/USD',       dir:'Fall', conf:66, tf:'5 minutes',  why:'Rejected the 2,320 level three times. Real yields ticking up ahead of CPI.' },
+    { sym:'USD/JPY',       dir:'Rise', conf:63, tf:'1 hour',     why:'Carry demand intact; no intervention rhetoric in the last two sessions.' },
+    { sym:'ETH/USD',       dir:'Fall', conf:59, tf:'15 minutes', why:'Lower highs against bitcoin for six hours. Momentum fading on the hourly.' },
+    { sym:'Volatility 75', dir:'Rise', conf:54, tf:'1 minute',   why:'Mean-reversion setup after a two-sigma move down. Low conviction — size small.' }
+  ];
+
+  var PATTERNS = [
+    ['GBP/USD', 'Double top',        '15m', 'Fall', '4 min ago'],
+    ['US 100',  'Bull flag',         '5m',  'Rise', '11 min ago'],
+    ['WTI',     'Falling wedge',     '1h',  'Rise', '18 min ago'],
+    ['SOL/USD', 'Breakout retest',   '5m',  'Rise', '24 min ago'],
+    ['XAG/USD', 'Head and shoulders','1h',  'Fall', '38 min ago']
+  ];
+
+  function render(filter) {
+    var rows = SIGNALS.filter(function (s) { return filter === 'all' || s.dir === filter; });
+    document.getElementById('signals').innerHTML = rows.map(function (s) {
+      var m = OrbisData.bySymbol(s.sym) || { sym: s.sym, name: '', icon: {} };
+      var up = s.dir === 'Rise';
+      return '<div class="signal">' +
+        '<div class="signal-hd">' + OrbisData.assetHTML(m) +
+          '<span class="nm"><b>' + s.sym + '</b><span>' + s.tf + ' contract</span></span>' +
+          '<span class="tag ' + (up ? 'tag-up' : 'tag-down') + '">' +
+          '<i data-lucide="' + (up ? 'trending-up' : 'trending-down') + '" class="i-sm"></i>' + s.dir + '</span>' +
+        '</div>' +
+        '<div style="display:flex;justify-content:space-between;font-size:12px;color:var(--ink-3)">' +
+          '<span>Confidence</span><b class="mono" style="color:var(--ink)">' + s.conf + '%</b></div>' +
+        '<div class="conf"><i style="width:' + s.conf + '%;background:' +
+          (up ? 'var(--up)' : 'var(--down)') + '"></i></div>' +
+        '<p>' + s.why + '</p>' +
+        '<a class="btn btn-ghost btn-sm" style="margin-top:12px" href="trade.html?symbol=' +
+          encodeURIComponent(s.sym) + '">Open on chart<i data-lucide="arrow-right" class="i-sm"></i></a>' +
+      '</div>';
+    }).join('');
+    window.orbisIcons();
+  }
+
+  document.getElementById('sigFilter').addEventListener('click', function (e) {
+    var p = e.target.closest('.pill');
+    if (p) render(p.dataset.f);
+  });
+
+  document.getElementById('patterns').innerHTML = PATTERNS.map(function (r) {
+    var up = r[3] === 'Rise';
+    return '<tr><td><b>' + r[0] + '</b></td><td>' + r[1] + '</td><td class="mono">' + r[2] + '</td>' +
+      '<td><span class="tag ' + (up ? 'tag-up' : 'tag-down') + '">' + r[3] + '</span></td>' +
+      '<td class="r dim">' + r[4] + '</td></tr>';
+  }).join('');
+
+  render('all');
+})();
+</script>
+</body>
+</html>

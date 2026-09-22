@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Preferences · orbisflow</title>
+<meta name="description" content="Trade defaults, notifications and limits.">
+<meta name="theme-color" content="#1C1C1C">
+<link rel="icon" href="assets/img/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/styles.css">
+<script>(function(){try{var t=localStorage.getItem("orbisflow-theme")||(matchMedia("(prefers-color-scheme:dark)").matches?"dark":"light");document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body data-page="preferences" data-nav="account" data-title="Preferences" data-shell="app">
+
+<div id="site-header"></div>
+
+<main class="wrap page-body">
+  <div class="stack" style="max-width:720px">
+    <div class="card card-flat">
+      <div class="row-line">
+        <div><b>Default stake</b><span>Pre-filled on the ticket</span></div>
+        <div class="input-wrap" style="width:130px">
+          <span class="input-prefix">$</span>
+          <input class="input" type="number" value="25">
+        </div>
+      </div>
+      <div class="row-line">
+        <div><b>Default duration</b><span>Pre-filled on the ticket</span></div>
+        <select class="select" style="width:150px"><option>1 minute</option><option selected>5 minutes</option><option>15 minutes</option></select>
+      </div>
+      <div class="row-line">
+        <div><b>Confirm before placing a trade</b><span>Extra tap, fewer accidents</span></div>
+        <button class="switch" role="switch" aria-checked="false" aria-label="Confirm before trade"></button>
+      </div>
+      <div class="row-line">
+        <div><b>Settlement notifications</b><span>Push when a contract settles</span></div>
+        <button class="switch on" role="switch" aria-checked="true" aria-label="Settlement notifications"></button>
+      </div>
+      <div class="row-line">
+        <div><b>Marketing emails</b><span>Product news and briefings</span></div>
+        <button class="switch" role="switch" aria-checked="false" aria-label="Marketing emails"></button>
+      </div>
+    </div>
+
+    <div class="card card-flat">
+      <div class="row-line">
+        <div><b>Trading limits</b><span>Deposit caps, loss limits, cooling-off</span></div>
+        <button class="btn btn-ghost btn-sm" data-mock="Trading limits">Manage</button>
+      </div>
+      <div class="row-line">
+        <div><b>Self-exclusion</b><span>Pause your account</span></div>
+        <button class="btn btn-ghost btn-sm" data-mock="Self-exclusion">Manage</button>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script src="assets/js/app.js"></script>
+<script src="assets/js/modals.js"></script>
+</body>
+</html>

@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Log in · orbisflow</title>
+<meta name="description" content="Log in to orbisflow.">
+<meta name="theme-color" content="#1C1C1C">
+<link rel="icon" href="assets/img/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/styles.css">
+<script>(function(){try{var t=localStorage.getItem("orbisflow-theme")||(matchMedia("(prefers-color-scheme:dark)").matches?"dark":"light");document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body data-page="login" data-shell="bare">
+
+<main class="auth">
+  <aside class="auth-aside auth-aside-center">
+    <img class="auth-skyline" src="assets/img/skyline.svg" alt="" aria-hidden="true">
+    <a class="logo" href="index.html" style="position:relative;z-index:2">
+      <span class="logo-word on-dark">orbis<span class="flow">flow</span></span>
+    </a>
+    <p class="auth-quote">Everything moves.<br>You just call which way.</p>
+  </aside>
+
+  <div class="auth-main">
+    <div class="auth-top">
+      <a class="logo logo-lg" href="index.html">
+        <span class="logo-word">orbis<span class="flow">flow</span></span>
+      </a>
+    </div>
+
+    <div class="auth-card">
+      <h1>Log in</h1>
+
+      <form data-mock-submit="Signed in" data-go="trade.html">
+        <div class="field">
+          <label class="label" for="email">Email</label>
+          <input class="input" id="email" type="email" placeholder="you@example.com" required>
+        </div>
+
+        <div class="field">
+          <label class="label" for="pw">Password</label>
+          <div class="input-wrap">
+            <input class="input" id="pw" type="password" placeholder="••••••••" required>
+            <button type="button" class="input-affix" data-reveal="#pw" aria-label="Show password">
+              <i data-lucide="eye" class="i-sm"></i>
+            </button>
+          </div>
+        </div>
+
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin:2px 0 20px">
+          <label class="check"><input type="checkbox" checked> Stay signed in</label>
+          <a href="#" data-mock="Password reset" style="font-size:13px;font-weight:600">Forgot?</a>
+        </div>
+
+        <button class="btn btn-primary btn-block btn-lg" type="submit">Log in</button>
+      </form>
+
+      <div class="or">or</div>
+
+      <button class="btn btn-google btn-block" data-login="trade.html">
+        <img src="assets/img/google.svg" alt=""> Continue with Google
+      </button>
+
+      <p class="auth-foot">New here? <a href="signup.html">Create an account</a></p>
+    </div>
+
+    <p class="auth-legal">Prototype — no real authentication.</p>
+  </div>
+</main>
+
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script src="assets/js/app.js"></script>
+</body>
+</html>

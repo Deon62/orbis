@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Security · orbisflow</title>
+<meta name="description" content="Password, two-factor authentication and sessions.">
+<meta name="theme-color" content="#1C1C1C">
+<link rel="icon" href="assets/img/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/styles.css">
+<script>(function(){try{var t=localStorage.getItem("orbisflow-theme")||(matchMedia("(prefers-color-scheme:dark)").matches?"dark":"light");document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body data-page="security" data-nav="account" data-title="Security" data-shell="app">
+
+<div id="site-header"></div>
+
+<main class="wrap page-body">
+  <div class="stack" style="max-width:720px">
+    <div class="card card-flat">
+      <div class="row-line">
+        <div><b>Password</b><span>Last changed 12 Sep 2026</span></div>
+        <button class="btn btn-ghost btn-sm" data-mock="Change password">Change</button>
+      </div>
+      <div class="row-line">
+        <div><b>Two-factor authentication</b><span>Authenticator app</span></div>
+        <button class="btn btn-primary btn-sm" data-mock="Enable 2FA">Enable</button>
+      </div>
+      <div class="row-line">
+        <div><b>Login alerts</b><span>Email me on a new device</span></div>
+        <button class="switch on" role="switch" aria-checked="true" aria-label="Login alerts"></button>
+      </div>
+      <div class="row-line">
+        <div><b>Withdrawal confirmation</b><span>Approve every withdrawal by email</span></div>
+        <button class="switch on" role="switch" aria-checked="true" aria-label="Withdrawal confirmation"></button>
+      </div>
+    </div>
+
+    <div class="card card-flat">
+      <div class="card-hd"><h3>Active sessions</h3><button class="btn btn-ghost btn-sm" data-mock="Sign out all devices">Sign out all</button></div>
+      <div class="row-line">
+        <div><b>Chrome · Windows</b><span>Nairobi, Kenya</span></div>
+        <span class="tag tag-up">This device</span>
+      </div>
+      <div class="row-line">
+        <div><b>orbisflow iOS</b><span>Nairobi, Kenya · 3 hours ago</span></div>
+        <button class="btn btn-quiet btn-sm" data-mock="Revoke session">Revoke</button>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script src="assets/js/app.js"></script>
+<script src="assets/js/modals.js"></script>
+</body>
+</html>

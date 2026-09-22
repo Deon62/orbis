@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Markets · orbisflow</title>
+<meta name="description" content="Forex, crypto, commodities, indices and synthetic markets on orbisflow.">
+<meta name="theme-color" content="#1C1C1C">
+<link rel="icon" href="assets/img/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/styles.css">
+<script>(function(){try{var t=localStorage.getItem("orbisflow-theme")||(matchMedia("(prefers-color-scheme:dark)").matches?"dark":"light");document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body data-page="markets" data-shell="app">
+
+<div id="site-header"></div>
+
+<main class="wrap page-body">
+  <div class="toolbar">
+    <div class="input-wrap grow" style="max-width:320px">
+      <input class="input" id="search" type="search" placeholder="Search markets" aria-label="Search markets">
+      <span class="input-affix" style="pointer-events:none"><i data-lucide="search" class="i-sm"></i></span>
+    </div>
+  </div>
+
+
+  <div class="grid g4" style="margin-bottom:18px">
+    <div class="stat">
+      <span><i data-lucide="flame" class="i-sm"></i>Most traded</span>
+      <b>Volatility 75</b><em class="up">+2.41%</em>
+    </div>
+    <div class="stat">
+      <span><i data-lucide="trending-up" class="i-sm"></i>Top gainer</span>
+      <b>BTC/USD</b><em class="up">+1.92%</em>
+    </div>
+    <div class="stat">
+      <span><i data-lucide="trending-down" class="i-sm"></i>Top loser</span>
+      <b>ETH/USD</b><em class="down">-1.07%</em>
+    </div>
+    <div class="stat">
+      <span><i data-lucide="percent" class="i-sm"></i>Best payout</span>
+      <b>92%</b><em class="dim">Volatility 75</em>
+    </div>
+  </div>
+
+  <div class="pills" id="cats">
+    <button class="pill active" data-cat="all"><i data-lucide="layers" class="i-sm"></i>All markets</button>
+    <button class="pill" data-cat="forex"><i data-lucide="banknote" class="i-sm"></i>Forex</button>
+    <button class="pill" data-cat="crypto"><i data-lucide="bitcoin" class="i-sm"></i>Crypto</button>
+    <button class="pill" data-cat="commodities"><i data-lucide="fuel" class="i-sm"></i>Commodities</button>
+    <button class="pill" data-cat="indices"><i data-lucide="chart-line" class="i-sm"></i>Indices</button>
+    <button class="pill" data-cat="synthetics"><i data-lucide="waves" class="i-sm"></i>Synthetics</button>
+  </div>
+
+  <div class="card card-flat">
+    <div class="card-hd">
+      <h3 id="listTitle">All markets</h3>
+      <span class="dim" style="font-size:12.5px">Payout shown is the maximum for a 5-minute contract</span>
+    </div>
+    <div id="list"></div>
+  </div>
+
+  <p class="hint" style="margin-top:14px">
+    Prices are simulated for this prototype. A live feed will replace them in the real build.
+  </p>
+</main>
+
+<div id="site-footer"></div>
+
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script src="assets/js/chart.js"></script>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/app.js"></script>
+<script src="assets/js/modals.js"></script>
+<script>
+(function () {
+  var listEl = document.getElementById('list');
+  var titleEl = document.getElementById('listTitle');
+  var cat = 'all', term = '';
+
+  function render() {
+    var rows = OrbisData.markets.filter(function (m) {
+      var okCat = cat === 'all' || m.cat === cat;
+      var okTerm = !term || (m.sym + ' ' + m.name).toLowerCase().indexOf(term) > -1;
+      return okCat && okTerm;
+    });
+
+    listEl.innerHTML = rows.length
+      ? rows.map(OrbisData.rowHTML).join('')
+      : '<div class="empty"><i data-lucide="search-x" class="i-lg"></i>' +
+        '<b>No markets match that</b><p>Try a different name, or clear the filters.</p></div>';
+
+    titleEl.textContent = (cat === 'all' ? 'All markets' : OrbisData.cats[cat]) +
+      ' · ' + rows.length + (rows.length === 1 ? ' instrument' : ' instruments');
+    OrbisData.drawSparklines();
+    window.orbisIcons();
+  }
+
+  document.getElementById('cats').addEventListener('click', function (e) {
+    var p = e.target.closest('.pill');
+    if (p) { cat = p.dataset.cat; render(); }
+  });
+  document.getElementById('search').addEventListener('input', function (e) {
+    term = e.target.value.trim().toLowerCase();
+    render();
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>

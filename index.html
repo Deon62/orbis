@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="en" class="snap">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>orbisflow — Binary trading, stripped back</title>
+<meta name="description" content="Pick a market, pick a direction, set your stake. A deliberately simple binary options platform.">
+<meta name="theme-color" content="#1C1C1C">
+<link rel="icon" href="assets/img/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/styles.css">
+<script>(function(){try{var t=localStorage.getItem("orbisflow-theme")||(matchMedia("(prefers-color-scheme:dark)").matches?"dark":"light");document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body data-page="home" data-shell="public">
+
+<div class="mockbar">Design prototype — <b>every price, balance and trade on this site is simulated.</b></div>
+<div id="site-header"></div>
+
+<!-- ============================================================== hero -- -->
+<section class="hero snap-section">
+  <img class="hero-skyline" src="assets/img/skyline.svg" alt="" aria-hidden="true">
+  <div class="wrap hero-in">
+    <div class="hero-grid">
+      <div>
+        <p class="sec-eyebrow">Binary options · 24/7 markets</p>
+        <h1>Two directions. One decision.</h1>
+        <p class="lead">
+          Deriv gives you four hundred controls. orbisflow gives you the six that decide a trade:
+          market, direction, stake, duration, payout, go.
+        </p>
+        <div class="hero-cta">
+          <a class="btn btn-primary btn-lg" href="signup.html"><i data-lucide="arrow-right" class="i-sm"></i>Create free account</a>
+          <a class="btn btn-lg btn-ghost" style="border-color:#383836;color:#F2F1ED" href="trade.html">
+            <i data-lucide="play" class="i-sm"></i>Try the demo
+          </a>
+        </div>
+        <div class="hero-trust">
+          <div><b class="num">$10,000</b><span>Free demo funds</span></div>
+          <div><b class="num">92%</b><span>Max payout</span></div>
+          <div><b class="num">5s</b><span>Shortest contract</span></div>
+          <div><b class="num">60+</b><span>Markets</span></div>
+        </div>
+      </div>
+
+      <div class="hero-chart">
+        <div class="chart-top" style="padding:11px 13px">
+          <div class="sym">
+            <span id="heroMark"></span>
+            <div><b>EUR/USD</b><span>Forex</span></div>
+          </div>
+          <div class="sym-price">
+            <b class="mono" id="heroPrice">1.08420</b>
+            <span class="up" id="heroChg">+0.18%</span>
+          </div>
+        </div>
+        <div class="chart-stage" style="height:280px">
+          <img class="chart-skyline" src="assets/img/skyline.svg" alt="" aria-hidden="true">
+          <canvas id="heroChart"></canvas>
+        </div>
+        <div class="chart-foot">
+          <span><i class="dotlive"></i>Simulated feed</span>
+          <span style="margin-left:auto">1m candles</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <span class="snap-cue">Scroll <i data-lucide="chevron-down" class="i-sm"></i></span>
+</section>
+
+<!-- ============================================================ ticker -- -->
+<div class="ticker">
+  <div class="ticker-track" id="ticker"></div>
+</div>
+
+<!-- ========================================================== features -- -->
+<section class="sec snap-section">
+  <div class="wrap">
+    <p class="sec-eyebrow">Why orbisflow</p>
+    <h2>Everything a trade needs. Nothing it doesn't.</h2>
+    <p class="sec-lead">One screen where the trade happens. Clean pages for the money around it.</p>
+
+    <div class="grid g4" style="margin-top:34px">
+      <div class="feat">
+        <div class="feat-ic"><i data-lucide="chart-candlestick" class="i"></i></div>
+        <h3>One trade screen</h3>
+        <p>Chart, stake, duration and payout on a single view. Place a trade in two taps on a phone.</p>
+      </div>
+      <div class="feat">
+        <div class="feat-ic"><i data-lucide="wallet" class="i"></i></div>
+        <h3>Money in, money out</h3>
+        <p>Mobile money, card, bank transfer and crypto in one cashier. Withdrawals reviewed same day.</p>
+      </div>
+      <div class="feat">
+        <div class="feat-ic"><i data-lucide="gift" class="i"></i></div>
+        <h3>Refer and earn</h3>
+        <p>A personal link, a live dashboard and revenue share that steps up as your network grows.</p>
+      </div>
+      <div class="feat">
+        <div class="feat-ic"><i data-lucide="shield-check" class="i"></i></div>
+        <h3>Funds held separately</h3>
+        <p>Client money kept in segregated accounts. Withdraw your balance whenever you want it.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================== how --- -->
+<section class="sec snap-section" id="how" style="background:var(--surface);border-block:1px solid var(--line)">
+  <div class="wrap">
+    <div class="split">
+      <div>
+        <p class="sec-eyebrow">How it works</p>
+        <h2>Three steps, about ninety seconds.</h2>
+        <p class="sec-lead">Start on demo with $10,000. Switch to real money when you are ready.</p>
+        <a class="btn btn-dark btn-lg" href="signup.html" style="margin-top:26px">Open an account</a>
+      </div>
+      <div class="grid" style="gap:26px">
+        <div class="step">
+          <span class="step-n">1</span>
+          <div>
+            <b>Pick a market and a direction</b>
+            <p>Forex, crypto, commodities, indices and synthetics. Will it be higher or lower when the contract ends?</p>
+          </div>
+        </div>
+        <div class="step">
+          <span class="step-n">2</span>
+          <div>
+            <b>Set your stake and duration</b>
+            <p>From $1 and from five seconds. The payout is shown before you commit — no surprises after the fact.</p>
+          </div>
+        </div>
+        <div class="step">
+          <span class="step-n">3</span>
+          <div>
+            <b>Wait for the settlement</b>
+            <p>The contract settles automatically at expiry and the result lands in your balance. No closing trades manually.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========================================================== markets --- -->
+<section class="sec snap-section">
+  <div class="wrap">
+    <div class="page-hd-row" style="margin-bottom:20px">
+      <div>
+        <p class="sec-eyebrow">Markets</p>
+        <h2>Trade what's moving right now.</h2>
+      </div>
+      <a class="btn btn-ghost" href="markets.html">All markets<i data-lucide="arrow-right" class="i-sm"></i></a>
+    </div>
+    <div class="card" id="homeMarkets"></div>
+  </div>
+</section>
+
+<!-- =========================================================== referral - -->
+<section class="wrap snap-section" style="padding-block:40px">
+  <div class="ref-hero">
+    <div class="split" style="align-items:center">
+      <div>
+        <p class="sec-eyebrow">Refer &amp; earn</p>
+        <h2>Your link. Their trades. Your revenue share.</h2>
+        <p>Up to 35% of the spread on everyone you bring in, for as long as they trade. Paid weekly, tracked to the trade.</p>
+        <a class="btn btn-primary btn-lg" href="signup.html" style="margin-top:24px">Start referring</a>
+      </div>
+      <div class="grid g3" style="position:relative;z-index:2">
+        <div style="border:1px solid var(--black-line);padding:16px;background:var(--black-2)">
+          <b style="font-size:24px">20%</b>
+          <div style="font-size:12.5px;color:var(--on-black-2)">Starter tier</div>
+        </div>
+        <div style="border:1px solid var(--black-line);padding:16px;background:var(--black-2)">
+          <b style="font-size:24px">28%</b>
+          <div style="font-size:12.5px;color:var(--on-black-2)">10+ referrals</div>
+        </div>
+        <div style="border:1px solid var(--brand);padding:16px;background:var(--black-2)">
+          <b style="font-size:24px;color:var(--brand)">35%</b>
+          <div style="font-size:12.5px;color:var(--on-black-2)">50+ referrals</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =============================================================== cta -- -->
+<section class="wrap snap-section" style="padding-block:40px">
+  <div class="cta">
+    <h2>Start on the demo. Move over when it clicks.</h2>
+    <p>No deposit needed to try it. $10,000 in simulated funds, the same screen real traders use.</p>
+    <a class="btn btn-lg" href="signup.html">Create free account</a>
+  </div>
+</section>
+
+<div id="site-footer"></div>
+
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script src="assets/js/chart.js"></script>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/app.js"></script>
+<script>
+/* hero chart */
+(function () {
+  var priceEl = document.getElementById('heroPrice');
+  var chgEl = document.getElementById('heroChg');
+  var base = 1.0842;
+  OrbisChart.create(document.getElementById('heroChart'), {
+    start: base, vol: 0.0016, seed: 42, count: 64,
+    onPrice: function (p) {
+      priceEl.textContent = p.toFixed(5);
+      var pct = ((p - base) / base) * 100;
+      chgEl.textContent = (pct >= 0 ? '+' : '') + pct.toFixed(2) + '%';
+      chgEl.className = pct >= 0 ? 'up' : 'down';
+    }
+  });
+
+  /* ticker strip */
+  var t = document.getElementById('ticker');
+  var items = OrbisData.markets.slice(0, 10).map(function (m) {
+    return '<span class="ticker-item"><b>' + m.sym + '</b>' +
+           '<span class="mono dim">' + m.price + '</span>' +
+           '<span class="' + (m.chg >= 0 ? 'up' : 'down') + '">' +
+           (m.chg >= 0 ? '+' : '') + m.chg.toFixed(2) + '%</span></span>';
+  }).join('');
+  t.innerHTML = items + items;
+
+  /* market preview rows */
+  document.getElementById('homeMarkets').innerHTML =
+    OrbisData.markets.slice(0, 6).map(OrbisData.rowHTML).join('');
+  document.getElementById('heroMark').innerHTML = OrbisData.assetHTML(OrbisData.bySymbol('EUR/USD'));
+  OrbisData.drawSparklines();
+  window.orbisIcons();
+})();
+</script>
+</body>
+</html>

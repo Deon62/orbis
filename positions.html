@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Positions · orbisflow</title>
+<meta name="description" content="Open contracts, settled contracts and trading statistics.">
+<meta name="theme-color" content="#1C1C1C">
+<link rel="icon" href="assets/img/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/styles.css">
+<script>(function(){try{var t=localStorage.getItem("orbisflow-theme")||(matchMedia("(prefers-color-scheme:dark)").matches?"dark":"light");document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body data-page="positions" data-shell="app">
+
+<div id="site-header"></div>
+
+<main class="wrap page-body">
+
+  <div class="grid g4" style="margin-bottom:18px">
+    <div class="stat">
+      <span><i data-lucide="activity" class="i-sm"></i>Open contracts</span>
+      <b class="num">4</b><em class="dim">$100.00 at risk</em>
+    </div>
+    <div class="stat">
+      <span><i data-lucide="trending-up" class="i-sm"></i>Net P/L (30d)</span>
+      <b class="num up">+$412.60</b><em class="dim">from 128 contracts</em>
+    </div>
+    <div class="stat">
+      <span><i data-lucide="target" class="i-sm"></i>Win rate</span>
+      <b class="num">61%</b><em class="dim">78 won · 50 lost</em>
+    </div>
+    <div class="stat">
+      <span><i data-lucide="coins" class="i-sm"></i>Average stake</span>
+      <b class="num">$24.80</b><em class="dim">5m most common</em>
+    </div>
+  </div>
+
+  <section class="card" data-panels>
+    <div class="card-hd">
+      <div class="seg">
+        <button class="active" data-panel="open">Open</button>
+        <button data-panel="closed">Settled</button>
+        <button data-panel="stats">Statistics</button>
+      </div>
+      <button class="btn btn-ghost btn-sm" data-mock="Statement export"><i data-lucide="download" class="i-sm"></i>Export</button>
+    </div>
+
+    <!-- open -->
+    <div data-panel-id="open" class="tbl-scroll">
+      <table class="tbl">
+        <thead>
+          <tr>
+            <th>Contract</th><th>Market</th><th>Direction</th>
+            <th class="r">Stake</th><th class="r">Entry</th><th class="r">Current</th>
+            <th class="r">Ends in</th><th class="r">P/L</th><th></th>
+          </tr>
+        </thead>
+        <tbody id="openBody"></tbody>
+      </table>
+    </div>
+
+    <!-- settled -->
+    <div data-panel-id="closed" hidden class="tbl-scroll">
+      <table class="tbl">
+        <thead>
+          <tr>
+            <th>Contract</th><th>Market</th><th>Direction</th>
+            <th class="r">Stake</th><th class="r">Entry</th><th class="r">Exit</th>
+            <th>Result</th><th class="r">P/L</th><th class="r">Settled</th>
+          </tr>
+        </thead>
+        <tbody id="closedBody"></tbody>
+      </table>
+    </div>
+
+    <!-- stats -->
+    <div data-panel-id="stats" hidden class="card-pad">
+      <div class="split" style="gap:34px">
+        <div>
+          <h3 style="font-size:15px;margin-bottom:12px">By market</h3>
+          <div class="kv"><span>Volatility 75</span><b class="mono up">+$188.20</b></div>
+          <div class="kv"><span>EUR/USD</span><b class="mono up">+$121.40</b></div>
+          <div class="kv"><span>BTC/USD</span><b class="mono up">+$96.10</b></div>
+          <div class="kv"><span>XAU/USD</span><b class="mono up">+$44.90</b></div>
+          <div class="kv"><span>ETH/USD</span><b class="mono down">-$38.00</b></div>
+        </div>
+        <div>
+          <h3 style="font-size:15px;margin-bottom:12px">By duration</h3>
+          <div class="kv"><span>Under 1 minute</span><b class="mono">18 contracts · 50% won</b></div>
+          <div class="kv"><span>1 – 5 minutes</span><b class="mono">64 contracts · 64% won</b></div>
+          <div class="kv"><span>5 – 30 minutes</span><b class="mono">32 contracts · 63% won</b></div>
+          <div class="kv"><span>Over 30 minutes</span><b class="mono">14 contracts · 57% won</b></div>
+        </div>
+      </div>
+      <p class="hint" style="margin-top:20px">
+        Charts and a full performance breakdown land here once the reporting service is wired up.
+      </p>
+    </div>
+  </section>
+</main>
+
+<div id="site-footer"></div>
+
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script src="assets/js/chart.js"></script>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/app.js"></script>
+<script src="assets/js/modals.js"></script>
+<script>
+(function () {
+  document.getElementById('openBody').innerHTML = OrbisData.openTrades.map(function (t) {
+    return '<tr>' +
+      '<td class="mono dim">' + t.id + '</td>' +
+      '<td><b>' + t.sym + '</b></td>' +
+      '<td><span class="tag ' + (t.dir === 'Rise' ? 'tag-up' : 'tag-down') + '">' + t.dir + '</span></td>' +
+      '<td class="r mono">' + OrbisData.money(t.stake) + '</td>' +
+      '<td class="r mono">' + t.entry + '</td>' +
+      '<td class="r mono">' + t.now + '</td>' +
+      '<td class="r mono">' + t.ends + '</td>' +
+      '<td class="r mono ' + (t.pl >= 0 ? 'up' : 'down') + '">' + (t.pl >= 0 ? '+' : '') + OrbisData.money(t.pl) + '</td>' +
+      '<td class="r"><button class="btn btn-ghost btn-sm" data-mock="Sell back contract">Sell back</button></td>' +
+    '</tr>';
+  }).join('');
+
+  document.getElementById('closedBody').innerHTML = OrbisData.closedTrades.map(function (t) {
+    return '<tr>' +
+      '<td class="mono dim">' + t.id + '</td>' +
+      '<td><b>' + t.sym + '</b></td>' +
+      '<td>' + t.dir + '</td>' +
+      '<td class="r mono">' + OrbisData.money(t.stake) + '</td>' +
+      '<td class="r mono">' + t.entry + '</td>' +
+      '<td class="r mono">' + t.exit + '</td>' +
+      '<td><span class="tag ' + (t.result === 'won' ? 'tag-up' : 'tag-down') + '">' +
+        (t.result === 'won' ? 'Won' : 'Lost') + '</span></td>' +
+      '<td class="r mono ' + (t.pl >= 0 ? 'up' : 'down') + '">' + (t.pl >= 0 ? '+' : '') + OrbisData.money(t.pl) + '</td>' +
+      '<td class="r dim">' + t.when + '</td>' +
+    '</tr>';
+  }).join('');
+
+  window.orbisIcons();
+})();
+</script>
+</body>
+</html>

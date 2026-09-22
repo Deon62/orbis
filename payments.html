@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Payment methods · orbisflow</title>
+<meta name="description" content="Saved deposit and withdrawal methods.">
+<meta name="theme-color" content="#1C1C1C">
+<link rel="icon" href="assets/img/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/styles.css">
+<script>(function(){try{var t=localStorage.getItem("orbisflow-theme")||(matchMedia("(prefers-color-scheme:dark)").matches?"dark":"light");document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body data-page="payments" data-nav="account" data-title="Payment methods" data-shell="app">
+
+<div id="site-header"></div>
+
+<main class="wrap page-body">
+  <div class="stack" style="max-width:720px">
+    <div class="card card-flat">
+      <div class="row-line">
+        <div style="display:flex;align-items:center;gap:12px">
+          <span class="method-ic"><i data-lucide="smartphone" class="i"></i></span>
+          <div><b>M-Pesa</b><span>+254 7•• ••• 412 · default</span></div>
+        </div>
+        <span class="tag tag-up">Verified</span>
+      </div>
+      <div class="row-line">
+        <div style="display:flex;align-items:center;gap:12px">
+          <span class="method-ic"><i data-lucide="credit-card" class="i"></i></span>
+          <div><b>Visa ••••4417</b><span>Expires 09/28</span></div>
+        </div>
+        <button class="btn btn-quiet btn-sm" data-mock="Remove card">Remove</button>
+      </div>
+      <div class="row-line">
+        <div style="display:flex;align-items:center;gap:12px">
+          <span class="method-ic"><i data-lucide="bitcoin" class="i"></i></span>
+          <div><b>USDT (TRC-20)</b><span>T••••••••••••x92</span></div>
+        </div>
+        <button class="btn btn-quiet btn-sm" data-mock="Remove wallet">Remove</button>
+      </div>
+    </div>
+
+    <button class="btn btn-primary" data-mock="Add payment method" style="justify-self:start">
+      <i data-lucide="plus" class="i-sm"></i>Add a method
+    </button>
+  </div>
+</main>
+
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script src="assets/js/app.js"></script>
+<script src="assets/js/modals.js"></script>
+</body>
+</html>
