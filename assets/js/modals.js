@@ -242,32 +242,62 @@
   }
 
   /* ============================================================= refer == */
+  /* share targets, ready to work the moment the domain is live */
+  var SHARE_TEXT = 'I trade on orbisflow. Use my link and we both get a bonus:';
+
+  function shareLinks(url) {
+    var t = encodeURIComponent(SHARE_TEXT);
+    var u = encodeURIComponent(url);
+    return [
+      ['whatsapp', 'WhatsApp', 'https://wa.me/?text=' + t + '%20' + u],
+      ['x',        'X',        'https://twitter.com/intent/tweet?text=' + t + '&url=' + u],
+      ['telegram', 'Telegram', 'https://t.me/share/url?url=' + u + '&text=' + t],
+      ['facebook', 'Facebook', 'https://www.facebook.com/sharer/sharer.php?u=' + u]
+    ];
+  }
+
   function referModal() {
+    var share = shareLinks(REF_LINK).map(function (x) {
+      return '<a class="share-btn" href="' + x[2] + '" target="_blank" rel="noopener noreferrer" ' +
+        'aria-label="Share on ' + x[1] + '">' +
+        '<img class="brand-ic" src="https://cdn.simpleicons.org/' + x[0] + '/93928C" alt="" width="16" height="16">' +
+        '</a>';
+    }).join('') +
+      '<a class="share-btn" href="mailto:?subject=' + encodeURIComponent('Trade with me on orbisflow') +
+        '&body=' + encodeURIComponent(SHARE_TEXT + ' ' + REF_LINK) + '" aria-label="Share by email">' +
+        ic('mail', 'i-sm') + '</a>';
+
     var html =
       '<div class="modal-bd">' +
         '<div class="copybox">' +
           '<input id="mRef" value="' + REF_LINK + '" readonly aria-label="Your referral link">' +
           '<button data-copy="#mRef" aria-label="Copy link">' + ic('copy', 'i-sm') + '</button>' +
         '</div>' +
-        '<div class="share-row">' +
-          '<button class="share-btn" data-mock="Share to WhatsApp" aria-label="WhatsApp"><img class="brand-ic" src="https://cdn.simpleicons.org/whatsapp/93928C" alt="" width="16" height="16"></button>' +
-          '<button class="share-btn" data-mock="Share to X" aria-label="X"><img class="brand-ic" src="https://cdn.simpleicons.org/x/93928C" alt="" width="16" height="16"></button>' +
-          '<button class="share-btn" data-mock="Share to Telegram" aria-label="Telegram"><img class="brand-ic" src="https://cdn.simpleicons.org/telegram/93928C" alt="" width="16" height="16"></button>' +
-          '<button class="share-btn" data-mock="Share by email" aria-label="Email">' + ic('mail', 'i-sm') + '</button>' +
-          '<button class="share-btn" data-mock="QR code" aria-label="QR code">' + ic('qr-code', 'i-sm') + '</button>' +
+        '<div class="share-row">' + share + '</div>' +
+        '<div class="qr-wrap">' +
+          '<canvas id="mQr" aria-label="QR code for your referral link" role="img"></canvas>' +
+          '<span class="hint">Point a camera at this to open your link</span>' +
         '</div>' +
       '</div>' +
       '<div style="border-top:1px solid var(--line)">' +
         '<a class="link-row" href="/referrals">' +
           '<span class="lr-ic">' + ic('users') + '</span>' +
-          '<span class="lr-tx"><b>Your referrals</b><span>37 signed up · 21 active</span></span>' +
+          '<span class="lr-tx"><b>Your referrals</b><span>37 signed up, 21 active</span></span>' +
           ic('chevron-right', 'i-sm') + '</a>' +
         '<a class="link-row" href="/referral-earnings">' +
           '<span class="lr-ic">' + ic('banknote') + '</span>' +
-          '<span class="lr-tx"><b>Referral earnings</b><span>$1,406.80 earned · $89.90 pending</span></span>' +
+          '<span class="lr-tx"><b>Referral earnings</b><span>$1,406.80 earned, $89.90 pending</span></span>' +
           ic('chevron-right', 'i-sm') + '</a>' +
       '</div>';
-    open('Refer &amp; earn', html);
+
+    open('Refer &amp; earn', html, function (root) {
+      var cv = root.querySelector('#mQr');
+      if (cv && global.OrbisQR) {
+        /* always dark-on-light: an inverted QR fails on most scanners, so this
+           one keeps its own white field even in dark mode */
+        global.OrbisQR.render(cv, REF_LINK, { size: 160, dark: '#1C1C1C', light: '#FFFFFF' });
+      }
+    });
   }
 
   /* =========================================================== account == */

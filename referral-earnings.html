@@ -22,20 +22,25 @@
 <main class="wrap page-body">
   <div class="stack" style="max-width:780px">
 
-    <div class="grid g3">
-      <div class="stat">
-        <span>Earned to date</span>
-        <b class="num up">$1,406.80</b>
+    <!-- part-to-whole with two parts: a stacked bar reads it better than a
+         two-slice donut, where the 6% pending share is a sliver -->
+    <figure class="viz">
+      <figcaption class="viz-hd">
+        <span class="viz-label">Total accrued</span>
+        <b class="viz-hero mono">$1,496.70</b>
+      </figcaption>
+
+      <div class="sbar" role="img"
+           aria-label="Paid $1,406.80, 94 percent. Pending $89.90, 6 percent.">
+        <span class="sbar-seg seg-1" style="width:94%" data-tip="Paid · $1,406.80 · 94%"></span>
+        <span class="sbar-seg seg-2" style="width:6%"  data-tip="Pending · $89.90 · 6%"></span>
       </div>
-      <div class="stat">
-        <span>Pending</span>
-        <b class="num">$89.90</b><em class="dim">pays Monday</em>
+
+      <div class="viz-legend">
+        <span class="viz-key"><i class="sw sw-1"></i>Paid<b class="mono">$1,406.80</b></span>
+        <span class="viz-key"><i class="sw sw-2"></i>Pending<b class="mono">$89.90</b></span>
       </div>
-      <div class="stat">
-        <span>Your tier</span>
-        <b>28%</b><em class="dim">29 more for 35%</em>
-      </div>
-    </div>
+    </figure>
 
     <div class="card card-flat">
       <div class="tbl-scroll">
@@ -58,6 +63,26 @@
 
 <script src="/assets/js/icons.js"></script>
 <script src="/assets/js/app.js"></script>
+<script src="/assets/js/qr.js"></script>
+<script src="/assets/js/qr.js"></script>
 <script src="/assets/js/modals.js"></script>
+<script>
+/* per-segment tooltip, the hover layer a chart is expected to carry */
+(function () {
+  var tip;
+  document.querySelectorAll('.sbar-seg').forEach(function (seg) {
+    seg.addEventListener('pointerenter', function () {
+      tip = tip || Object.assign(document.createElement('div'), { className: 'viz-tip' });
+      tip.textContent = seg.dataset.tip;
+      document.body.appendChild(tip);
+      var r = seg.getBoundingClientRect();
+      tip.style.left = Math.round(r.left + r.width / 2) + 'px';
+      tip.style.top = Math.round(r.top + window.scrollY - 10) + 'px';
+      tip.classList.add('show');
+    });
+    seg.addEventListener('pointerleave', function () { if (tip) tip.classList.remove('show'); });
+  });
+})();
+</script>
 </body>
 </html>

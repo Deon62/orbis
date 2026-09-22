@@ -79,6 +79,21 @@ No build step, but two generators live in `scripts/`:
   dash joined clauses, a hyphen where it spanned a range. `--check` lists offenders
   without changing anything.
 
+## Charts
+
+Two categorical slots, `--viz-1` / `--viz-2`, validated for colour-vision
+separation against both surfaces: green/indigo, not green/gold (green and gold read
+as the same colour to a protanope, ΔE 4.3). Referral earnings uses a horizontal
+stacked bar rather than a donut, because pending is 6% of the total and a 6% slice of
+a donut is a sliver.
+
+## QR codes
+
+`assets/js/qr.js` is a small byte-mode encoder, error correction level M, versions 1
+to 6, rendering straight to a canvas. It is always drawn dark-on-light whatever the
+theme, because an inverted QR fails on most scanners. Correctness is verified by
+decoding the output with `jsqr`, not by eye.
+
 ## Country picker
 
 `assets/js/countries.js` holds 198 ISO 3166-1 alpha-2 entries, which double as the

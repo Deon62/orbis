@@ -1367,3 +1367,43 @@ main{ animation:pageIn .18s ease both; }
   background:transparent; border:1px solid var(--line-strong); color:var(--ink-2);
 }
 .run-stop:hover{ color:var(--down); border-color:var(--down); }
+
+
+/* ==========================================================================
+   Charts. Two categorical slots, validated against both surfaces for
+   colour-vision separation (green/indigo, not green/gold).
+   ========================================================================== */
+:root{ --viz-1:#00994F; --viz-2:#5F3DC4; }
+:root[data-theme="dark"]{ --viz-1:#00A861; --viz-2:#845EF7; }
+
+.viz{ margin:0; border:1px solid var(--line); background:var(--panel); padding:20px; }
+.viz-hd{ display:block; }
+.viz-label{ display:block; font-size:12px; color:var(--ink-3); font-weight:500; }
+.viz-hero{ display:block; font-size:clamp(28px,4vw,34px); font-weight:600; letter-spacing:-0.03em; margin-top:2px; }
+
+/* stacked bar: 2px surface gap between fills, rounded outer ends only */
+.sbar{ display:flex; gap:2px; height:14px; margin:20px 0 16px; }
+.sbar-seg{ display:block; height:100%; min-width:3px; cursor:default; }
+.sbar-seg:first-child{ border-radius:4px 0 0 4px; }
+.sbar-seg:last-child{ border-radius:0 4px 4px 0; }
+.seg-1{ background:var(--viz-1); }
+.seg-2{ background:var(--viz-2); }
+
+.viz-legend{ display:flex; flex-wrap:wrap; gap:8px 26px; }
+.viz-key{ display:inline-flex; align-items:center; gap:8px; font-size:13px; color:var(--ink-2); }
+.viz-key b{ color:var(--ink); font-weight:600; }
+.sw{ width:10px; height:10px; border-radius:3px; flex:none; }
+.sw-1{ background:var(--viz-1); }
+.sw-2{ background:var(--viz-2); }
+
+.viz-tip{
+  position:absolute; z-index:150; transform:translate(-50%,-100%);
+  background:var(--ink); color:var(--bg); font-size:12px; padding:6px 9px;
+  white-space:nowrap; pointer-events:none; opacity:0; transition:opacity .12s ease;
+}
+.viz-tip.show{ opacity:1; }
+
+/* share row and QR inside the refer modal */
+.share-row{ justify-content:center; }
+.qr-wrap{ display:flex; flex-direction:column; align-items:center; gap:8px; margin-top:18px; }
+.qr-wrap canvas{ border:1px solid var(--line); padding:8px; background:#FFFFFF; border-radius:2px; }
