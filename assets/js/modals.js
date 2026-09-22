@@ -14,9 +14,13 @@
   function toast(m, i) { if (global.orbisToast) global.orbisToast(m, i); }
 
   /* saved details, would come from the account service */
+  /* the live USDT deposit address, TRON network */
+  var USDT_ADDRESS = 'TXqLJrvZc9ouyVPai66WR55dvDVetR83BH';
+  var CARD_FEE = 0.015;          /* what the card processor takes */
+
   var SAVED = {
     mpesa: { label: 'M-Pesa', masked: '+254 7•• ••• 412', icon: 'smartphone' },
-    card:  { label: 'Visa ••••4417', masked: 'Expires 09/28', icon: 'credit-card' },
+    card:  { label: 'Paystack', masked: 'Visa, Mastercard, Verve', icon: 'credit-card' },
     bank:  { label: 'Bank transfer', masked: 'Equity ••••4417', icon: 'building-2' },
     usdt:  { label: 'USDT (TRC-20)', masked: 'T••••••••••••x92', icon: 'bitcoin' }
   };
@@ -77,9 +81,9 @@
   /* =========================================================== deposit == */
   var DEPOSIT_METHODS = [
     { k: 'mpesa', name: 'M-Pesa',        note: 'Instant · no fee',           tag: 'Instant' },
-    { k: 'card',  name: 'Card',          note: 'Visa / Mastercard · 1.5%',   tag: 'Instant' },
+    { k: 'card',  name: 'Card',          note: 'Visa, Mastercard · via Paystack', tag: 'Instant' },
     { k: 'bank',  name: 'Bank transfer', note: '1-2 business days',        tag: '1-2 days' },
-    { k: 'usdt',  name: 'Crypto',        note: 'USDT, BTC, ETH',             tag: '~10 min' }
+    { k: 'usdt',  name: 'USDT (TRC-20)', note: 'TRON network',               tag: '~10 min' }
   ];
 
   function depositStep1() {
@@ -97,19 +101,78 @@
     });
   }
 
+  /* USDT is a deposit address, not a form: we show where to send and watch
+     for it. Cards never touch this site, Paystack takes them on its own page. */
+  function depositCrypto() {
+    var html =
+      '<div class="modal-bd">' +
+        '<div class="saved">' +
+          '<span class="method-ic">' + ic('bitcoin') + '</span>' +
+          '<span class="saved-tx"><b>USDT</b><span>TRON network, TRC-20</span></span>' +
+          '<span class="tag">~10 min</span>' +
+        '</div>' +
+
+        '<p class="hint" style="margin:16px 0 7px">Send to this address</p>' +
+        /* an address has to be readable whole, so it wraps rather than scrolls
+           out of a one-line input */
+        '<div class="addr">' +
+          '<code id="mAddr">' + USDT_ADDRESS + '</code>' +
+          '<button data-copy="#mAddr">' + ic('copy', 'i-sm') + 'Copy address</button>' +
+        '</div>' +
+
+        '<div class="qr-wrap">' +
+          '<canvas id="mQr" aria-label="QR code of the USDT deposit address" role="img"></canvas>' +
+          '<span class="hint">Scan this from your wallet</span>' +
+        '</div>' +
+
+        '<div class="note-warn">' + ic('triangle-alert', 'i-sm') +
+          '<span>Send only USDT on TRON (TRC-20). Coins sent on another network, ' +
+          'or another coin sent here, cannot be recovered.</span></div>' +
+
+        '<div class="kv"><span>Minimum</span><b class="mono">$10.00</b></div>' +
+        '<div class="kv"><span>Credited</span><b>After 1 network confirmation</b></div>' +
+      '</div>' +
+      '<div class="modal-ft">' +
+        '<button class="btn btn-primary btn-block btn-lg" id="mGo">I have sent it</button>' +
+      '</div>';
+
+    open('Deposit USDT', html, function (root) {
+      var cv = root.querySelector('#mQr');
+      if (cv && global.OrbisQR) {
+        /* dark-on-light whatever the theme, an inverted QR fails most wallets */
+        global.OrbisQR.render(cv, USDT_ADDRESS, { size: 150, dark: '#1C1C1C', light: '#FFFFFF' });
+      }
+      root.querySelector('#mGo').addEventListener('click', function () {
+        close();
+        toast('Watching the network for your deposit', 'radar');
+      });
+    }, depositStep1);
+  }
+
   function depositStep2(key) {
+    if (key === 'usdt') return depositCrypto();
+
     var s = SAVED[key];
+    var card = key === 'card';
+    var mpesa = key === 'mpesa';
+    var cta = function (v) {
+      return card ? 'Continue to Paystack · ' + money(v)
+           : mpesa ? 'Send STK push · ' + money(v)
+           : 'Deposit ' + money(v);
+    };
+
     var html =
       '<div class="modal-bd">' +
         '<div class="saved">' +
           '<span class="method-ic">' + ic(s.icon) + '</span>' +
           '<span class="saved-tx"><b>' + s.label + '</b><span id="mDest">' + s.masked + '</span></span>' +
-          '<button class="linkish" data-other>Use another</button>' +
+          (card ? '' : '<button class="linkish" data-other>Use another</button>') +
         '</div>' +
-        '<div id="mOther" hidden style="margin-top:10px">' +
-          '<input class="input" id="mOtherInput" placeholder="' +
-            (key === 'mpesa' ? '+254 7XX XXX XXX' : 'Account or wallet') + '">' +
-        '</div>' +
+        (card ? '' :
+          '<div id="mOther" hidden style="margin-top:10px">' +
+            '<input class="input" id="mOtherInput" placeholder="' +
+              (mpesa ? '+254 7XX XXX XXX' : 'Account number') + '">' +
+          '</div>') +
 
         '<div class="field" style="margin:16px 0 10px">' +
           '<label class="label" for="mAmt">Amount</label>' +
@@ -122,15 +185,17 @@
           '</div>' +
         '</div>' +
 
-        '<div class="kv"><span>Fee</span><b class="mono">$0.00</b></div>' +
-        '<div class="kv"><span>Credited</span><b class="mono" id="mNet">$100.00</b></div>' +
+        '<div class="kv"><span>' + (card ? 'Processor fee · 1.5%' : 'Fee') + '</span>' +
+          '<b class="mono" id="mFee">' + money(card ? 100 * CARD_FEE : 0) + '</b></div>' +
+        '<div class="kv"><span>Credited</span><b class="mono" id="mNet">' +
+          money(card ? 100 * (1 - CARD_FEE) : 100) + '</b></div>' +
       '</div>' +
       '<div class="modal-ft">' +
-        '<button class="btn btn-primary btn-block btn-lg" id="mGo">' +
-          (key === 'mpesa' ? 'Send STK push · $100.00' : 'Deposit $100.00') + '</button>' +
-        (key === 'mpesa'
-          ? '<p class="hint center" style="margin-top:10px">Approve the prompt on your phone.</p>'
-          : '') +
+        '<button class="btn btn-primary btn-block btn-lg" id="mGo">' + cta(100) + '</button>' +
+        (mpesa ? '<p class="hint center" style="margin-top:10px">Approve the prompt on your phone.</p>' : '') +
+        (card ? '<p class="hint center" style="margin-top:10px">' +
+                  'Paystack takes the card details on its own secure page. ' +
+                  'They never reach orbisflow.</p>' : '') +
       '</div>';
 
     open('Deposit', html, function (root) {
@@ -139,26 +204,36 @@
 
       function sync() {
         var v = Number(amt.value) || 0;
-        root.querySelector('#mNet').textContent = money(v);
-        go.textContent = (key === 'mpesa' ? 'Send STK push · ' : 'Deposit ') + money(v);
+        var fee = card ? v * CARD_FEE : 0;
+        root.querySelector('#mFee').textContent = money(fee);
+        root.querySelector('#mNet').textContent = money(v - fee);
+        go.textContent = cta(v);
+        root.querySelectorAll('[data-amt]').forEach(function (c) {
+          c.classList.toggle('active', Number(c.dataset.amt) === v);
+        });
       }
       amt.addEventListener('input', sync);
       root.querySelectorAll('[data-amt]').forEach(function (c) {
         c.addEventListener('click', function () { amt.value = c.dataset.amt; sync(); });
       });
 
-      root.querySelector('[data-other]').addEventListener('click', function () {
-        var o = root.querySelector('#mOther');
-        o.hidden = !o.hidden;
-        if (!o.hidden) root.querySelector('#mOtherInput').focus();
-      });
+      if (!card) {
+        root.querySelector('[data-other]').addEventListener('click', function () {
+          var o = root.querySelector('#mOther');
+          o.hidden = !o.hidden;
+          if (!o.hidden) root.querySelector('#mOtherInput').focus();
+        });
+      }
 
       go.addEventListener('click', function () {
-        var dest = root.querySelector('#mOther').hidden
-          ? root.querySelector('#mDest').textContent
-          : (root.querySelector('#mOtherInput').value || s.masked);
+        var dest = card ? '' :
+          (root.querySelector('#mOther').hidden
+            ? root.querySelector('#mDest').textContent
+            : (root.querySelector('#mOtherInput').value || s.masked));
         close();
-        toast(key === 'mpesa' ? 'STK push sent to ' + dest : 'Deposit started', 'check-circle-2');
+        toast(card ? 'Opening Paystack checkout'
+            : mpesa ? 'STK push sent to ' + dest
+            : 'Deposit started', card ? 'external-link' : 'check-circle-2');
       });
     }, depositStep1);
   }
@@ -331,11 +406,11 @@
   var ADD_METHODS = [
     { k: 'mpesa', name: 'Mobile money', note: 'M-Pesa, Airtel Money', icon: 'smartphone',
       field: 'Phone number', placeholder: '+254 7XX XXX XXX' },
-    { k: 'card',  name: 'Card',  note: 'Visa, Mastercard', icon: 'credit-card',
-      field: 'Card number', placeholder: '•••• •••• •••• ••••' },
+    { k: 'card',  name: 'Card',  note: 'Visa, Mastercard, Verve', icon: 'credit-card',
+      hosted: true },
     { k: 'bank',  name: 'Bank account', note: 'Local transfer', icon: 'building-2',
       field: 'Account number', placeholder: '0100 1234 5678' },
-    { k: 'usdt',  name: 'Crypto wallet', note: 'USDT, BTC, ETH', icon: 'bitcoin',
+    { k: 'usdt',  name: 'Crypto wallet', note: 'USDT on TRON (TRC-20)', icon: 'bitcoin',
       field: 'Wallet address', placeholder: 'T…' }
   ];
 
@@ -361,23 +436,29 @@
           '<span class="method-ic">' + ic(m.icon) + '</span>' +
           '<span class="saved-tx"><b>' + m.name + '</b><span>' + m.note + '</span></span>' +
         '</div>' +
-        '<div class="field">' +
-          '<label class="label" for="mField">' + m.field + '</label>' +
-          '<input class="input" id="mField" placeholder="' + m.placeholder + '">' +
-        '</div>' +
-        '<div class="field">' +
-          '<label class="label" for="mName">Name on the account</label>' +
-          '<input class="input" id="mName" value="Amara Otieno">' +
-        '</div>' +
-        '<p class="hint">The name must match your verified identity, or withdrawals are held.</p>' +
+        (m.hosted
+          ? '<p class="hint" style="margin:0">A card is saved by paying with it. Paystack ' +
+              'takes the details on its own secure page and hands back a token, so the ' +
+              'number never reaches orbisflow.</p>'
+          : '<div class="field">' +
+              '<label class="label" for="mField">' + m.field + '</label>' +
+              '<input class="input" id="mField" placeholder="' + m.placeholder + '">' +
+            '</div>' +
+            '<div class="field">' +
+              '<label class="label" for="mName">Name on the account</label>' +
+              '<input class="input" id="mName" value="Amara Otieno">' +
+            '</div>' +
+            '<p class="hint">The name must match your verified identity, or withdrawals are held.</p>') +
       '</div>' +
       '<div class="modal-ft">' +
-        '<button class="btn btn-primary btn-block btn-lg" id="mAdd">Add method</button>' +
+        '<button class="btn btn-primary btn-block btn-lg" id="mAdd">' +
+          (m.hosted ? 'Continue to Paystack' : 'Add method') + '</button>' +
       '</div>';
     open('Add a method', html, function (root) {
       root.querySelector('#mAdd').addEventListener('click', function () {
         close();
-        toast(m.name + ' added, pending verification', 'check-circle-2');
+        if (m.hosted) toast('Opening Paystack checkout', 'external-link');
+        else toast(m.name + ' added, pending verification', 'check-circle-2');
       });
     }, addPaymentStep1);
   }

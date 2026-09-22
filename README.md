@@ -132,9 +132,19 @@ A page can also hang one action off the top bar with `data-hdr-action` (plus
 Flows too short to deserve a page live in `assets/js/modals.js`, opened by
 `data-modal="deposit|withdraw|refer|account"` on any element.
 
-- **Deposit** — step 1 picks the method, step 2 prefills the saved destination masked
-  (`+254 7•• ••• 412`) with a **Use another** toggle, then the CTA reads
-  *Send STK push · $100.00* for M-Pesa. The back chevron returns to step 1.
+- **Deposit** — step 1 picks the method, step 2 depends on it. The back chevron
+  returns to step 1 from any of them.
+  - *M-Pesa and bank* prefill the saved destination masked (`+254 7•• ••• 412`) with a
+    **Use another** toggle; the CTA reads *Send STK push · $100.00*.
+  - *Card* goes through **Paystack**. No card field exists anywhere on this site — the
+    CTA is *Continue to Paystack*, and the modal says the details are taken on
+    Paystack's own page. The 1.5% processor fee is shown and subtracted from what is
+    credited. The same holds in **Add a method**: a card is saved by paying with it,
+    not by typing a number in.
+  - *USDT* is an address, not a form: the TRC-20 deposit address whole and wrapped
+    (`USDT_ADDRESS` in `modals.js`), a copy button, a QR of it, and the one warning
+    that matters — wrong network, money gone. No amount field, because the amount is
+    whatever arrives.
 - **Withdraw** — same shape, against the available balance, minus a flat $1.00 platform
   fee. The modal shows the fee and what actually lands; below $1.00 the CTA disables
   and says so rather than offering a withdrawal that nets nothing.
@@ -146,7 +156,8 @@ Flows too short to deserve a page live in `assets/js/modals.js`, opened by
   *Your referrals* and *Referral earnings*.
 
 - **Switch account** — Demo / Real with balances, tick on the active one.
-- **Add a method** — payment type, then its one field; opened from Payment methods.
+- **Add a method** — payment type, then its one field, except a card, which goes to
+  Paystack; opened from Payment methods.
 - **Market read** — the AI page's sentiment/volatility/accuracy figures.
 - **Copy <provider>** — allocation stepper, minimum enforced, fee and exit terms.
 - **Contract running → Won/Lost** — placing a trade opens a running card with a
