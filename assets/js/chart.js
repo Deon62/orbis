@@ -50,9 +50,12 @@
     opts = opts || {};
     this.cv = canvas;
     this.ctx = canvas.getContext('2d');
-    this.count = opts.count || 70;
+    this.count = opts.count || 140;        /* candles kept in memory */
+    this.view = opts.view || 72;           /* candles actually drawn */
+    this.minView = 24;
     this.vol = opts.vol || 0.0018;
     this.data = generate(this.count, opts.start || 1.0842, this.vol, opts.seed || 7);
+    this.onZoom = opts.onZoom || function () {};
     this.padR = opts.padR === undefined ? 58 : opts.padR;
     this.padB = opts.padB === undefined ? 22 : opts.padB;
     this.padT = 14;
@@ -72,6 +75,16 @@
 
   Chart.prototype.retheme = function () { this.C = themeColors(this.cv); this.draw(); };
 
+  Chart.prototype.visible = function () { return this.data.slice(-this.view); };
+
+  /* dir > 0 zooms in (fewer, wider candles), dir < 0 zooms out */
+  Chart.prototype.zoom = function (dir) {
+    var next = Math.round(dir > 0 ? this.view * 0.75 : this.view / 0.75);
+    this.view = Math.max(this.minView, Math.min(this.data.length, next));
+    this.draw();
+    this.onZoom(this.view, this.view <= this.minView, this.view >= this.data.length);
+  };
+
   Chart.prototype.resize = function () {
     var dpr = window.devicePixelRatio || 1;
     var r = this.cv.getBoundingClientRect();
@@ -82,10 +95,11 @@
   };
 
   Chart.prototype.range = function () {
+    var d = this.visible();
     var hi = -Infinity, lo = Infinity;
-    for (var i = 0; i < this.data.length; i++) {
-      if (this.data[i].h > hi) hi = this.data[i].h;
-      if (this.data[i].l < lo) lo = this.data[i].l;
+    for (var i = 0; i < d.length; i++) {
+      if (d[i].h > hi) hi = d[i].h;
+      if (d[i].l < lo) lo = d[i].l;
     }
     var pad = (hi - lo) * 0.12 || 0.001;
     return { hi: hi + pad, lo: lo - pad };
@@ -130,10 +144,11 @@
       ctx.fillText(('0' + t.getHours()).slice(-2) + ':' + ('0' + t.getMinutes()).slice(-2), vx, h - this.padB / 2);
     }
 
-    var step = plotW / this.data.length;
-    var bw = Math.max(2, Math.min(11, step * 0.62));
-    for (var i = 0; i < this.data.length; i++) {
-      var d = this.data[i];
+    var series = this.visible();
+    var step = plotW / series.length;
+    var bw = Math.max(2, Math.min(18, step * 0.62));
+    for (var i = 0; i < series.length; i++) {
+      var d = series[i];
       var cx = Math.round(step * i + step / 2);
       ctx.strokeStyle = ctx.fillStyle = d.c >= d.o ? C.up : C.down;
       ctx.beginPath();

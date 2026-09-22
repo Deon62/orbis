@@ -920,3 +920,24 @@ input:focus-visible,select:focus-visible{ outline:2px solid var(--brand); outlin
   border-bottom:1px solid var(--line-soft); font-size:12.5px; color:var(--ink-3);
 }
 .ticket-meta b{ font-size:13.5px; font-weight:600; color:var(--ink); }
+
+
+/* log out is the one destructive-feeling action in the panel */
+.drawer-act-danger{ color:var(--down); }
+.drawer-act-danger:hover{ color:var(--down); background:var(--down-soft, rgba(224,65,63,.08)); }
+
+/* ==========================================================================
+   Chart zoom — so the candles scale without zooming the whole page
+   ========================================================================== */
+.chart-zoom{
+  position:absolute; left:8px; bottom:30px; z-index:3;
+  display:flex; flex-direction:column; gap:4px;
+}
+.chart-zoom button{
+  width:28px; height:28px; display:grid; place-items:center; cursor:pointer;
+  background:var(--panel); border:1px solid var(--line); color:var(--ink-2);
+}
+.chart-zoom button:hover{ border-color:var(--line-strong); color:var(--ink); }
+.chart-zoom button[disabled]{ opacity:.4; cursor:not-allowed; }
+.rail-item-danger{ color:var(--down); }
+.rail-item-danger:hover{ color:var(--down); background:rgba(224,65,63,.08); }

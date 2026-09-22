@@ -38,8 +38,9 @@ vercel dev            # or any static server with clean-URL support
 | `cashier.html` | Transaction history. Deposit and withdraw are modals, not pages. |
 | `referrals.html` | The referral list, nothing else. |
 | `referral-earnings.html` | Weekly payouts and accruals. |
-| `account.html` | Profile hub — a short menu. |
-| `profile-details.html`, `verification.html`, `security.html`, `payments.html`, `preferences.html` | One concern each. |
+| `account.html` | The old profile hub. **No longer linked** — Profile goes straight to `profile-details`, and the drawer covers everything the hub listed. Kept on disk, safe to delete. |
+| `profile-details.html` | The profile page — what the Profile tab and the avatar open. |
+| `verification.html`, `security.html`, `payments.html`, `preferences.html` | One concern each, reached from the drawer. |
 
 Sub-pages carry no page title or description of their own: they set `data-title`
 (shown in the header, with a back chevron) and `data-nav="account"` so the Profile tab
@@ -118,7 +119,12 @@ All modals float centred, phones included.
 
 On phones the drawer covers 55% of the width, and the duration shown in the ticket
 mirrors whichever button is active in the row above the chart — there is no second
-duration control. On phones the theme switch and Log out are pinned to the bottom of the
+duration control.
+
+The chart has its own `+` / `−` in the bottom-left corner: they change how many candles
+are drawn (`Chart.view`, 24–140) rather than relying on browser zoom, which would scale
+the entire page. Back arrows step through history when there is any, falling back to
+`data-back-to` or `/trade`. On phones the theme switch and Log out are pinned to the bottom of the
 drawer so they never need scrolling to, and the Deposit button only appears on the
 trading surfaces — not on settings sub-pages.
 

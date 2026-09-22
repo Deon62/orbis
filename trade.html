@@ -50,6 +50,10 @@
         <img class="chart-skyline sky-on-light" src="/assets/img/skyline-ink.svg" alt="" aria-hidden="true">
         <img class="chart-skyline sky-on-dark" src="/assets/img/skyline.svg" alt="" aria-hidden="true">
         <canvas id="mainChart"></canvas>
+        <div class="chart-zoom">
+          <button id="zoomIn" aria-label="Zoom in"><i data-lucide="plus" class="i-sm"></i></button>
+          <button id="zoomOut" aria-label="Zoom out"><i data-lucide="minus" class="i-sm"></i></button>
+        </div>
       </div>
 
       <div class="chart-foot">
@@ -130,8 +134,15 @@
   var current = M[idx];
 
   var chart = OrbisChart.create($('#mainChart'), {
-    start: current.base, vol: current.vol, seed: 11, count: 72, onPrice: onPrice
+    start: current.base, vol: current.vol, seed: 11, onPrice: onPrice,
+    onZoom: function (view, atMin, atMax) {
+      $('#zoomIn').disabled = atMin;
+      $('#zoomOut').disabled = atMax;
+    }
   });
+
+  $('#zoomIn').addEventListener('click', function () { chart.zoom(1); });
+  $('#zoomOut').addEventListener('click', function () { chart.zoom(-1); });
 
   /* ------------------------------------------------- custom dropdown -- */
   var menu = $('#pickMenu'), btn = $('#pickBtn');

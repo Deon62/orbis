@@ -103,7 +103,7 @@
     { id: 'markets',   label: 'Markets',   icon: 'layers',            url: '/markets' },
     { id: 'ai',        label: 'AI',        icon: 'sparkles',          url: '/ai' },
     { id: 'positions', label: 'Positions', icon: 'receipt-text',      url: '/positions' },
-    { id: 'account',   label: 'Profile',   icon: 'user-round',        url: '/account' }
+    { id: 'account',   label: 'Profile',   icon: 'user-round',        url: '/profile-details' }
   ];
 
   var DRAWER_GROUPS = [
@@ -164,7 +164,7 @@
         '<button class="rail-item" data-theme-toggle title="Theme">' +
           '<span data-theme-icon>' + ic(currentTheme() === 'dark' ? 'sun' : 'moon', 'i-lg') + '</span>' +
           '<span>Theme</span></button>' +
-        '<a class="rail-item" href="' + href('/') + '" title="Log out">' + ic('log-out', 'i-lg') + '<span>Log out</span></a>' +
+        '<a class="rail-item rail-item-danger" href="' + href('/') + '" title="Log out">' + ic('log-out', 'i-lg') + '<span>Log out</span></a>' +
       '</div></nav>';
   }
 
@@ -198,7 +198,7 @@
             '<span class="switch' + (currentTheme() === 'dark' ? ' on' : '') +
               '" data-theme-switch role="switch" aria-checked="' + (currentTheme() === 'dark') + '"></span>' +
           '</button>' +
-          '<a class="drawer-act" href="' + href('/') + '">' + ic('log-out') + '<span>Log out</span></a>' +
+          '<a class="drawer-act drawer-act-danger" href="' + href('/') + '">' + ic('log-out') + '<span>Log out</span></a>' +
         '</div>' +
       '</aside>';
   }
@@ -226,7 +226,7 @@
     var lead = full
       ? '<button class="icon-btn hide-desk" data-drawer-open aria-label="Open menu">' + ic('menu', 'i-lg') + '</button>' +
         '<span class="hide-desk">' + logo() + '</span>'
-      : '<a class="icon-btn" href="' + (BODY.dataset.backTo || '/trade') + '" aria-label="Back">' +
+      : '<a class="icon-btn" data-back-nav href="' + (BODY.dataset.backTo || '/trade') + '" aria-label="Back">' +
         ic('chevron-left', 'i-lg') + '</a>';
 
     return '<header class="hdr"><div class="hdr-in">' + lead +
@@ -237,7 +237,7 @@
             '<button class="btn btn-primary btn-sm hide-mobile" data-modal="deposit">' +
               ic('plus', 'i-sm') + 'Deposit</button>'
           : '') +
-        '<a class="avatar" href="/account" aria-label="Account">AO</a>' +
+        '<a class="avatar" href="/profile-details" aria-label="Profile">AO</a>' +
       '</div></div></header>';
   }
 
@@ -339,6 +339,12 @@
   document.addEventListener('click', function (e) {
     if (e.target.closest('[data-theme-toggle]')) {
       setTheme(currentTheme() === 'dark' ? 'light' : 'dark');
+      return;
+    }
+    var back = e.target.closest('[data-back-nav]');
+    if (back && history.length > 1 && document.referrer) {
+      e.preventDefault();
+      history.back();
       return;
     }
     if (e.target.closest('[data-drawer-open]')) { setDrawer(true); return; }
