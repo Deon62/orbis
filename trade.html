@@ -75,9 +75,17 @@
         <div class="ticket-body">
           <div class="field" style="margin-bottom:14px">
             <label class="label" for="stake">Stake</label>
-            <div class="input-wrap">
-              <span class="input-prefix">$</span>
-              <input class="input" id="stake" type="number" value="25" min="1" step="1">
+            <div class="stepper">
+              <button type="button" class="step-btn" data-step="-1" aria-label="Decrease stake">
+                <i data-lucide="minus" class="i-sm"></i>
+              </button>
+              <span class="stepper-val">
+                <span class="cur">$</span>
+                <input id="stake" type="number" value="25" min="1" step="1" aria-label="Stake">
+              </span>
+              <button type="button" class="step-btn" data-step="1" aria-label="Increase stake">
+                <i data-lucide="plus" class="i-sm"></i>
+              </button>
             </div>
             <div class="stake-row">
               <button class="chip" data-stake="10">10</button>
@@ -85,11 +93,6 @@
               <button class="chip" data-stake="50">50</button>
               <button class="chip" data-stake="100">100</button>
             </div>
-          </div>
-
-          <!-- duration comes from the row above the chart -->
-          <div class="ticket-meta">
-            <span>Duration</span><b id="durLabel">1m</b>
           </div>
 
           <!-- on phones this row is fixed just above the tab bar -->
@@ -248,10 +251,19 @@
     var sub = current.payout + '% · ' + OrbisData.money(payout);
     $('#upSub').textContent = sub;
     $('#downSub').textContent = sub;
-    $('#durLabel').textContent = duration();
   }
   $('#stake').addEventListener('input', calc);
-  document.querySelector('.tf').addEventListener('click', function () { setTimeout(calc, 0); });
+
+  /* bigger jumps once the stake is past pocket change */
+  document.querySelectorAll('[data-step]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var el = $('#stake');
+      var v = Number(el.value) || 0;
+      var step = v >= 20 ? 5 : 1;
+      el.value = Math.max(1, v + step * Number(b.dataset.step));
+      calc();
+    });
+  });
   document.querySelectorAll('[data-stake]').forEach(function (b) {
     b.addEventListener('click', function () { $('#stake').value = b.dataset.stake; calc(); });
   });

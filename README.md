@@ -31,7 +31,7 @@ vercel dev            # or any static server with clean-URL support
 |---|---|
 | `index.html` | Marketing landing page. On laptops it scrolls section-by-section. |
 | `login.html` / `signup.html` | Centred cards, "Continue with Google" below the email form. |
-| `trade.html` | Chart + ticket. The row above the chart is the duration picker; the ticket is Manual/Auto, stake, and two CTAs. |
+| `trade.html` | Chart + ticket. The row above the chart is the duration picker; the ticket is Manual/Auto, a stake stepper, and two CTAs. |
 | `markets.html` | 17 instruments across 5 asset classes, searchable and filterable. |
 | `ai.html` | Signals with confidence, pattern watch, ask box. |
 | `positions.html` | Open, settled and statistics tabs. |
@@ -117,9 +117,13 @@ Every other page gets only a back arrow, the page name and the avatar. The theme
 lives in the rail on desktop and the drawer on mobile, so it is reachable either way.
 All modals float centred, phones included.
 
-On phones the drawer covers 55% of the width, and the duration shown in the ticket
-mirrors whichever button is active in the row above the chart — there is no second
-duration control.
+On phones the drawer covers 55% of the width. Duration is chosen once, in the row above
+the chart — the ticket has no duration control of its own. Stake is a stepper: minus,
+centred amount, plus, stepping by 1 below $20 and by 5 above, floored at $1.
+
+The phone CTA bar is fixed, so `body[data-page="trade"]` reserves
+`var(--tab-h) + 118px` — enough that every ticket control can be scrolled clear of it
+(86px of clearance on the tightest control at full scroll, on any phone size).
 
 The chart has its own `+` / `−` in the bottom-left corner: they change how many candles
 are drawn (`Chart.view`, 24–140) rather than relying on browser zoom, which would scale

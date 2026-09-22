@@ -748,8 +748,11 @@ body.app-shell .hdr-right{ margin-left:auto; }
     bottom:calc(var(--tab-h) + env(safe-area-inset-bottom));
     padding:8px 12px; background:var(--panel); border-top:1px solid var(--line);
   }
-  body[data-page="trade"]{ padding-bottom:calc(var(--tab-h) + 78px); }
+  /* the fixed CTA bar must never sit over a control — a mistap here is a trade */
+  body[data-page="trade"]{ padding-bottom:calc(var(--tab-h) + 118px); }
   .ticket-body{ padding-bottom:4px; }
+  .ticket-body .field:last-of-type{ margin-bottom:0; }
+  .stake-row,.stepper{ scroll-margin-bottom:150px; }
 }
 
 /* ==========================================================================
@@ -914,12 +917,7 @@ input:focus-visible,select:focus-visible{ outline:2px solid var(--brand); outlin
   .drawer-act{ padding-inline:14px; }
 }
 
-.ticket-meta{
-  display:flex; align-items:center; justify-content:space-between;
-  padding:10px 0; margin-bottom:12px; border-top:1px solid var(--line-soft);
-  border-bottom:1px solid var(--line-soft); font-size:12.5px; color:var(--ink-3);
-}
-.ticket-meta b{ font-size:13.5px; font-weight:600; color:var(--ink); }
+
 
 
 /* log out is the one destructive-feeling action in the panel */
@@ -941,3 +939,40 @@ input:focus-visible,select:focus-visible{ outline:2px solid var(--brand); outlin
 .chart-zoom button[disabled]{ opacity:.4; cursor:not-allowed; }
 .rail-item-danger{ color:var(--down); }
 .rail-item-danger:hover{ color:var(--down); background:rgba(224,65,63,.08); }
+
+
+/* ==========================================================================
+   Stake stepper — minus, centred amount, plus
+   ========================================================================== */
+.stepper{
+  display:grid; grid-template-columns:46px 1fr 46px; align-items:stretch;
+  border:1px solid var(--line-strong); background:var(--panel); height:46px;
+}
+.step-btn{
+  display:grid; place-items:center; background:transparent; border:0; cursor:pointer;
+  color:var(--ink-2);
+}
+.step-btn:hover{ background:var(--panel-2); color:var(--ink); }
+.step-btn:first-child{ border-right:1px solid var(--line); }
+.step-btn:last-child{ border-left:1px solid var(--line); }
+.stepper-val{
+  display:flex; align-items:center; justify-content:center; gap:1px; min-width:0;
+}
+.stepper-val .cur{ font-size:15px; font-weight:500; color:var(--ink-3); }
+.stepper-val input{
+  width:6ch; padding:0; border:0; background:transparent; outline:none;
+  font-size:16px; font-weight:600; color:var(--ink); text-align:left;
+  font-variant-numeric:tabular-nums;
+}
+/* no spinner arrows — the buttons are the control */
+.stepper-val input::-webkit-outer-spin-button,
+.stepper-val input::-webkit-inner-spin-button{ -webkit-appearance:none; margin:0; }
+.stepper-val input[type=number]{ -moz-appearance:textfield; }
+
+/* The CTA bar is fixed and opaque, so controls scroll under it rather than
+   hide behind it. What matters is that the page reserves enough room for every
+   control to be scrolled clear of the bar — see the padding-bottom above. */
+@media(max-width:1039px){
+  .ticket-seg{ padding:8px; }
+  .ticket-body{ padding:12px 14px 4px; }
+}
