@@ -1259,7 +1259,13 @@ main{ animation:pageIn .18s ease both; }
 @media(max-width:899px){ .hide-mobile{ display:none !important; } }
 
 /* hero: copy centred down the page, ragged right */
-.hero-copy{ display:flex; flex-direction:column; justify-content:center; text-align:left; }
+/* the hero is copy only now — the block centres, the text stays left-aligned */
+.hero-copy{
+  display:flex; flex-direction:column; justify-content:center; text-align:left;
+  max-width:58ch; margin-inline:auto; width:100%;
+}
+.hero-copy h1{ max-width:16ch; }
+.hero-copy .lead{ max-width:46ch; }
 .hero-cta{ display:grid; grid-template-columns:repeat(2,minmax(0,200px)); gap:10px; margin-top:26px; }
 .hero-cta .btn{ width:100%; }
 @media(max-width:559px){ .hero-cta{ grid-template-columns:1fr 1fr; } }

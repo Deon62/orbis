@@ -24,38 +24,15 @@
 <section class="hero snap-section">
   <img class="hero-skyline" src="/assets/img/skyline.svg" alt="" aria-hidden="true">
   <div class="wrap hero-in">
-    <div class="hero-grid">
-      <div class="hero-copy">
-        <h1>Two directions. One decision.</h1>
-        <p class="lead">
-          Market, direction, stake, duration, payout, go. That is the whole screen —
-          nothing else between you and the trade.
-        </p>
-        <div class="hero-cta">
-          <a class="btn btn-primary btn-lg" href="/signup">Create free account</a>
-          <a class="btn btn-lg btn-onblack" href="/trade">Try the demo</a>
-        </div>
-      </div>
-
-      <div class="hero-chart">
-        <div class="chart-top" style="padding:11px 13px">
-          <div class="sym">
-            <span id="heroMark"></span>
-            <div><b>EUR/USD</b><span>Forex</span></div>
-          </div>
-          <div class="sym-price">
-            <b class="mono" id="heroPrice">1.08420</b>
-            <span class="up" id="heroChg">+0.18%</span>
-          </div>
-        </div>
-        <div class="chart-stage" style="height:280px">
-          <img class="chart-skyline" src="/assets/img/skyline.svg" alt="" aria-hidden="true">
-          <canvas id="heroChart"></canvas>
-        </div>
-        <div class="chart-foot">
-          <span><i class="dotlive"></i>Live</span>
-          <span style="margin-left:auto">1m candles</span>
-        </div>
+    <div class="hero-copy">
+      <h1>Two directions. One decision.</h1>
+      <p class="lead">
+        Market, direction, stake, duration, payout, go. That is the whole screen —
+        nothing else between you and the trade.
+      </p>
+      <div class="hero-cta">
+        <a class="btn btn-primary btn-lg" href="/signup">Create free account</a>
+        <a class="btn btn-lg btn-onblack" href="/trade">Try the demo</a>
       </div>
     </div>
   </div>
@@ -66,6 +43,37 @@
 <div class="ticker">
   <div class="ticker-track" id="ticker"></div>
 </div>
+
+<!-- =========================================================== terminal - -->
+<section class="sec snap-section">
+  <div class="wrap">
+    <h2>The screen you will actually trade on.</h2>
+    <p class="sec-lead">Live candles, one tap to a contract. This is the real thing, not a picture of it.</p>
+
+    <div class="chart-panel" style="margin-top:28px">
+      <div class="chart-top">
+        <div class="sym">
+          <span id="heroMark"></span>
+          <div><b>EUR/USD</b><span>Forex · Euro / US Dollar</span></div>
+        </div>
+        <div class="sym-price">
+          <b class="mono" id="heroPrice">1.08420</b>
+          <span class="up" id="heroChg">+0.18%</span>
+        </div>
+      </div>
+      <div class="chart-stage" style="height:min(46vh,380px)">
+        <img class="chart-skyline sky-on-light" src="/assets/img/skyline-ink.svg" alt="" aria-hidden="true">
+        <img class="chart-skyline sky-on-dark" src="/assets/img/skyline.svg" alt="" aria-hidden="true">
+        <canvas id="heroChart"></canvas>
+      </div>
+      <div class="chart-foot">
+        <span><i class="dotlive"></i>Live</span>
+        <span>Payout <b class="mono brandtxt">88%</b></span>
+        <span style="margin-left:auto">1m candles</span>
+      </div>
+    </div>
+  </div>
+</section>
 
 <!-- ========================================================== features -- -->
 <section class="sec snap-section">
