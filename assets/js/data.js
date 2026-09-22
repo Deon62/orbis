@@ -56,7 +56,7 @@
 
   function rowHTML(m, idx) {
     var up = m.chg >= 0;
-    return '<a class="mkt-row" href="trade.html?symbol=' + encodeURIComponent(m.sym) + '">' +
+    return '<a class="mkt-row" href="/trade?symbol=' + encodeURIComponent(m.sym) + '">' +
       assetHTML(m) +
       '<span class="mkt-name"><b>' + m.sym + '</b><span>' + m.name + '</span></span>' +
       '<canvas class="spark" data-seed="' + (idx * 13 + 5) + '" data-up="' + up + '" ' +

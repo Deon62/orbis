@@ -239,7 +239,6 @@
 
   /* ============================================================= refer == */
   function referModal() {
-    var root = document.body.dataset.root || './';
     var html =
       '<div class="modal-bd">' +
         '<div class="copybox">' +
@@ -255,11 +254,11 @@
         '</div>' +
       '</div>' +
       '<div style="border-top:1px solid var(--line)">' +
-        '<a class="link-row" href="' + root + 'referrals.html">' +
+        '<a class="link-row" href="/referrals">' +
           '<span class="lr-ic">' + ic('users') + '</span>' +
           '<span class="lr-tx"><b>Your referrals</b><span>37 signed up · 21 active</span></span>' +
           ic('chevron-right', 'i-sm') + '</a>' +
-        '<a class="link-row" href="' + root + 'referral-earnings.html">' +
+        '<a class="link-row" href="/referral-earnings">' +
           '<span class="lr-ic">' + ic('banknote') + '</span>' +
           '<span class="lr-tx"><b>Referral earnings</b><span>$1,406.80 earned · $89.90 pending</span></span>' +
           ic('chevron-right', 'i-sm') + '</a>' +
@@ -275,7 +274,7 @@
       return '<button class="method acct-row' + (a.id === active ? ' active' : '') + '" data-acct="' + a.id + '">' +
         '<span class="method-ic">' + ic(a.icon) + '</span>' +
         '<span style="flex:1"><b>' + a.label + '</b><span class="mono">' + a.amount + '</span></span>' +
-        '<img class="acct-flag" src="https://flagcdn.com/w40/us.png" alt="" aria-hidden="true">' +
+        '<img class="acct-flag" src="https://flagcdn.com/w40/us.png" alt="USD" title="US dollar">' +
         (a.id === active ? ic('check', 'i-sm') : '') + '</button>';
     }).join('') + '</div>';
 

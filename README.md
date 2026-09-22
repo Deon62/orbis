@@ -6,13 +6,24 @@ duration, done. Static HTML/CSS/JS — no build step, no dependencies to install
 **Everything is mocked.** No auth, no prices, no money. Prices are simulated in the
 browser, links that aren't built yet show a "placeholder" toast.
 
+## URLs
+
+Deployed on Vercel with `vercel.json` → `cleanUrls: true`, `trailingSlash: false`, so
+pages are served without the extension: `/login`, `/trade`, `/referral-earnings`, and
+`/` for the home page. Vercel 308-redirects `/login.html` → `/login` for any old links.
+
+Every internal link and every asset path is root-relative and extensionless to match, so
+navigation never takes a redirect hop.
+
 ## Run it
 
-```bash
-python -m http.server 8777      # from this folder, then open http://127.0.0.1:8777
-```
+Because of the clean URLs this needs a server that resolves `/login` → `login.html`
+(`vercel dev` does, plain `python -m http.server` does not, and `file://` will not work
+at all):
 
-Opening `index.html` straight from disk works too.
+```bash
+vercel dev            # or any static server with clean-URL support
+```
 
 ## Pages
 
@@ -93,13 +104,15 @@ Defined at the top of `assets/css/styles.css`.
 Everything sits on one background. Boxes are used sparingly: stat tiles have no frame,
 lists and tables are horizontal hairlines (`.list`, `.card-flat`) rather than cards.
 
-**Selection is a 2px green line, never a filled box** — left edge on the rail, top edge
-on the tab bar, bottom edge on segments, timeframes, pills and chips. Corners are square
-except avatars and asset badges.
+**Selection is a small green dot, never a filled box or a line** — under the label on the
+rail and tab bar, before the label on segments. Compact controls (timeframes, chips,
+pills) just darken their text and border. Tap highlight is off everywhere and focus
+rings only show for keyboard users. Corners are square except avatars and asset badges.
 
-The active account sits in the top bar as a card (`.acct-card`) with a chevron; pressing
-it opens a centred **Switch account** modal listing Demo and Real with their balances,
-and the card updates in place. All modals float centred, phones included. On phones the theme switch and Log out are pinned to the bottom of the
+The active account sits at the far right of the top bar as a card (`.acct-card`) with a
+round US flag and a chevron; pressing it opens a centred **Switch account** modal listing
+Demo and Real, which closes itself on selection and updates the card. The site name sits
+next to the hamburger. All modals float centred, phones included. On phones the theme switch and Log out are pinned to the bottom of the
 drawer so they never need scrolling to, and the Deposit button only appears on the
 trading surfaces — not on settings sub-pages.
 

@@ -15,7 +15,8 @@
   var SHELL = BODY.dataset.shell || 'app';
   var ROOT = BODY.dataset.root || './';
 
-  function href(p) { return ROOT + p; }
+  /* pages are served without the .html extension (see vercel.json) */
+  function href(p) { return p; }
   function ic(n, c) { return '<i data-lucide="' + n + '" class="' + (c || 'i') + '"></i>'; }
 
   /* Brand marks were dropped from Lucide, so those come from Simple Icons. */
@@ -27,7 +28,7 @@
 
   /* the mark is a wordmark, so it is type — not an image */
   function logo(cls) {
-    return '<a class="logo ' + (cls || '') + '" href="' + href(SHELL === 'app' ? 'trade.html' : 'index.html') +
+    return '<a class="logo ' + (cls || '') + '" href="' + href(SHELL === 'app' ? '/trade' : '/') +
            '" aria-label="orbisflow"><span class="logo-word">orbis<span class="flow">flow</span></span></a>';
   }
 
@@ -73,7 +74,7 @@
   function accountCardHTML() {
     var a = ACCOUNTS.filter(function (x) { return x.id === activeAccount; })[0];
     return '<button class="acct-card" data-modal="account" aria-haspopup="dialog">' +
-      '<img class="acct-flag" src="https://flagcdn.com/w40/us.png" alt="" aria-hidden="true">' +
+      '<img class="acct-flag" src="https://flagcdn.com/w40/us.png" alt="USD" title="US dollar">' +
       '<span class="acct-card-tx"><small>' + a.short + '</small><b class="num">' + a.amount + '</b></span>' +
       ic('chevron-down', 'i-sm') + '</button>';
   }
@@ -96,18 +97,18 @@
   /* these six are the bottom tab bar and the desktop rail — and so are
      deliberately absent from the drawer, which carries everything else */
   var NAV = [
-    { id: 'trade',     label: 'Trade',     icon: 'chart-candlestick', url: 'trade.html' },
-    { id: 'markets',   label: 'Markets',   icon: 'layers',            url: 'markets.html' },
-    { id: 'ai',        label: 'AI',        icon: 'sparkles',          url: 'ai.html' },
-    { id: 'positions', label: 'Positions', icon: 'receipt-text',      url: 'positions.html' },
-    { id: 'account',   label: 'Profile',   icon: 'user-round',        url: 'account.html' }
+    { id: 'trade',     label: 'Trade',     icon: 'chart-candlestick', url: '/trade' },
+    { id: 'markets',   label: 'Markets',   icon: 'layers',            url: '/markets' },
+    { id: 'ai',        label: 'AI',        icon: 'sparkles',          url: '/ai' },
+    { id: 'positions', label: 'Positions', icon: 'receipt-text',      url: '/positions' },
+    { id: 'account',   label: 'Profile',   icon: 'user-round',        url: '/account' }
   ];
 
   var DRAWER_GROUPS = [
     { h: 'Money', items: [
       ['Deposit',             'arrow-down-to-line', 'modal:deposit'],
       ['Withdraw',            'arrow-up-from-line', 'modal:withdraw'],
-      ['Transaction history', 'receipt',            'cashier.html'],
+      ['Transaction history', 'receipt',            '/cashier'],
       ['Refer & earn',        'gift',               'modal:refer']
     ]},
     { h: 'Trading tools', items: [
@@ -117,15 +118,15 @@
       ['Watchlists',        'star',          null]
     ]},
     { h: 'Reports', items: [
-      ['Statements',          'file-text',  'positions.html'],
+      ['Statements',          'file-text',  '/positions'],
       ['Profit table',        'table',      null],
       ['Trade confirmations', 'file-check', null]
     ]},
     { h: 'Account', items: [
-      ['Verification',    'badge-check', 'verification.html'],
-      ['Security',        'shield',      'security.html'],
-      ['Payment methods', 'credit-card', 'payments.html'],
-      ['Preferences',     'settings',    'preferences.html']
+      ['Verification',    'badge-check', '/verification'],
+      ['Security',        'shield',      '/security'],
+      ['Payment methods', 'credit-card', '/payments'],
+      ['Preferences',     'settings',    '/preferences']
     ]},
     { h: 'Support', items: [
       ['Help centre', 'life-buoy',      null],
@@ -140,9 +141,9 @@
   ];
 
   var PUBLIC_NAV = [
-    { label: 'Markets',      url: 'markets.html' },
-    { label: 'How it works', url: 'index.html#how' },
-    { label: 'Refer & earn', url: 'referrals.html' }
+    { label: 'Markets',      url: '/markets' },
+    { label: 'How it works', url: '/#how' },
+    { label: 'Refer & earn', url: '/referrals' }
   ];
 
   /* ============================================================= rail ==== */
@@ -153,12 +154,12 @@
     }).join('');
 
     return '<nav class="rail" aria-label="Sections">' +
-      '<a class="rail-logo" href="' + href('trade.html') + '" aria-label="orbisflow">' +
+      '<a class="rail-logo" href="' + href('/trade') + '" aria-label="orbisflow">' +
         '<span class="logo-word"><span class="flow">of</span></span></a>' +
       '<div class="rail-items">' + items + '</div>' +
       '<div class="rail-foot">' +
         '<button class="rail-item" data-drawer-open title="More">' + ic('menu', 'i-lg') + '<span>More</span></button>' +
-        '<a class="rail-item" href="' + href('index.html') + '" title="Log out">' + ic('log-out', 'i-lg') + '<span>Log out</span></a>' +
+        '<a class="rail-item" href="' + href('/') + '" title="Log out">' + ic('log-out', 'i-lg') + '<span>Log out</span></a>' +
       '</div></nav>';
   }
 
@@ -179,7 +180,7 @@
         '<div class="drawer-hd">' + logo() +
           '<button class="icon-btn" data-drawer-close aria-label="Close menu">' + ic('x') + '</button>' +
         '</div>' +
-        '<a class="drawer-acct" href="' + href('account.html') + '">' +
+        '<a class="drawer-acct" href="' + href('/account') + '">' +
           '<span class="avatar">AO</span>' +
           '<div><b>Amara Otieno</b><span>Demo · $10,000.00</span></div>' +
         '</a>' +
@@ -192,7 +193,7 @@
             '<span class="switch' + (currentTheme() === 'dark' ? ' on' : '') +
               '" data-theme-switch role="switch" aria-checked="' + (currentTheme() === 'dark') + '"></span>' +
           '</button>' +
-          '<a class="drawer-act" href="' + href('index.html') + '">' + ic('log-out') + '<span>Log out</span></a>' +
+          '<a class="drawer-act" href="' + href('/') + '">' + ic('log-out') + '<span>Log out</span></a>' +
         '</div>' +
       '</aside>';
   }
@@ -208,15 +209,15 @@
       return '<header class="hdr"><div class="wrap hdr-in">' + logo() +
         '<nav class="hdr-nav">' + nav + '</nav>' +
         '<div class="hdr-right">' + themeBtn() +
-          '<a class="btn btn-quiet btn-sm" href="' + href('login.html') + '">Log in</a>' +
-          '<a class="btn btn-primary btn-sm" href="' + href('signup.html') + '">Create account</a>' +
+          '<a class="btn btn-quiet btn-sm" href="' + href('/login') + '">Log in</a>' +
+          '<a class="btn btn-primary btn-sm" href="' + href('/signup') + '">Create account</a>' +
         '</div></div></header>';
     }
 
     var sub = BODY.dataset.title;
     var title = sub || (NAV.filter(function (n) { return n.id === ACTIVE; })[0] || { label: '' }).label;
     var lead = sub
-      ? '<a class="icon-btn" href="' + href(BODY.dataset.backTo || 'account.html') + '" aria-label="Back">' + ic('chevron-left') + '</a>'
+      ? '<a class="icon-btn" href="' + (BODY.dataset.backTo || '/account') + '" aria-label="Back">' + ic('chevron-left') + '</a>'
       : '<button class="icon-btn hide-desk" data-drawer-open aria-label="Open menu">' + ic('menu') + '</button>' +
         '<span class="hide-desk">' + logo() + '</span>';
     return '<header class="hdr"><div class="hdr-in">' + lead +
@@ -227,7 +228,7 @@
                     ic('plus', 'i-sm') + 'Deposit</button>') +
         themeBtn() +
         '<button class="icon-btn" data-mock="Notifications" aria-label="Notifications">' + ic('bell') + '</button>' +
-        '<a class="avatar" href="' + href('account.html') + '" aria-label="Account">AO</a>' +
+        '<a class="avatar" href="' + href('/account') + '" aria-label="Account">AO</a>' +
       '</div></div></header>';
   }
 
@@ -240,9 +241,9 @@
 
   /* =========================================================== footer ==== */
   var FOOTER_COLS = [
-    { h: 'Platform', links: [['Trade', 'trade.html'], ['Markets', 'markets.html'],
-      ['AI insights', 'ai.html'], ['Positions', 'positions.html'],
-      ['Cashier', 'cashier.html'], ['Refer & earn', 'referrals.html']] },
+    { h: 'Platform', links: [['Trade', '/trade'], ['Markets', '/markets'],
+      ['AI insights', '/ai'], ['Positions', '/positions'],
+      ['Cashier', '/cashier'], ['Refer & earn', '/referrals']] },
     { h: 'Company', links: [['About', null], ['Careers', null], ['Newsroom', null], ['Contact', null]] },
     { h: 'Support', links: [['Help centre', null], ['Payment methods', null], ['Verification', null], ['Status', null]] },
     { h: 'Legal', links: [['Terms', null], ['Privacy', null], ['Risk disclosure', null], ['AML policy', null], ['Cookies', null]] }
