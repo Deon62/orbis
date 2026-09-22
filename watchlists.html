@@ -19,11 +19,15 @@
 
 <main class="wrap page-body">
   <div class="toolbar" style="padding-top:0">
-    <div class="pills" style="padding:0">
-      <button class="pill active">Default</button>
-      <button class="pill" data-mock="Crypto watchlist">Crypto</button>
-      <button class="pill" data-mock="New watchlist"><i data-lucide="plus" class="i-sm"></i>New</button>
+    <div class="fdrop" data-fdrop>
+      <button class="fdrop-btn" aria-haspopup="listbox" aria-expanded="false"><span class="fdrop-val">Default</span><i data-lucide="chevron-down" class="i-sm chev"></i></button>
+      <div class="fdrop-menu" hidden role="listbox">
+        <button class="fdrop-opt" role="option" data-v="default" aria-selected="true"><span class="fdrop-tx">Default</span></button>
+        <button class="fdrop-opt" role="option" data-v="crypto" aria-selected="false"><span class="fdrop-tx">Crypto</span></button>
+      </div>
     </div>
+    <span class="grow"></span>
+    <button class="btn btn-ghost btn-sm" data-mock="New watchlist"><i data-lucide="plus" class="i-sm"></i>New</button>
   </div>
 
   <div class="card card-flat" id="wlist"></div>

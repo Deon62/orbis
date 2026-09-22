@@ -239,6 +239,10 @@
             '<button class="btn btn-primary btn-sm hide-mobile" data-modal="deposit">' +
               ic('plus', 'i-sm') + 'Deposit</button>'
           : '') +
+        (BODY.dataset.hdrAction
+          ? '<button class="icon-btn" data-modal="' + BODY.dataset.hdrAction + '" aria-label="' +
+            (BODY.dataset.hdrLabel || 'Details') + '">' + ic(BODY.dataset.hdrIcon || 'info') + '</button>'
+          : '') +
         '<a class="avatar" href="/profile-details" aria-label="Profile">AO</a>' +
       '</div></div></header>';
   }
@@ -422,6 +426,60 @@
       if (f.dataset.go) setTimeout(function () { window.location.href = href(f.dataset.go); }, 700);
     }
   });
+
+  /* ==================================================== filter dropdown == */
+  /* One horizontal row of choices was fine with three options and cramped with
+     six. Every filter is a dropdown now; pages listen for 'fdrop:change'. */
+  function closeDrops(except) {
+    document.querySelectorAll('[data-fdrop]').forEach(function (d) {
+      if (d === except) return;
+      var m = d.querySelector('.fdrop-menu');
+      if (m && !m.hidden) {
+        m.hidden = true;
+        d.querySelector('.fdrop-btn').setAttribute('aria-expanded', 'false');
+      }
+    });
+  }
+
+  document.addEventListener('click', function (e) {
+    var btn = e.target.closest('.fdrop-btn');
+    if (btn) {
+      var drop = btn.closest('[data-fdrop]');
+      var menu = drop.querySelector('.fdrop-menu');
+      var willOpen = menu.hidden;
+      closeDrops(drop);
+      menu.hidden = !willOpen;
+      btn.setAttribute('aria-expanded', String(willOpen));
+      return;
+    }
+
+    var opt = e.target.closest('.fdrop-opt');
+    if (opt) {
+      var d = opt.closest('[data-fdrop]');
+      d.querySelectorAll('.fdrop-opt').forEach(function (o) { o.setAttribute('aria-selected', 'false'); });
+      opt.setAttribute('aria-selected', 'true');
+
+      var label = d.querySelector('.fdrop-val');
+      if (label) label.innerHTML = opt.querySelector('.fdrop-tx').innerHTML;
+
+      d.querySelector('.fdrop-menu').hidden = true;
+      d.querySelector('.fdrop-btn').setAttribute('aria-expanded', 'false');
+
+      /* options can drive panels directly, the way the segmented tabs did */
+      if (opt.dataset.panel) {
+        var scope = opt.closest('[data-panels]') || document;
+        scope.querySelectorAll('[data-panel-id]').forEach(function (pn) {
+          pn.hidden = (pn.dataset.panelId !== opt.dataset.panel);
+        });
+      }
+      d.dispatchEvent(new CustomEvent('fdrop:change', { bubbles: true, detail: { value: opt.dataset.v } }));
+      return;
+    }
+
+    closeDrops(null);
+  });
+
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeDrops(null); });
 
   /* ============================================================ icons ==== */
   function drawIcons() {

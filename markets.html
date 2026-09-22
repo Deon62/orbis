@@ -23,19 +23,21 @@
       <input class="input" id="search" type="search" placeholder="Search markets" aria-label="Search markets">
       <span class="input-affix" style="pointer-events:none"><i data-lucide="search" class="i-sm"></i></span>
     </div>
+    <div class="fdrop" data-fdrop>
+      <button class="fdrop-btn" aria-haspopup="listbox" aria-expanded="false"><span class="fdrop-val"><i data-lucide="layers" class="i-sm"></i>All markets</span><i data-lucide="chevron-down" class="i-sm chev"></i></button>
+      <div class="fdrop-menu" hidden role="listbox">
+        <button class="fdrop-opt" role="option" data-v="all" aria-selected="true"><span class="fdrop-tx"><i data-lucide="layers" class="i-sm"></i>All markets</span></button>
+        <button class="fdrop-opt" role="option" data-v="forex" aria-selected="false"><span class="fdrop-tx"><i data-lucide="banknote" class="i-sm"></i>Forex</span></button>
+        <button class="fdrop-opt" role="option" data-v="crypto" aria-selected="false"><span class="fdrop-tx"><i data-lucide="bitcoin" class="i-sm"></i>Crypto</span></button>
+        <button class="fdrop-opt" role="option" data-v="commodities" aria-selected="false"><span class="fdrop-tx"><i data-lucide="fuel" class="i-sm"></i>Commodities</span></button>
+        <button class="fdrop-opt" role="option" data-v="indices" aria-selected="false"><span class="fdrop-tx"><i data-lucide="chart-line" class="i-sm"></i>Indices</span></button>
+        <button class="fdrop-opt" role="option" data-v="synthetics" aria-selected="false"><span class="fdrop-tx"><i data-lucide="waves" class="i-sm"></i>Synthetics</span></button>
+      </div>
+    </div>
     <span class="grow"></span>
     <span class="dim" id="listCount" style="font-size:12.5px"></span>
   </div>
 
-
-  <div class="pills" id="cats">
-    <button class="pill active" data-cat="all"><i data-lucide="layers" class="i-sm"></i>All markets</button>
-    <button class="pill" data-cat="forex"><i data-lucide="banknote" class="i-sm"></i>Forex</button>
-    <button class="pill" data-cat="crypto"><i data-lucide="bitcoin" class="i-sm"></i>Crypto</button>
-    <button class="pill" data-cat="commodities"><i data-lucide="fuel" class="i-sm"></i>Commodities</button>
-    <button class="pill" data-cat="indices"><i data-lucide="chart-line" class="i-sm"></i>Indices</button>
-    <button class="pill" data-cat="synthetics"><i data-lucide="waves" class="i-sm"></i>Synthetics</button>
-  </div>
 
   <div class="card card-flat" id="list"></div>
 </main>
@@ -70,10 +72,7 @@
     window.orbisIcons();
   }
 
-  document.getElementById('cats').addEventListener('click', function (e) {
-    var p = e.target.closest('.pill');
-    if (p) { cat = p.dataset.cat; render(); }
-  });
+  document.addEventListener('fdrop:change', function (e) { cat = e.detail.value; render(); });
   document.getElementById('search').addEventListener('input', function (e) {
     term = e.target.value.trim().toLowerCase();
     render();

@@ -65,6 +65,18 @@ Sub-pages carry no page title or description of their own: they set `data-title`
 (shown in the header, with a back chevron) and `data-nav="account"` so the Profile tab
 stays lit. The list pages are lists — no headers, no blurbs.
 
+## Filters
+
+Every filter is a dropdown, not a row of pills — six categories in a horizontal row
+crowded the page and wrapped on phones. The markup is `[data-fdrop]` with a
+`.fdrop-btn` and `.fdrop-menu` of `.fdrop-opt` buttons; `app.js` handles open/close,
+click-outside and Escape, then fires `fdrop:change` with the chosen value. An option
+carrying `data-panel` also switches panels, which is how Positions' Open/Settled/
+Statistics works now.
+
+A page can also hang one action off the top bar with `data-hdr-action` (plus
+`data-hdr-icon`/`data-hdr-label`) — the AI page uses it for the market-read info icon.
+
 ## Modals
 
 Flows too short to deserve a page live in `assets/js/modals.js`, opened by

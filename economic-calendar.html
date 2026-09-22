@@ -19,10 +19,13 @@
 
 <main class="wrap page-body">
   <div class="toolbar" style="padding-top:0">
-    <div class="pills" style="padding:0">
-      <button class="pill active">Today</button>
-      <button class="pill" data-mock="Tomorrow">Tomorrow</button>
-      <button class="pill" data-mock="This week">This week</button>
+    <div class="fdrop" data-fdrop>
+      <button class="fdrop-btn" aria-haspopup="listbox" aria-expanded="false"><span class="fdrop-val">Today</span><i data-lucide="chevron-down" class="i-sm chev"></i></button>
+      <div class="fdrop-menu" hidden role="listbox">
+        <button class="fdrop-opt" role="option" data-v="today" aria-selected="true"><span class="fdrop-tx">Today</span></button>
+        <button class="fdrop-opt" role="option" data-v="tomorrow" aria-selected="false"><span class="fdrop-tx">Tomorrow</span></button>
+        <button class="fdrop-opt" role="option" data-v="week" aria-selected="false"><span class="fdrop-tx">This week</span></button>
+      </div>
     </div>
     <span class="grow"></span>
     <span class="dim" style="font-size:12.5px">All times UTC</span>

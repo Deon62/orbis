@@ -19,10 +19,13 @@
 
 <main class="wrap page-body">
   <div class="toolbar" style="padding-top:0">
-    <div class="pills" id="sortBy" style="padding:0">
-      <button class="pill active" data-s="ret">Return</button>
-      <button class="pill" data-s="win">Win rate</button>
-      <button class="pill" data-s="min">Minimum</button>
+    <div class="fdrop" data-fdrop>
+      <button class="fdrop-btn" aria-haspopup="listbox" aria-expanded="false"><span class="fdrop-lbl">Sort by</span><span class="fdrop-val">Return</span><i data-lucide="chevron-down" class="i-sm chev"></i></button>
+      <div class="fdrop-menu" hidden role="listbox">
+        <button class="fdrop-opt" role="option" data-v="ret" aria-selected="true"><span class="fdrop-tx">Return</span></button>
+        <button class="fdrop-opt" role="option" data-v="win" aria-selected="false"><span class="fdrop-tx">Win rate</span></button>
+        <button class="fdrop-opt" role="option" data-v="min" aria-selected="false"><span class="fdrop-tx">Minimum</span></button>
+      </div>
     </div>
     <span class="grow"></span>
     <span class="dim" style="font-size:12.5px">Last 30 days</span>
@@ -69,10 +72,7 @@
     window.orbisIcons();
   }
 
-  document.getElementById('sortBy').addEventListener('click', function (e) {
-    var p = e.target.closest('.pill');
-    if (p) render(p.dataset.s);
-  });
+  document.addEventListener('fdrop:change', function (e) { render(e.detail.value); });
 
   render('ret');
 })();

@@ -21,11 +21,14 @@
 
   <section class="card card-flat" data-panels>
     <div class="card-hd">
-      <div class="seg">
-        <button class="active" data-panel="open">Open</button>
-        <button data-panel="closed">Settled</button>
-        <button data-panel="stats">Statistics</button>
+      <div class="fdrop" data-fdrop>
+      <button class="fdrop-btn" aria-haspopup="listbox" aria-expanded="false"><span class="fdrop-val">Open</span><i data-lucide="chevron-down" class="i-sm chev"></i></button>
+      <div class="fdrop-menu" hidden role="listbox">
+        <button class="fdrop-opt" role="option" data-v="open" data-panel="open" aria-selected="true"><span class="fdrop-tx">Open</span></button>
+        <button class="fdrop-opt" role="option" data-v="closed" data-panel="closed" aria-selected="false"><span class="fdrop-tx">Settled</span></button>
+        <button class="fdrop-opt" role="option" data-v="stats" data-panel="stats" aria-selected="false"><span class="fdrop-tx">Statistics</span></button>
       </div>
+    </div>
       <button class="btn btn-ghost btn-sm" data-mock="Statement export"><i data-lucide="download" class="i-sm"></i>Export</button>
     </div>
 

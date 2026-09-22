@@ -13,7 +13,7 @@
 <link rel="stylesheet" href="/assets/css/styles.css">
 <script>(function(){try{var t=localStorage.getItem("orbisflow-theme")||(matchMedia("(prefers-color-scheme:dark)").matches?"dark":"light");document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
 </head>
-<body data-page="ai" data-shell="app">
+<body data-page="ai" data-hdr-action="market-read" data-hdr-icon="info" data-hdr-label="Market read" data-shell="app">
 
 <div id="site-header"></div>
 
@@ -23,15 +23,15 @@
     <!-- signals --------------------------------------------------------- -->
     <div>
       <div class="toolbar" style="border-bottom:0;padding-top:0">
-        <div class="pills" id="sigFilter" style="padding:0">
-          <button class="pill active" data-f="all">All signals</button>
-          <button class="pill" data-f="Rise">Rise</button>
-          <button class="pill" data-f="Fall">Fall</button>
-        </div>
+        <div class="fdrop" data-fdrop>
+      <button class="fdrop-btn" aria-haspopup="listbox" aria-expanded="false"><span class="fdrop-lbl">Showing</span><span class="fdrop-val">All signals</span><i data-lucide="chevron-down" class="i-sm chev"></i></button>
+      <div class="fdrop-menu" hidden role="listbox">
+        <button class="fdrop-opt" role="option" data-v="all" aria-selected="true"><span class="fdrop-tx">All signals</span></button>
+        <button class="fdrop-opt" role="option" data-v="Rise" aria-selected="false"><span class="fdrop-tx"><i data-lucide="arrow-up" class="i-sm"></i>Rise only</span></button>
+        <button class="fdrop-opt" role="option" data-v="Fall" aria-selected="false"><span class="fdrop-tx"><i data-lucide="arrow-down" class="i-sm"></i>Fall only</span></button>
+      </div>
+    </div>
         <span class="grow"></span>
-        <button class="icon-btn" data-modal="market-read" aria-label="Market read">
-          <i data-lucide="info" class="i"></i>
-        </button>
         <button class="btn btn-primary btn-sm" data-mock="Rescan markets">
           <i data-lucide="radar" class="i-sm"></i>Rescan
         </button>
@@ -106,10 +106,7 @@
     window.orbisIcons();
   }
 
-  document.getElementById('sigFilter').addEventListener('click', function (e) {
-    var p = e.target.closest('.pill');
-    if (p) render(p.dataset.f);
-  });
+  document.addEventListener('fdrop:change', function (e) { render(e.detail.value); });
 
   document.getElementById('patterns').innerHTML = PATTERNS.map(function (r) {
     var up = r[3] === 'Rise';
