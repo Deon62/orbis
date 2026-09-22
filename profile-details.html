@@ -21,43 +21,41 @@
 
 <main class="wrap page-body">
   <div class="stack" style="max-width:720px">
-    <div class="card card-pad">
+    <div class="card card-flat card-pad" style="padding-inline:0">
       <form data-mock-submit="Saved">
-        <div class="row2">
-          <div class="field">
-            <label class="label" for="afn">First name</label>
-            <input class="input" id="afn" value="Amara">
-          </div>
-          <div class="field">
-            <label class="label" for="aln">Last name</label>
-            <input class="input" id="aln" value="Otieno">
-          </div>
+        <div class="field">
+          <label class="label" for="atn">Trader name</label>
+          <input class="input" id="atn" value="Amara Otieno">
         </div>
-        <div class="row2">
-          <div class="field">
-            <label class="label" for="aem">Email</label>
-            <input class="input" id="aem" type="email" value="ceo@ardena.co.ke">
-          </div>
-          <div class="field">
-            <label class="label" for="aph">Phone</label>
-            <input class="input" id="aph" type="tel" value="+254 712 000 412">
-          </div>
+
+        <div class="field">
+          <label class="label" for="aem">Email</label>
+          <input class="input" id="aem" type="email" value="ceo@ardena.co.ke">
         </div>
-        <div class="row2">
+
+        <div class="field">
+          <label class="label" for="aph">Phone</label>
+          <input class="input" id="aph" type="tel" value="+254 712 000 412">
+        </div>
+
+        <!-- kept side by side at every width, so the form fits without scrolling -->
+        <div class="row2-tight">
           <div class="field">
             <label class="label" for="acy">Country</label>
             <select class="select" id="acy"><option>Kenya</option><option>Nigeria</option><option>Ghana</option></select>
           </div>
           <div class="field">
-            <label class="label" for="acur">Account currency</label>
+            <label class="label" for="acur">Currency</label>
             <select class="select" id="acur"><option>USD</option><option>KES</option><option>USDT</option></select>
           </div>
         </div>
-        <button class="btn btn-primary" type="submit">Save changes</button>
+
+        <div class="form-actions">
+          <button class="btn btn-primary" type="submit">Save changes</button>
+        </div>
       </form>
     </div>
-  </div>
-</main>
+  </main>
 
 <script src="/assets/js/icons.js"></script>
 <script src="/assets/js/app.js"></script>

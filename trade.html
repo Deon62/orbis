@@ -69,13 +69,13 @@
 
     <!-- ==================================================== ticket ----- -->
     <aside class="stack">
-      <div class="ticket">
+      <div class="ticket" data-panels>
         <div class="ticket-seg">
-          <button class="active">Manual</button>
-          <button data-mock="Auto trading">Auto</button>
+          <button class="active" data-panel="manual">Manual</button>
+          <button data-panel="auto">Auto</button>
         </div>
 
-        <div class="ticket-body">
+        <div class="ticket-body" data-panel-id="manual">
           <div class="field" style="margin-bottom:14px">
             <label class="label" for="stake">Stake</label>
             <div class="stepper">
@@ -109,6 +109,51 @@
               <span class="tb-sub" id="downSub">88% · $47.00</span>
             </button>
           </div>
+        </div>
+
+        <div class="ticket-body" data-panel-id="auto" hidden>
+          <div class="field" style="margin-bottom:12px">
+            <label class="label" for="aStake">Stake per trade</label>
+            <div class="stepper">
+              <button type="button" class="step-btn" data-astep="-1" aria-label="Decrease"><i data-lucide="minus" class="i-sm"></i></button>
+              <span class="stepper-val"><span class="cur">$</span>
+                <input id="aStake" type="number" value="10" min="1" step="1" aria-label="Stake per trade"></span>
+              <button type="button" class="step-btn" data-astep="1" aria-label="Increase"><i data-lucide="plus" class="i-sm"></i></button>
+            </div>
+          </div>
+
+          <div class="auto-row">
+            <span class="lr-tx"><b>Target profit</b><span>Stop when reached</span></span>
+            <span class="auto-amt input-wrap">
+              <span class="input-prefix">$</span>
+              <input class="input" id="aTarget" type="number" value="50" min="1">
+            </span>
+          </div>
+
+          <div class="auto-row">
+            <span class="lr-tx"><b>Stop loss</b><span>Stop when reached</span></span>
+            <span class="auto-amt input-wrap">
+              <span class="input-prefix">$</span>
+              <input class="input" id="aLoss" type="number" value="30" min="1">
+            </span>
+          </div>
+
+          <div class="auto-row">
+            <span class="lr-tx"><b>Martingale</b><span>Double the stake after a loss</span></span>
+            <button class="switch" id="aMartingale" role="switch" aria-checked="false" aria-label="Martingale"></button>
+          </div>
+
+          <div class="payout" style="margin:14px 0">
+            <div><span>Session</span><b class="mono" id="aSession">Not running</b></div>
+            <div style="text-align:right"><span>Net</span><b class="mono" id="aNet">$0.00</b></div>
+          </div>
+
+          <button class="btn btn-primary btn-block btn-lg" id="aRun">
+            <i data-lucide="play" class="i-sm"></i>Start auto trading
+          </button>
+          <p class="hint center" style="margin-top:10px">
+            Runs Rise/Fall on the selected market until a limit is hit.
+          </p>
         </div>
       </div>
 
@@ -275,6 +320,11 @@
 
   document.querySelectorAll('[data-dir]').forEach(function (b) {
     b.addEventListener('click', function () {
+      /* while a contract runs this button sells it back instead */
+      if (b.classList.contains('busy')) {
+        if (window.orbisTradeStop) window.orbisTradeStop();
+        return;
+      }
       var stake = Number($('#stake').value) || 0;
       OrbisData.openTrades.unshift({
         id: 'OB-' + (948000 + Math.floor(Math.random() * 900)),
@@ -320,6 +370,92 @@
       if (btn) btn.classList.add('suggested');
       window.orbisToast('AI signal loaded · ' + dir + ' ' + current.sym + (tf ? ' · ' + tf : ''), 'bot');
     }
+  })();
+
+  /* --------------------------------------- a contract you can interrupt -- */
+  var busyBtn;
+  document.addEventListener('orbis:trade-start', function (e) {
+    busyBtn = document.querySelector('[data-dir="' + e.detail.contract.dir + '"]');
+    var other = document.querySelector('[data-dir="' + (e.detail.contract.dir === 'Rise' ? 'Fall' : 'Rise') + '"]');
+    if (other) other.disabled = true;
+    if (busyBtn) {
+      busyBtn.classList.add('busy');
+      busyBtn.querySelector('.tb-main').innerHTML =
+        '<i data-lucide="square" class="i-sm"></i>Sell back';
+      busyBtn.querySelector('.tb-sub').textContent = 'Running · ' + e.detail.total + 's';
+      window.orbisIcons();
+    }
+  });
+
+  document.addEventListener('orbis:trade-tick', function (e) {
+    if (busyBtn) busyBtn.querySelector('.tb-sub').textContent = 'Running · ' + e.detail.left + 's';
+  });
+
+  document.addEventListener('orbis:trade-end', function () {
+    document.querySelectorAll('[data-dir]').forEach(function (b) { b.disabled = false; });
+    if (busyBtn) {
+      var isUp = busyBtn.dataset.dir === 'Rise';
+      busyBtn.classList.remove('busy');
+      busyBtn.querySelector('.tb-main').innerHTML =
+        '<i data-lucide="arrow-' + (isUp ? 'up' : 'down') + '" class="i-sm"></i>' + busyBtn.dataset.dir;
+      window.orbisIcons();
+    }
+    busyBtn = null;
+    calc();
+  });
+
+  /* ------------------------------------------------------ auto trading --- */
+  (function auto() {
+    var stake = $('#aStake'), target = $('#aTarget'), loss = $('#aLoss');
+    var run = $('#aRun'), session = $('#aSession'), net = $('#aNet');
+    var timer = null, pnl = 0, trades = 0;
+
+    document.querySelectorAll('[data-astep]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var v = Number(stake.value) || 0;
+        stake.value = Math.max(1, v + (v >= 20 ? 5 : 1) * Number(b.dataset.astep));
+      });
+    });
+
+    function paint() {
+      net.textContent = (pnl >= 0 ? '+' : '') + OrbisData.money(pnl);
+      net.className = 'mono ' + (pnl >= 0 ? 'up' : 'down');
+      session.textContent = timer ? trades + ' trade' + (trades === 1 ? '' : 's') : 'Not running';
+    }
+
+    function stop(why) {
+      clearInterval(timer);
+      timer = null;
+      run.innerHTML = '<i data-lucide="play" class="i-sm"></i>Start auto trading';
+      run.classList.remove('btn-dark');
+      run.classList.add('btn-primary');
+      window.orbisIcons();
+      paint();
+      window.orbisToast('Auto trading stopped · ' + why, 'circle-stop');
+    }
+
+    run.addEventListener('click', function () {
+      if (timer) return stop('by you');
+
+      pnl = 0; trades = 0;
+      var size = Number(stake.value) || 1;
+      var martingale = $('#aMartingale').classList.contains('on');
+      run.innerHTML = '<i data-lucide="square" class="i-sm"></i>Stop auto trading';
+      run.classList.remove('btn-primary');
+      run.classList.add('btn-dark');
+      window.orbisIcons();
+      paint();
+
+      timer = setInterval(function () {
+        var won = Math.random() < 0.5;
+        pnl += won ? size * (current.payout / 100) : -size;
+        trades++;
+        size = (martingale && !won) ? size * 2 : (Number(stake.value) || 1);
+        paint();
+        if (pnl >= Number(target.value)) return stop('target profit reached');
+        if (pnl <= -Number(loss.value)) return stop('stop loss reached');
+      }, 1400);
+    });
   })();
 
   setInterval(function () {

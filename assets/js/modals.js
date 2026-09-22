@@ -438,46 +438,52 @@
 
   function tradeModal(c) {
     var up = c.dir === 'Rise';
-    var payout = c.stake + c.stake * (c.payout / 100);
+    var left = SETTLE_SECONDS;
 
-    var html =
-      '<div class="modal-bd">' +
-        '<div class="run-head">' +
-          '<span class="run-dir ' + (up ? 'up' : 'down') + '">' +
-            ic(up ? 'arrow-up' : 'arrow-down') + '</span>' +
-          '<span class="lr-tx"><b>' + c.dir + ' · ' + c.sym + '</b>' +
-            '<span>' + money(c.stake) + ' · ' + c.duration + ' contract</span></span>' +
-        '</div>' +
+    var pop = document.createElement('div');
+    pop.className = 'run-pop';
+    pop.innerHTML =
+      '<span class="run-dot ' + (up ? 'up' : 'down') + '">' +
+        ic(up ? 'arrow-up' : 'arrow-down', 'i-sm') + '</span>' +
+      '<span class="run-tx"><b>' + c.dir + ' · ' + c.sym + '</b>' +
+        '<span>' + money(c.stake) + ' · ' + c.duration + '</span></span>' +
+      '<b class="run-clock mono">' + left + 's</b>' +
+      '<i class="run-line"></i>';
+    document.body.appendChild(pop);
+    icons();
+    requestAnimationFrame(function () { pop.classList.add('in'); });
 
-        '<div class="run-bar"><i id="tProg"></i></div>' +
-        '<div class="run-meta">' +
-          '<span>Settles in <b id="tLeft" class="mono">' + SETTLE_SECONDS + 's</b></span>' +
-          '<span>Entry <b class="mono">' + c.entry + '</b></span>' +
-        '</div>' +
+    var line = pop.querySelector('.run-line');
+    var clock = pop.querySelector('.run-clock');
 
-        '<div class="kv"><span>Payout if correct</span><b class="mono">' + money(payout) + '</b></div>' +
-        '<div class="kv"><span>At risk</span><b class="mono">' + money(c.stake) + '</b></div>' +
-        '<p class="hint" style="margin-top:12px">Settlement is accelerated for this prototype — a real ' +
-          c.duration + ' contract runs its full term.</p>' +
-      '</div>';
+    function emit(name, detail) {
+      document.dispatchEvent(new CustomEvent(name, { detail: detail }));
+    }
 
-    open('Contract running', html, function (root) {
-      var left = SETTLE_SECONDS;
-      var bar = root.querySelector('#tProg');
-      var cd = root.querySelector('#tLeft');
-      bar.style.width = '0%';
+    function stop(settled) {
+      clearInterval(running);
+      running = null;
+      window.orbisTradeStop = null;
+      pop.classList.remove('in');
+      setTimeout(function () { pop.remove(); }, 200);
+      emit('orbis:trade-end', { contract: c, settled: settled });
+      if (settled) settleModal(c);
+      else toast('Sold back · ' + money(c.stake * 0.75) + ' returned', 'undo-2');
+    }
 
-      running = setInterval(function () {
-        left--;
-        cd.textContent = Math.max(0, left) + 's';
-        bar.style.width = ((SETTLE_SECONDS - left) / SETTLE_SECONDS * 100) + '%';
-        if (left <= 0) {
-          clearInterval(running);
-          running = null;
-          settleModal(c);
-        }
-      }, 1000);
-    });
+    /* the ticket exposes a stop, because a running contract should be
+       interruptible from where it was placed */
+    window.orbisTradeStop = function () { stop(false); };
+
+    emit('orbis:trade-start', { contract: c, total: SETTLE_SECONDS });
+
+    running = setInterval(function () {
+      left--;
+      clock.textContent = Math.max(0, left) + 's';
+      line.style.width = ((SETTLE_SECONDS - left) / SETTLE_SECONDS * 100) + '%';
+      emit('orbis:trade-tick', { left: Math.max(0, left), total: SETTLE_SECONDS });
+      if (left <= 0) stop(true);
+    }, 1000);
 
     if (global.orbisBeep) global.orbisBeep('place');
   }

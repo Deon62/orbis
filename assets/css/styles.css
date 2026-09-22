@@ -1183,8 +1183,10 @@ body.app-shell.no-tabbar{ padding-bottom:0; }
 /* ==========================================================================
    Page transitions — settle in, and only show a bar when the wait is real
    ========================================================================== */
+/* opacity only — animating transform here makes <main> a containing block,
+   which silently breaks position:fixed for the phone trade buttons inside it */
 main{ animation:pageIn .18s ease both; }
-@keyframes pageIn{ from{ opacity:0; transform:translateY(4px); } to{ opacity:1; transform:none; } }
+@keyframes pageIn{ from{ opacity:0; } to{ opacity:1; } }
 
 .nav-progress{
   position:fixed; top:0; left:0; height:2px; width:0; z-index:300;
@@ -1198,3 +1200,48 @@ main{ animation:pageIn .18s ease both; }
   main{ animation:none; }
   .nav-progress{ display:none; }
 }
+
+
+/* ==========================================================================
+   A running contract: a strip at the top, not a modal over the chart
+   ========================================================================== */
+.run-pop{
+  position:fixed; top:10px; left:50%; transform:translate(-50%,-14px); z-index:210;
+  display:flex; align-items:center; gap:11px; min-width:270px; max-width:calc(100vw - 24px);
+  padding:9px 13px; background:var(--panel); border:1px solid var(--line-strong);
+  box-shadow:0 10px 30px rgba(0,0,0,.12); opacity:0;
+  transition:opacity .18s ease, transform .18s ease; overflow:hidden;
+}
+:root[data-theme="dark"] .run-pop{ box-shadow:0 10px 30px rgba(0,0,0,.5); }
+.run-pop.in{ opacity:1; transform:translate(-50%,0); }
+.run-dot{ width:26px; height:26px; border-radius:50%; display:grid; place-items:center; color:#fff; flex:none; }
+.run-dot.up{ background:var(--brand-strong); }
+.run-dot.down{ background:#C93B39; }
+.run-tx{ flex:1; min-width:0; line-height:1.25; }
+.run-tx b{ display:block; font-size:13px; font-weight:600; }
+.run-tx span{ display:block; font-size:11.5px; color:var(--ink-3); }
+.run-clock{ font-size:13.5px; font-weight:600; }
+.run-line{
+  position:absolute; left:0; bottom:0; height:2px; width:0;
+  background:var(--brand); transition:width 1s linear;
+}
+
+/* the ticket button says what it is doing */
+.btn-up.busy,.btn-down.busy{ background:var(--ink); }
+.btn-up[disabled],.btn-down[disabled]{ opacity:.35; cursor:not-allowed; }
+
+/* ==========================================================================
+   Auto trading
+   ========================================================================== */
+.auto-row{
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
+  padding:12px 0; border-bottom:1px solid var(--line-soft);
+}
+.auto-row:last-of-type{ border-bottom:0; }
+.auto-row .lr-tx b{ font-size:13.5px; }
+.auto-amt{ width:120px; }
+.auto-amt .input{ height:38px; text-align:right; }
+
+/* a form that fits the screen it is on */
+.form-actions{ display:flex; justify-content:center; padding-top:4px; }
+.row2-tight{ display:grid; grid-template-columns:1fr 1fr; gap:0 13px; }
