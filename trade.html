@@ -37,7 +37,7 @@
         </div>
       </div>
 
-      <div class="tf" role="group" aria-label="Timeframe">
+      <div class="tf" role="group" aria-label="Duration">
         <button>1t</button><button>15s</button><button class="active">1m</button>
         <button>5m</button><button>15m</button><button>1h</button><button>1d</button>
         <span class="tf-sep"></span>
@@ -64,23 +64,12 @@
     <aside class="stack">
       <div class="ticket">
         <div class="ticket-seg">
-          <button class="active">Rise / Fall</button>
-          <button data-mock="Higher / Lower">Higher / Lower</button>
+          <button class="active">Manual</button>
+          <button data-mock="Auto trading">Auto</button>
         </div>
 
         <div class="ticket-body">
-          <div class="field">
-            <label class="label" for="dur">Duration</label>
-            <div style="display:grid;grid-template-columns:1fr 104px;gap:8px">
-              <input class="input" id="dur" type="number" value="5" min="1" max="60">
-              <select class="select" id="durUnit">
-                <option>ticks</option><option>seconds</option>
-                <option selected>minutes</option><option>hours</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="field" style="margin-bottom:10px">
+          <div class="field" style="margin-bottom:14px">
             <label class="label" for="stake">Stake</label>
             <div class="input-wrap">
               <span class="input-prefix">$</span>
@@ -94,15 +83,21 @@
             </div>
           </div>
 
-          <div class="payout">
-            <div><span>Payout</span><b class="mono" id="payoutAmt">$47.00</b></div>
-            <div style="text-align:right"><span>Profit</span><b class="mono up" id="profitAmt">+$22.00</b></div>
+          <!-- duration comes from the row above the chart -->
+          <div class="ticket-meta">
+            <span>Duration</span><b id="durLabel">1m</b>
           </div>
 
           <!-- on phones this row is fixed just above the tab bar -->
           <div class="trade-btns">
-            <button class="btn-up" data-dir="Rise"><i data-lucide="trending-up" class="i-sm"></i>Rise</button>
-            <button class="btn-down" data-dir="Fall"><i data-lucide="trending-down" class="i-sm"></i>Fall</button>
+            <button class="btn-up" data-dir="Rise">
+              <span class="tb-main"><i data-lucide="arrow-up" class="i-sm"></i>Rise</span>
+              <span class="tb-sub" id="upSub">88% · $47.00</span>
+            </button>
+            <button class="btn-down" data-dir="Fall">
+              <span class="tb-main"><i data-lucide="arrow-down" class="i-sm"></i>Fall</span>
+              <span class="tb-sub" id="downSub">88% · $47.00</span>
+            </button>
           </div>
         </div>
       </div>
@@ -231,13 +226,21 @@
   applyMarket(idx);
 
   /* ----------------------------------------------------------- ticket -- */
+  function duration() {
+    var b = document.querySelector('.tf button.active');
+    return b ? b.textContent.trim() : '1m';
+  }
+
   function calc() {
     var stake = Number($('#stake').value) || 0;
-    var profit = stake * (current.payout / 100);
-    $('#payoutAmt').textContent = OrbisData.money(stake + profit);
-    $('#profitAmt').textContent = '+' + OrbisData.money(profit);
+    var payout = stake + stake * (current.payout / 100);
+    var sub = current.payout + '% · ' + OrbisData.money(payout);
+    $('#upSub').textContent = sub;
+    $('#downSub').textContent = sub;
+    $('#durLabel').textContent = duration();
   }
   $('#stake').addEventListener('input', calc);
+  document.querySelector('.tf').addEventListener('click', function () { setTimeout(calc, 0); });
   document.querySelectorAll('[data-stake]').forEach(function (b) {
     b.addEventListener('click', function () { $('#stake').value = b.dataset.stake; calc(); });
   });
@@ -250,11 +253,12 @@
         id: 'OB-' + (948000 + Math.floor(Math.random() * 900)),
         sym: current.sym, dir: b.dataset.dir, stake: stake,
         entry: $('#price').textContent, now: $('#price').textContent,
-        ends: '0' + $('#dur').value + ':00', pl: 0
+        ends: duration(), pl: 0
       });
       var n = $('#openN');
       if (n) n.textContent = OrbisData.openTrades.length;
-      window.orbisToast(b.dataset.dir + ' · ' + OrbisData.money(stake) + ' on ' + current.sym, 'check-circle-2');
+      window.orbisToast(b.dataset.dir + ' · ' + OrbisData.money(stake) + ' on ' +
+        current.sym + ' · ' + duration(), 'check-circle-2');
     });
   });
 

@@ -147,9 +147,10 @@ ul{ margin:0; padding:0; list-style:none; }
 .acct-card .i-sm{ color:var(--ink-3); }
 
 .icon-btn{
-  width:36px; height:36px; display:grid; place-items:center;
+  width:40px; height:40px; display:grid; place-items:center;
   background:transparent; border:1px solid transparent; cursor:pointer; color:var(--ink-2);
 }
+.icon-btn .i-lg{ width:24px; height:24px; stroke-width:2; }
 .icon-btn:hover{ background:var(--panel-2); color:var(--ink); }
 
 /* avatars stay round — not everything is square */
@@ -306,7 +307,7 @@ body.app-shell .hdr-in{ padding-inline:8px; gap:10px; }
 /* ------------------------------------------------------------- drawer -- */
 .scrim{ position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:90; }
 .drawer{
-  position:fixed; inset:0 auto 0 0; z-index:95; width:min(312px,86vw);
+  position:fixed; inset:0 auto 0 0; z-index:95; width:min(280px,55vw);
   background:var(--panel); border-right:1px solid var(--line);
   transform:translateX(-100%); transition:transform .22s ease;
   display:flex; flex-direction:column; overflow-y:auto;
@@ -890,3 +891,32 @@ input:focus-visible,select:focus-visible{ outline:2px solid var(--brand); outlin
   border:1px solid var(--line);
 }
 .acct-row .acct-flag{ width:22px; height:22px; }
+
+
+/* ==========================================================================
+   Trade ticket: manual / auto, and CTAs that state what they pay
+   ========================================================================== */
+.btn-up,.btn-down{
+  flex-direction:column; gap:1px; height:62px; line-height:1.2;
+}
+.btn-up .tb-main,.btn-down .tb-main{
+  display:flex; align-items:center; gap:7px; font-size:15px; font-weight:600;
+}
+.btn-up .tb-sub,.btn-down .tb-sub{
+  font-size:11.5px; font-weight:500; opacity:.82; font-variant-numeric:tabular-nums;
+}
+
+/* the panel is narrower now, so its rows tighten up */
+@media(max-width:899px){
+  .drawer-grp a{ padding-inline:14px; gap:10px; font-size:13.5px; }
+  .drawer-grp h4{ padding-inline:14px; }
+  .drawer-acct{ padding:13px 14px; }
+  .drawer-act{ padding-inline:14px; }
+}
+
+.ticket-meta{
+  display:flex; align-items:center; justify-content:space-between;
+  padding:10px 0; margin-bottom:12px; border-top:1px solid var(--line-soft);
+  border-bottom:1px solid var(--line-soft); font-size:12.5px; color:var(--ink-3);
+}
+.ticket-meta b{ font-size:13.5px; font-weight:600; color:var(--ink); }

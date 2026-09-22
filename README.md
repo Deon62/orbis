@@ -31,7 +31,7 @@ vercel dev            # or any static server with clean-URL support
 |---|---|
 | `index.html` | Marketing landing page. On laptops it scrolls section-by-section. |
 | `login.html` / `signup.html` | Centred cards, "Continue with Google" below the email form. |
-| `trade.html` | Chart + Rise/Fall ticket. Custom market picker with flags. |
+| `trade.html` | Chart + ticket. The row above the chart is the duration picker; the ticket is Manual/Auto, stake, and two CTAs. |
 | `markets.html` | 17 instruments across 5 asset classes, searchable and filterable. |
 | `ai.html` | Signals with confidence, pattern watch, ask box. |
 | `positions.html` | Open, settled and statistics tabs. |
@@ -109,10 +109,16 @@ rail and tab bar, before the label on segments. Compact controls (timeframes, ch
 pills) just darken their text and border. Tap highlight is off everywhere and focus
 rings only show for keyboard users. Corners are square except avatars and asset badges.
 
-The active account sits at the far right of the top bar as a card (`.acct-card`) with a
-round US flag and a chevron; pressing it opens a centred **Switch account** modal listing
-Demo and Real, which closes itself on selection and updates the card. The site name sits
-next to the hamburger. All modals float centred, phones included. On phones the theme switch and Log out are pinned to the bottom of the
+The top bar has two shapes. On **Trade, Markets and Positions** it carries the account
+card (`.acct-card`, with a round US flag and a chevron) plus Deposit and the avatar;
+pressing the card opens a centred **Switch account** modal that closes on selection.
+Every other page gets only a back arrow, the page name and the avatar. The theme switch
+lives in the rail on desktop and the drawer on mobile, so it is reachable either way.
+All modals float centred, phones included.
+
+On phones the drawer covers 55% of the width, and the duration shown in the ticket
+mirrors whichever button is active in the row above the chart — there is no second
+duration control. On phones the theme switch and Log out are pinned to the bottom of the
 drawer so they never need scrolling to, and the Deposit button only appears on the
 trading surfaces — not on settings sub-pages.
 

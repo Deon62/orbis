@@ -70,6 +70,8 @@
     { id: 'real', label: 'Real account', short: 'Real', amount: '$1,384.40',  icon: 'wallet' }
   ];
   var activeAccount = 'demo';
+  /* the account card belongs where money is at stake */
+  var ACCOUNT_PAGES = ['trade', 'markets', 'positions'];
 
   function accountCardHTML() {
     var a = ACCOUNTS.filter(function (x) { return x.id === activeAccount; })[0];
@@ -159,6 +161,9 @@
       '<div class="rail-items">' + items + '</div>' +
       '<div class="rail-foot">' +
         '<button class="rail-item" data-drawer-open title="More">' + ic('menu', 'i-lg') + '<span>More</span></button>' +
+        '<button class="rail-item" data-theme-toggle title="Theme">' +
+          '<span data-theme-icon>' + ic(currentTheme() === 'dark' ? 'sun' : 'moon', 'i-lg') + '</span>' +
+          '<span>Theme</span></button>' +
         '<a class="rail-item" href="' + href('/') + '" title="Log out">' + ic('log-out', 'i-lg') + '<span>Log out</span></a>' +
       '</div></nav>';
   }
@@ -216,19 +221,23 @@
 
     var sub = BODY.dataset.title;
     var title = sub || (NAV.filter(function (n) { return n.id === ACTIVE; })[0] || { label: '' }).label;
-    var lead = sub
-      ? '<a class="icon-btn" href="' + (BODY.dataset.backTo || '/account') + '" aria-label="Back">' + ic('chevron-left') + '</a>'
-      : '<button class="icon-btn hide-desk" data-drawer-open aria-label="Open menu">' + ic('menu') + '</button>' +
-        '<span class="hide-desk">' + logo() + '</span>';
+    var full = !sub && ACCOUNT_PAGES.indexOf(ACTIVE) > -1;
+
+    var lead = full
+      ? '<button class="icon-btn hide-desk" data-drawer-open aria-label="Open menu">' + ic('menu', 'i-lg') + '</button>' +
+        '<span class="hide-desk">' + logo() + '</span>'
+      : '<a class="icon-btn" href="' + (BODY.dataset.backTo || '/trade') + '" aria-label="Back">' +
+        ic('chevron-left', 'i-lg') + '</a>';
+
     return '<header class="hdr"><div class="hdr-in">' + lead +
-      '<span class="hdr-page' + (sub ? ' hdr-page-always' : '') + '">' + title + '</span>' +
-      '<div class="hdr-right">' + accountCardHTML() +
-        /* deposit belongs on the trading surfaces, not on a settings page */
-        (sub ? '' : '<button class="btn btn-primary btn-sm hide-mobile" data-modal="deposit">' +
-                    ic('plus', 'i-sm') + 'Deposit</button>') +
-        themeBtn() +
-        '<button class="icon-btn" data-mock="Notifications" aria-label="Notifications">' + ic('bell') + '</button>' +
-        '<a class="avatar" href="' + href('/account') + '" aria-label="Account">AO</a>' +
+      '<span class="hdr-page' + (full ? '' : ' hdr-page-always') + '">' + title + '</span>' +
+      '<div class="hdr-right">' +
+        (full
+          ? accountCardHTML() +
+            '<button class="btn btn-primary btn-sm hide-mobile" data-modal="deposit">' +
+              ic('plus', 'i-sm') + 'Deposit</button>'
+          : '') +
+        '<a class="avatar" href="/account" aria-label="Account">AO</a>' +
       '</div></div></header>';
   }
 
