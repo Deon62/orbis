@@ -262,7 +262,7 @@
         '<nav class="hdr-nav">' + nav + '</nav>' +
         '<div class="hdr-right">' + themeBtn() +
           '<a class="btn btn-quiet btn-sm" href="' + href('/login') + '">Log in</a>' +
-          '<a class="btn btn-primary btn-sm" href="' + href('/signup') + '">Create account</a>' +
+          '<a class="btn btn-primary btn-sm hide-mobile" href="' + href('/signup') + '">Create account</a>' +
         '</div></div></header>';
     }
 
@@ -330,8 +330,7 @@
       '</div>' +
       '<div class="ftr-risk"><b style="color:var(--ink)">Risk warning.</b> ' +
         'Binary options carry a high risk of losing money rapidly. Never trade with funds you ' +
-        'cannot afford to lose. <span class="brandtxt">Design prototype — all prices, balances ' +
-        'and trades are simulated.</span></div>' +
+        'cannot afford to lose.</div>' +
       '<div class="ftr-bottom">' +
         '<span>&copy; ' + new Date().getFullYear() + ' orbisflow Markets Ltd.</span>' +
         '<nav>' +

@@ -18,7 +18,6 @@
 </head>
 <body data-page="home" data-shell="public">
 
-<div class="mockbar">Design prototype — <b>every price, balance and trade on this site is simulated.</b></div>
 <div id="site-header"></div>
 
 <!-- ============================================================== hero -- -->
@@ -26,24 +25,15 @@
   <img class="hero-skyline" src="/assets/img/skyline.svg" alt="" aria-hidden="true">
   <div class="wrap hero-in">
     <div class="hero-grid">
-      <div>
-        <p class="sec-eyebrow">Binary options · 24/7 markets</p>
+      <div class="hero-copy">
         <h1>Two directions. One decision.</h1>
         <p class="lead">
-          Deriv gives you four hundred controls. orbisflow gives you the six that decide a trade:
-          market, direction, stake, duration, payout, go.
+          Market, direction, stake, duration, payout, go. That is the whole screen —
+          nothing else between you and the trade.
         </p>
         <div class="hero-cta">
-          <a class="btn btn-primary btn-lg" href="/signup"><i data-lucide="arrow-right" class="i-sm"></i>Create free account</a>
-          <a class="btn btn-lg btn-ghost" style="border-color:#383836;color:#F2F1ED" href="/trade">
-            <i data-lucide="play" class="i-sm"></i>Try the demo
-          </a>
-        </div>
-        <div class="hero-trust">
-          <div><b class="num">$10,000</b><span>Free demo funds</span></div>
-          <div><b class="num">92%</b><span>Max payout</span></div>
-          <div><b class="num">5s</b><span>Shortest contract</span></div>
-          <div><b class="num">60+</b><span>Markets</span></div>
+          <a class="btn btn-primary btn-lg" href="/signup">Create free account</a>
+          <a class="btn btn-lg btn-onblack" href="/trade">Try the demo</a>
         </div>
       </div>
 
@@ -63,7 +53,7 @@
           <canvas id="heroChart"></canvas>
         </div>
         <div class="chart-foot">
-          <span><i class="dotlive"></i>Simulated feed</span>
+          <span><i class="dotlive"></i>Live</span>
           <span style="margin-left:auto">1m candles</span>
         </div>
       </div>
@@ -80,7 +70,6 @@
 <!-- ========================================================== features -- -->
 <section class="sec snap-section">
   <div class="wrap">
-    <p class="sec-eyebrow">Why orbisflow</p>
     <h2>Everything a trade needs. Nothing it doesn't.</h2>
     <p class="sec-lead">One screen where the trade happens. Clean pages for the money around it.</p>
 
@@ -114,7 +103,6 @@
   <div class="wrap">
     <div class="split">
       <div>
-        <p class="sec-eyebrow">How it works</p>
         <h2>Three steps, about ninety seconds.</h2>
         <p class="sec-lead">Start on demo with $10,000. Switch to real money when you are ready.</p>
         <a class="btn btn-dark btn-lg" href="/signup" style="margin-top:26px">Open an account</a>
@@ -151,7 +139,6 @@
   <div class="wrap">
     <div class="page-hd-row" style="margin-bottom:20px">
       <div>
-        <p class="sec-eyebrow">Markets</p>
         <h2>Trade what's moving right now.</h2>
       </div>
       <a class="btn btn-ghost" href="/markets">All markets<i data-lucide="arrow-right" class="i-sm"></i></a>
@@ -165,26 +152,15 @@
   <div class="ref-hero">
     <div class="split" style="align-items:center">
       <div>
-        <p class="sec-eyebrow">Refer &amp; earn</p>
         <h2>Your link. Their trades. Your revenue share.</h2>
         <p>Up to 35% of the spread on everyone you bring in, for as long as they trade. Paid weekly, tracked to the trade.</p>
         <a class="btn btn-primary btn-lg" href="/signup" style="margin-top:24px">Start referring</a>
       </div>
-      <div class="grid g3" style="position:relative;z-index:2">
-        <div style="border:1px solid var(--black-line);padding:16px;background:var(--black-2)">
-          <b style="font-size:24px">20%</b>
-          <div style="font-size:12.5px;color:var(--on-black-2)">Starter tier</div>
-        </div>
-        <div style="border:1px solid var(--black-line);padding:16px;background:var(--black-2)">
-          <b style="font-size:24px">28%</b>
-          <div style="font-size:12.5px;color:var(--on-black-2)">10+ referrals</div>
-        </div>
-        <div style="border:1px solid var(--brand);padding:16px;background:var(--black-2)">
-          <b style="font-size:24px;color:var(--brand)">35%</b>
-          <div style="font-size:12.5px;color:var(--on-black-2)">50+ referrals</div>
-        </div>
+      <div class="grid g3 tiers">
+        <div class="tier"><b>20%</b><span>Starter tier</span></div>
+        <div class="tier"><b>28%</b><span>10+ referrals</span></div>
+        <div class="tier tier-top"><b>35%</b><span>50+ referrals</span></div>
       </div>
-    </div>
   </div>
 </section>
 

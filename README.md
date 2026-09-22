@@ -3,8 +3,9 @@
 A deliberately simple Deriv alternative: pick a market, pick a direction, set stake and
 duration, done. Static HTML/CSS/JS — no build step, no dependencies to install.
 
-**Everything is mocked.** No auth, no prices, no money. Prices are simulated in the
-browser, links that aren't built yet show a "placeholder" toast.
+**Everything is mocked** — no auth, no live prices, no money. Prices are generated in the
+browser and links that aren't built yet show a placeholder toast. The user-facing copy
+does not say so, because the build is meant to present as a real product.
 
 ## URLs
 
@@ -30,7 +31,7 @@ vercel dev            # or any static server with clean-URL support
 | File | What it is |
 |---|---|
 | `index.html` | Marketing landing page. On laptops it scrolls section-by-section. |
-| `login.html` / `signup.html` | Centred cards, "Continue with Google" below the email form. |
+| `login.html` / `signup.html` | Centred cards, "Continue with Google" below the email form. Signup takes one Trader name; country is set later in the profile. |
 | `trade.html` | Chart + ticket. The row above the chart is the duration picker; the ticket is Manual/Auto, a stake stepper, and two CTAs. |
 | `markets.html` | The instrument list, searchable and filterable. Nothing above it but the search row. |
 | `ai.html` | Market scan: signals with confidence and a pattern watch. Each signal hands its market, direction, duration and stake to the ticket via query params. The market read (sentiment, volatility, accuracy, next event) is behind the info icon. |
@@ -64,6 +65,12 @@ between. The five tab destinations keep it, `profile-details` included.
 Sub-pages carry no page title or description of their own: they set `data-title`
 (shown in the header, with a back chevron) and `data-nav="account"` so the Profile tab
 stays lit. The list pages are lists — no headers, no blurbs.
+
+## Country picker
+
+`assets/js/countries.js` holds 198 ISO 3166-1 alpha-2 entries, which double as the
+flagcdn codes used everywhere else. The profile's country field is a button that opens
+a searchable modal with a flag beside every name.
 
 ## Sound
 

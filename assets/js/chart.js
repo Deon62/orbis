@@ -1,5 +1,5 @@
 /* ==========================================================================
-   orbisflow — canvas candlestick chart (simulated data only)
+   orbisflow — canvas candlestick chart
    Colours are read from the active theme, so light/dark just works.
    Replace generate()/tick() with a real price feed when the backend exists.
    ========================================================================== */

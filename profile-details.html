@@ -30,7 +30,7 @@
 
         <div class="field">
           <label class="label" for="aem">Email</label>
-          <input class="input" id="aem" type="email" value="ceo@ardena.co.ke">
+          <input class="input" id="aem" type="email" value="amara.otieno@orbisflow.com">
         </div>
 
         <div class="field">
@@ -41,8 +41,12 @@
         <!-- kept side by side at every width, so the form fits without scrolling -->
         <div class="row2-tight">
           <div class="field">
-            <label class="label" for="acy">Country</label>
-            <select class="select" id="acy"><option>Kenya</option><option>Nigeria</option><option>Ghana</option></select>
+            <label class="label">Country</label>
+            <button type="button" class="select ctry-trigger" data-modal="country" data-code="ke">
+              <img class="ctry-flag" src="https://flagcdn.com/w40/ke.png" alt="">
+              <span class="ctry-name">Kenya</span>
+              <i data-lucide="chevron-down" class="i-sm"></i>
+            </button>
           </div>
           <div class="field">
             <label class="label" for="acur">Currency</label>
@@ -58,6 +62,7 @@
   </main>
 
 <script src="/assets/js/icons.js"></script>
+<script src="/assets/js/countries.js"></script>
 <script src="/assets/js/app.js"></script>
 <script src="/assets/js/modals.js"></script>
 </body>

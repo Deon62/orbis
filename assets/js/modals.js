@@ -363,7 +363,7 @@
         '<span class="lr-tx"><b>' + r[0] + '</b><span>' + r[2] + '</span></span>' +
         '<b class="read-val">' + r[1] + '</b></div>';
     }).join('') +
-      '<p class="hint" style="margin-top:14px">Recomputed on every scan. Simulated in this prototype.</p>' +
+      '<p class="hint" style="margin-top:14px">Recomputed on every scan.</p>' +
       '</div>';
     open('Market read', html);
   }
@@ -517,6 +517,50 @@
     if (global.orbisBeep) global.orbisBeep(won ? 'win' : 'lose');
   }
 
+  /* ========================================================== country === */
+  function countryModal(trigger) {
+    var list = global.OrbisCountries || [];
+    var current = trigger ? trigger.dataset.code : '';
+
+    function rows(filter) {
+      var f = (filter || '').toLowerCase();
+      var out = list.filter(function (c) { return !f || c[1].toLowerCase().indexOf(f) > -1; });
+      if (!out.length) return '<div class="empty"><b>No country matches that</b></div>';
+      return out.map(function (c) {
+        return '<button class="ctry" data-code="' + c[0] + '" data-name="' + c[1] + '">' +
+          '<img src="https://flagcdn.com/w40/' + c[0] + '.png" alt="" loading="lazy">' +
+          '<span>' + c[1] + '</span>' +
+          (c[0] === current ? ic('check', 'i-sm') : '') + '</button>';
+      }).join('');
+    }
+
+    var html =
+      '<div class="modal-search">' +
+        '<div class="input-wrap">' +
+          '<input class="input" id="ctrySearch" type="search" placeholder="Search countries" aria-label="Search countries">' +
+          '<span class="input-affix" style="pointer-events:none">' + ic('search', 'i-sm') + '</span>' +
+        '</div>' +
+      '</div>' +
+      '<div class="ctry-list" id="ctryList">' + rows('') + '</div>';
+
+    open('Country', html, function (root) {
+      var box = root.querySelector('#ctryList');
+      root.querySelector('#ctrySearch').addEventListener('input', function (e) {
+        box.innerHTML = rows(e.target.value);
+        icons();
+      });
+      box.addEventListener('click', function (e) {
+        var b = e.target.closest('.ctry');
+        if (!b || !trigger) return;
+        trigger.dataset.code = b.dataset.code;
+        trigger.querySelector('.ctry-flag').src = 'https://flagcdn.com/w40/' + b.dataset.code + '.png';
+        trigger.querySelector('.ctry-name').textContent = b.dataset.name;
+        close();
+      });
+      icons();
+    });
+  }
+
   /* =========================================================== triggers = */
   document.addEventListener('click', function (e) {
     var t = e.target.closest('[data-modal]');
@@ -529,11 +573,12 @@
     else if (kind === 'account') accountModal();
     else if (kind === 'add-payment') addPaymentStep1();
     else if (kind === 'market-read') marketReadModal();
+    else if (kind === 'country') countryModal(t);
     else if (kind === 'copy') copyModal(t.dataset.provider);
   });
 
   global.orbisModal = { open: open, close: close, deposit: depositStep1,
                       withdraw: withdrawStep1, refer: referModal, account: accountModal,
                       addPayment: addPaymentStep1, marketRead: marketReadModal, copy: copyModal,
-                      trade: tradeModal };
+                      trade: tradeModal, country: countryModal };
 })(window);
