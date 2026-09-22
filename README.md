@@ -99,6 +99,20 @@ and those PDFs are real: `scripts/build-pdfs.js` prints them from a branded HTML
 template with Chrome, so they are typeset rather than hand-assembled. Regenerate with
 `node scripts/build-pdfs.js`; they land in `assets/pdf/`.
 
+The three cards are two grey and one dark: the middle course is the one most people
+should take, so it is a dark island in the row, built by re-declaring the surface
+tokens inside it (the same trick as the marketing hero chart) rather than overriding
+every rule. On a dark page it inverts, going darker than the page with a lighter
+border, because a black card on a near-black background is not a highlight.
+
+**Enrolling never touches a trading account.** The Academy runs on its own dashboard,
+so `data-modal="enrol"` with `data-course="..."` opens a four-step flow in `modals.js`:
+what enrolment actually gets you, the email the login is sent to (validated, the CTA
+stays disabled until it parses), the payment method, then the receipt. Card goes to
+Paystack and USDT reuses the TRC-20 address with its QR. The page says the same thing
+above the cards, because someone who never opens the modal still needs to know that
+paying here does not open an orbisflow account.
+
 On a phone each course card owns a screen (`min-height:calc(100svh - var(--nav-h))`,
 with `scroll-margin-top` for the sticky header) so the three are compared one at a
 time rather than scrolled past as a wall. Above 760px they return to a three-column
@@ -234,6 +248,7 @@ Defined at the top of `assets/css/styles.css`.
 |---|---|---|---|
 | `--bg` | `#FAFAF9` | `#171716` | The one page background |
 | `--panel` | `#FFFFFF` | `#1E1E1D` | Chart and cards — barely lifted off `--bg` |
+| `--surface` | `#F4F3F0` | `#1C1C1B` | The tinted band a section sits on |
 | `--line` | `#E8E6E1` | `#2E2E2C` | Hairline separators |
 | `--ink` | `#1C1C1C` | `#EDECE8` | Text |
 | `--brand` | `#00BF63` | same | Logo green, rising prices, accents |

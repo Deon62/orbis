@@ -57,6 +57,13 @@
   <div class="wrap">
     <h2 class="course-h">Courses</h2>
 
+    <div class="note-info">
+      <i data-lucide="graduation-cap" class="i-sm"></i>
+      <span><b>The Academy is separate from trading.</b> Enrolling does not need an
+        orbisflow account and does not open one. You pay, and a login for the learning
+        dashboard is emailed to you.</span>
+    </div>
+
     <div class="grid g3 course-grid">
 
       <article class="course">
@@ -75,14 +82,14 @@
           </ul>
           <p class="course-meta">12 lessons · about 2 hours</p>
           <div class="course-ft">
-            <a class="btn btn-primary btn-block" href="/signup">Enrol · $19</a>
+            <button class="btn btn-primary btn-block" data-modal="enrol" data-course="foundations">Enrol · $19</button>
             <a class="btn btn-quiet btn-block btn-file" href="/assets/pdf/orbisflow-foundations-intro.pdf" download>
               <i data-lucide="file-down" class="i-sm"></i>Free intro · Your first ten trades</a>
           </div>
         </div>
       </article>
 
-      <article class="course">
+      <article class="course course-dark">
         <div class="course-in">
           <div class="course-hd">
             <span class="tag">Intermediate</span>
@@ -98,14 +105,14 @@
           </ul>
           <p class="course-meta">28 lessons · about 6 hours · monthly live Q&amp;A</p>
           <div class="course-ft">
-            <a class="btn btn-primary btn-block" href="/signup">Enrol · $59</a>
+            <button class="btn btn-primary btn-block" data-modal="enrol" data-course="practitioner">Enrol · $59</button>
             <a class="btn btn-quiet btn-block btn-file" href="/assets/pdf/orbisflow-practitioner-intro.pdf" download>
               <i data-lucide="file-down" class="i-sm"></i>Free intro · The risk sheet</a>
           </div>
         </div>
       </article>
 
-      <article class="course course-full">
+      <article class="course">
         <div class="course-in">
           <div class="course-hd">
             <span class="tag tag-up">Complete</span>
@@ -122,7 +129,7 @@
           </ul>
           <p class="course-meta">64 lessons · about 15 hours · mentor review</p>
           <div class="course-ft">
-            <a class="btn btn-primary btn-block" href="/signup">Enrol · $149</a>
+            <button class="btn btn-primary btn-block" data-modal="enrol" data-course="professional">Enrol · $149</button>
             <a class="btn btn-quiet btn-block btn-file" href="/assets/pdf/orbisflow-professional-intro.pdf" download>
               <i data-lucide="file-down" class="i-sm"></i>Free intro · Building a trading system</a>
           </div>
@@ -147,5 +154,7 @@
 
 <script src="/assets/js/icons.js"></script>
 <script src="/assets/js/app.js"></script>
+<script src="/assets/js/qr.js"></script>
+<script src="/assets/js/modals.js"></script>
 </body>
 </html>

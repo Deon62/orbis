@@ -717,6 +717,198 @@
 
   global.orbisAuto = { start: autoStart, update: autoUpdate, stop: autoStop };
 
+  /* ==================================================== academy enrol == */
+  /* The Academy is not the trading platform. Enrolling never touches an
+     orbisflow account: we take an email, take a payment, and send a login for
+     the learning dashboard. Three steps, then a receipt. */
+  var COURSES = {
+    foundations:  { name: 'Foundations',  price: 19,  level: 'Beginner' },
+    practitioner: { name: 'Practitioner', price: 59,  level: 'Intermediate' },
+    professional: { name: 'Professional', price: 149, level: 'Complete' }
+  };
+
+  var PAY_METHODS = [
+    { k: 'mpesa', name: 'M-Pesa',        note: 'STK push to your phone',   icon: 'smartphone' },
+    { k: 'card',  name: 'Card',          note: 'Visa, Mastercard, Verve \u00b7 via Paystack', icon: 'credit-card' },
+    { k: 'usdt',  name: 'USDT (TRC-20)', note: 'TRON network',             icon: 'bitcoin' }
+  ];
+
+  function courseOf(key) { return COURSES[key] || COURSES.foundations; }
+
+  function summaryRow(c) {
+    return '<div class="enrol-sum"><b>' + c.name + '<span class="dim" ' +
+      'style="font-weight:400"> \u00b7 ' + c.level + '</span></b>' +
+      '<span class="mono">' + money(c.price) + '</span></div>';
+  }
+
+  /* step one, what enrolling actually gets you */
+  function enrolInfo(key) {
+    var c = courseOf(key);
+    var rows = [
+      ['graduation-cap', 'A separate learning dashboard',
+       'The Academy runs on its own site. You do not need an orbisflow trading account, and enrolling does not open one.'],
+      ['mail', 'Your login arrives by email',
+       'A username and password for the dashboard, sent to the address you give on the next step, within a minute of payment.'],
+      ['infinity', 'Yours to keep',
+       'Lessons stay open once you are enrolled, on a phone or a laptop, with no time limit.']
+    ];
+
+    var html =
+      '<div class="modal-bd">' +
+        summaryRow(c) +
+        '<div style="margin-top:10px">' +
+          rows.map(function (r) {
+            return '<div class="enrol-row">' +
+              '<span class="enrol-ic">' + ic(r[0], 'i-sm') + '</span>' +
+              '<span class="enrol-tx"><b>' + r[1] + '</b><span>' + r[2] + '</span></span>' +
+            '</div>';
+          }).join('') +
+        '</div>' +
+      '</div>' +
+      '<div class="modal-ft">' +
+        '<button class="btn btn-primary btn-block btn-lg" id="mGo">Proceed to enrol</button>' +
+      '</div>';
+
+    open('Enrol in ' + c.name, html, function (root) {
+      root.querySelector('#mGo').addEventListener('click', function () { enrolEmail(key); });
+    });
+  }
+
+  /* step two, the address the login goes to */
+  function enrolEmail(key) {
+    var c = courseOf(key);
+    var html =
+      '<div class="modal-bd">' +
+        summaryRow(c) +
+        '<div class="field" style="margin:18px 0 0">' +
+          '<label class="label" for="mEmail">Email address</label>' +
+          '<input class="input" id="mEmail" type="email" inputmode="email" ' +
+            'autocomplete="email" placeholder="you@example.com">' +
+          '<p class="hint">Your dashboard login goes here, so check it reads correctly. ' +
+            'We do not use it for anything else.</p>' +
+        '</div>' +
+      '</div>' +
+      '<div class="modal-ft">' +
+        '<button class="btn btn-primary btn-block btn-lg" id="mGo" disabled>Continue to payment</button>' +
+      '</div>';
+
+    open('Enrol in ' + c.name, html, function (root) {
+      var input = root.querySelector('#mEmail');
+      var go = root.querySelector('#mGo');
+
+      function sync() {
+        var ok = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(input.value.trim());
+        go.disabled = !ok;
+        go.textContent = ok ? 'Continue to payment \u00b7 ' + money(c.price) : 'Continue to payment';
+      }
+      input.addEventListener('input', sync);
+      input.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' && !go.disabled) go.click();
+      });
+      go.addEventListener('click', function () { enrolPay(key, input.value.trim()); });
+      sync();
+    }, function () { enrolInfo(key); });
+  }
+
+  /* step three, how they want to pay for it */
+  function enrolPay(key, email) {
+    var c = courseOf(key);
+    var picked = '';
+
+    var html =
+      '<div class="modal-bd">' +
+        summaryRow(c) +
+        '<p class="hint" style="margin:12px 0 10px">Login details go to <b>' + email + '</b></p>' +
+        '<div class="stack-sm">' +
+          PAY_METHODS.map(function (m) {
+            return '<button class="method" data-pay="' + m.k + '">' +
+              '<span class="method-ic">' + ic(m.icon, 'i-sm') + '</span>' +
+              '<span style="flex:1;text-align:left"><b>' + m.name + '</b>' +
+              '<span>' + m.note + '</span></span>' +
+              '<i class="pick-dot"></i></button>';
+          }).join('') +
+        '</div>' +
+      '</div>' +
+      '<div class="modal-ft">' +
+        '<button class="btn btn-primary btn-block btn-lg" id="mGo" disabled>Pay ' + money(c.price) + '</button>' +
+      '</div>';
+
+    open('Payment', html, function (root) {
+      var go = root.querySelector('#mGo');
+      root.querySelectorAll('[data-pay]').forEach(function (b) {
+        b.addEventListener('click', function () {
+          root.querySelectorAll('[data-pay]').forEach(function (o) { o.classList.remove('active'); });
+          b.classList.add('active');
+          picked = b.dataset.pay;
+          go.disabled = false;
+        });
+      });
+
+      go.addEventListener('click', function () {
+        if (picked === 'usdt') return enrolCrypto(key, email);
+        if (picked === 'card') {
+          close();
+          if (global.orbisVeil) global.orbisVeil('Opening Paystack checkout');
+          else toast('Opening Paystack checkout', 'external-link');
+          return;
+        }
+        enrolDone(key, email, 'An STK push is on its way to your phone. ');
+      });
+    }, function () { enrolEmail(key); });
+  }
+
+  /* paying in USDT is the deposit address again, at a course price */
+  function enrolCrypto(key, email) {
+    var c = courseOf(key);
+    var html =
+      '<div class="modal-bd">' +
+        '<div class="enrol-sum"><b>Send ' + money(c.price) + ' in USDT</b>' +
+          '<span class="tag">TRC-20</span></div>' +
+        '<p class="hint" style="margin:13px 0 6px">To this address</p>' +
+        '<div class="addr">' +
+          '<code id="mAddr">' + USDT_ADDRESS + '</code>' +
+          '<button data-copy="#mAddr">' + ic('copy', 'i-sm') + 'Copy address</button>' +
+        '</div>' +
+        '<div class="qr-wrap">' +
+          '<canvas id="mQr" aria-label="QR code of the USDT address" role="img"></canvas>' +
+        '</div>' +
+        '<div class="note-warn">' + ic('triangle-alert', 'i-sm') +
+          '<span>USDT on TRON (TRC-20) only. Another network or another coin ' +
+          'cannot be recovered.</span></div>' +
+      '</div>' +
+      '<div class="modal-ft">' +
+        '<button class="btn btn-primary btn-block btn-lg" id="mGo">I have sent it</button>' +
+      '</div>';
+
+    open('Pay in USDT', html, function (root) {
+      var cv = root.querySelector('#mQr');
+      if (cv && global.OrbisQR) {
+        var small = Math.min(innerHeight, innerWidth) < 820;
+        global.OrbisQR.render(cv, USDT_ADDRESS,
+          { size: small ? 112 : 132, dark: '#1C1C1C', light: '#FFFFFF' });
+      }
+      root.querySelector('#mGo').addEventListener('click', function () {
+        enrolDone(key, email, 'We are watching the network for your transfer. ');
+      });
+    }, function () { enrolPay(key, email); });
+  }
+
+  /* the receipt */
+  function enrolDone(key, email, lead) {
+    var c = courseOf(key);
+    var html =
+      '<div class="modal-bd enrol-done">' +
+        '<span class="enrol-ic">' + ic('check') + '</span>' +
+        '<h4>You are enrolled in ' + c.name + '</h4>' +
+        '<p>' + lead + 'Your Academy login goes to <b>' + email +
+          '</b> as soon as the payment clears. It can land in spam the first time.</p>' +
+      '</div>' +
+      '<div class="modal-ft">' +
+        '<button class="btn btn-dark btn-block btn-lg" data-close>Done</button>' +
+      '</div>';
+    open('Enrolled', html);
+  }
+
   /* ======================================================= indicators == */
   function indicatorsModal() {
     var state = (global.orbisChartState && global.orbisChartState()) ||
@@ -783,10 +975,11 @@
     else if (kind === 'indicators') indicatorsModal();
     else if (kind === 'country') countryModal(t);
     else if (kind === 'copy') copyModal(t.dataset.provider);
+    else if (kind === 'enrol') enrolInfo(t.dataset.course);
   });
 
   global.orbisModal = { open: open, close: close, deposit: depositStep1,
                       withdraw: withdrawStep1, refer: referModal, account: accountModal,
                       addPayment: addPaymentStep1, marketRead: marketReadModal, copy: copyModal,
-                      trade: tradeModal, country: countryModal };
+                      trade: tradeModal, country: countryModal, enrol: enrolInfo };
 })(window);

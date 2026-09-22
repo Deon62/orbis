@@ -13,6 +13,7 @@
   --line:      #E8E6E1;
   --line-soft: #F0EFEB;
   --line-strong:#C9C6BF;
+  --surface:   #F4F3F0;   /* the tinted band a section sits on */
 
   --ink:   #1C1C1C;
   --ink-2: #5E5E59;
@@ -57,6 +58,7 @@
   --line:      #2E2E2C;
   --line-soft: #262625;
   --line-strong:#474743;
+  --surface:   #1C1C1B;
 
   --ink:   #EDECE8;
   --ink-2: #A5A49E;
@@ -1491,11 +1493,33 @@ body:has(.chart-full) .tabbar{ display:none; }
 
 /* ============================================================ Academy == */
 .course{
-  border:1px solid var(--line); background:var(--panel);
+  border:1px solid var(--line); background:var(--panel-2);
   display:flex; flex-direction:column;
 }
+
+/* the middle course is the one most people should take, so it is the dark
+   island in a row of grey ones. Same trick as the marketing hero chart: the
+   surface tokens are re-declared inside it rather than every rule overridden */
+.course-dark{
+  --panel:      var(--black-2);
+  --panel-2:    var(--black-3);
+  --line:       var(--black-line);
+  --line-soft:  var(--black-line);
+  --line-strong:var(--black-line);
+  --ink:        var(--on-black);
+  --ink-2:      var(--on-black-2);
+  --ink-3:      var(--on-black-2);
+  background:var(--black); color:var(--on-black); border-color:var(--black-line);
+}
+.course-dark .tag{ border-color:var(--black-line); color:var(--on-black-2); }
+.course-dark .ticks svg{ color:var(--brand); }
+.course-dark .btn-primary{ background:var(--brand); color:#0B0B0A; }
+.course-dark .btn-primary:hover{ background:var(--brand-strong); color:#fff; }
+.course-dark .btn-file{ border-color:var(--black-line); color:var(--on-black-2); }
+.course-dark .btn-file:hover{ background:var(--black-3); color:var(--on-black); border-color:var(--on-black-2); }
+/* on a dark page the island has to go the other way to still read as one */
+:root[data-theme="dark"] .course-dark{ background:#0D0D0C; border-color:#3D3D3A; }
 .course-in{ padding:22px 20px; display:flex; flex-direction:column; flex:1; }
-.course-full{ border-color:var(--line-strong); }
 
 .course-hd{ display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
 .course-price{ font-size:21px; font-weight:600; letter-spacing:-.02em; }
@@ -1622,3 +1646,46 @@ body:has(.chart-full) .tabbar{ display:none; }
    or navy. The chip stays light in both themes so every one of them reads,
    which is also how an exchange draws a coin list. */
 .asset-coin{ background:#F1F0EC; }
+
+
+/* how enrolment works, said once on the page and again in the modal */
+.note-info{
+  display:flex; gap:10px; align-items:flex-start;
+  padding:13px 15px; background:var(--panel-2); border-left:2px solid var(--brand);
+  font-size:13px; line-height:1.55; color:var(--ink-2); margin-bottom:22px;
+}
+.note-info svg{ color:var(--brand-strong); margin-top:2px; flex:none; }
+.note-info b{ color:var(--ink); font-weight:600; }
+:root[data-theme="dark"] .note-info svg{ color:var(--brand); }
+
+/* the enrolment steps */
+.enrol-row{ display:flex; gap:12px; align-items:flex-start; padding:13px 0; border-bottom:1px solid var(--line-soft); }
+.enrol-row:last-of-type{ border-bottom:0; }
+.enrol-ic{ width:34px; height:34px; background:var(--panel-2); display:grid; place-items:center; flex:none; }
+.enrol-tx b{ display:block; font-size:13.5px; font-weight:600; margin-bottom:2px; }
+.enrol-tx span{ font-size:12.5px; color:var(--ink-3); line-height:1.5; }
+.enrol-sum{
+  display:flex; align-items:center; justify-content:space-between;
+  padding:12px 14px; background:var(--panel-2); margin-bottom:4px;
+}
+.enrol-sum b{ font-size:14px; }
+.enrol-sum .mono{ font-size:17px; font-weight:600; }
+.enrol-done{ text-align:center; padding:8px 0 4px; }
+.enrol-done .enrol-ic{ width:46px; height:46px; margin:0 auto 14px; background:var(--brand-tint); }
+.enrol-done .enrol-ic svg{ color:var(--brand-strong); width:22px; height:22px; }
+.enrol-done h4{ font-size:17px; margin-bottom:6px; }
+.enrol-done p{ font-size:13.5px; color:var(--ink-2); line-height:1.6; max-width:38ch; margin-inline:auto; }
+
+
+/* which payment method is chosen, marked the way the rest of the site marks
+   a choice: a small dot, never a coloured fill */
+.pick-dot{
+  width:16px; height:16px; border:1px solid var(--line-strong); border-radius:50%;
+  flex:none; display:grid; place-items:center;
+}
+.method.active .pick-dot{ border-color:var(--brand-strong); }
+.method.active .pick-dot::after{
+  content:''; width:8px; height:8px; border-radius:50%; background:var(--brand-strong);
+}
+:root[data-theme="dark"] .method.active .pick-dot{ border-color:var(--brand); }
+:root[data-theme="dark"] .method.active .pick-dot::after{ background:var(--brand); }
