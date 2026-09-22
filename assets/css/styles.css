@@ -755,7 +755,8 @@ body.app-shell .hdr-right{ margin-left:auto; }
    Phone: the trade buttons ride just above the tab bar
    ========================================================================== */
 @media(max-width:1039px){
-  .trade-btns{
+  .trade-btns,
+  .auto-btns{
     position:fixed; left:0; right:0; z-index:66;
     bottom:calc(var(--tab-h) + env(safe-area-inset-bottom));
     padding:8px 12px; background:var(--panel); border-top:1px solid var(--line);
@@ -1237,7 +1238,9 @@ main{ animation:pageIn .18s ease both; }
   display:flex; align-items:center; justify-content:space-between; gap:12px;
   padding:12px 0; border-bottom:1px solid var(--line-soft);
 }
-.auto-row:last-of-type{ border-bottom:0; }
+/* :last-of-type counts divs, not .auto-rows, so target the one before the
+   payout box instead */
+.auto-row:has(+ .payout){ border-bottom:0; }
 .auto-row .lr-tx b{ font-size:13.5px; }
 .auto-amt{ width:120px; }
 .auto-amt .input{ height:38px; text-align:right; }
