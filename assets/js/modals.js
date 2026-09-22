@@ -561,6 +561,44 @@
     });
   }
 
+  /* ==================================================== auto session === */
+  /* The auto panel scrolls out of sight once you leave the ticket, so the
+     session reports itself from the top of the screen instead. */
+  var autoPop;
+
+  function autoStart(onStop) {
+    if (autoPop) autoPop.remove();
+    autoPop = document.createElement('div');
+    autoPop.className = 'run-pop';
+    autoPop.innerHTML =
+      '<span class="run-dot up">' + ic('bot', 'i-sm') + '</span>' +
+      '<span class="run-tx"><b>Auto trading</b><span id="autoTx">Starting</span></span>' +
+      '<button class="run-stop" id="autoStop" aria-label="Stop auto trading">' + ic('square', 'i-sm') + '</button>';
+    document.body.appendChild(autoPop);
+    icons();
+    requestAnimationFrame(function () { autoPop.classList.add('in'); });
+    autoPop.querySelector('#autoStop').addEventListener('click', function () {
+      if (onStop) onStop();
+    });
+  }
+
+  function autoUpdate(text, up) {
+    if (!autoPop) return;
+    var el = autoPop.querySelector('#autoTx');
+    el.textContent = text;
+    el.className = up === undefined ? '' : (up ? 'up' : 'down');
+  }
+
+  function autoStop() {
+    if (!autoPop) return;
+    var el = autoPop;
+    autoPop = null;
+    el.classList.remove('in');
+    setTimeout(function () { el.remove(); }, 200);
+  }
+
+  global.orbisAuto = { start: autoStart, update: autoUpdate, stop: autoStop };
+
   /* =========================================================== triggers = */
   document.addEventListener('click', function (e) {
     var t = e.target.closest('[data-modal]');

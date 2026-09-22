@@ -425,11 +425,17 @@
       net.textContent = (pnl >= 0 ? '+' : '') + OrbisData.money(pnl);
       net.className = 'mono ' + (pnl >= 0 ? 'up' : 'down');
       session.textContent = timer ? trades + ' trade' + (trades === 1 ? '' : 's') : 'Not running';
+      if (timer && window.orbisAuto) {
+        window.orbisAuto.update(
+          trades + ' trade' + (trades === 1 ? '' : 's') + ' · ' +
+          (pnl >= 0 ? '+' : '') + OrbisData.money(pnl), pnl >= 0);
+      }
     }
 
     function stop(why) {
       clearInterval(timer);
       timer = null;
+      if (window.orbisAuto) window.orbisAuto.stop();
       run.innerHTML = '<i data-lucide="play" class="i-sm"></i>Start auto trading';
       run.classList.remove('btn-dark');
       run.classList.add('btn-primary');
@@ -448,6 +454,7 @@
       run.classList.remove('btn-primary');
       run.classList.add('btn-dark');
       window.orbisIcons();
+      if (window.orbisAuto) window.orbisAuto.start(function () { stop('by you'); });
       paint();
 
       timer = setInterval(function () {

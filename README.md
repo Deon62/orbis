@@ -182,10 +182,16 @@ rail and tab bar, before the label on segments. Compact controls (timeframes, ch
 pills) just darken their text and border. Tap highlight is off everywhere and focus
 rings only show for keyboard users. Corners are square except avatars and asset badges.
 
+The marketing header and menu only link to pages that run the public shell
+(`/#how`, `/academy`, `/about`). Everything else lives inside the trading app, and
+linking to it from the landing page would drop a visitor into the app sideways.
+
 The top bar has two shapes. On **Trade, Markets and Positions** it carries the account
 card (`.acct-card`, with a round US flag and a chevron) plus Deposit and the avatar;
 pressing the card opens a centred **Switch account** modal that closes on selection.
-Every other page gets only a back arrow, the page name and the avatar. The theme switch
+Every other page gets only a back arrow and the page name; the deposit button is not
+offered on pages where no money is at stake. A page can put a person in that corner
+instead with `data-hdr-person` (live chat shows Sam, with a presence dot). The theme switch
 lives in the rail on desktop and the drawer on mobile, so it is reachable either way.
 All modals float centred, phones included.
 

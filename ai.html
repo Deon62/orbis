@@ -35,8 +35,8 @@
       </div>
     </div>
         <span class="grow"></span>
-        <button class="btn btn-primary btn-sm" data-mock="Rescan markets">
-          <i data-lucide="radar" class="i-sm"></i>Rescan
+        <button class="btn btn-primary btn-sm" id="rescan">
+          <i data-lucide="radar" class="i-sm"></i><span id="rescanTx">Rescan</span>
         </button>
       </div>
       <div class="grid g3" id="signals"></div>
@@ -116,6 +116,54 @@
       '<td><span class="tag ' + (up ? 'tag-up' : 'tag-down') + '">' + r[3] + '</span></td>' +
       '<td class="r dim">' + r[4] + '</td></tr>';
   }).join('');
+
+  /* ------------------------------------------------------------- scan --- */
+  var scanBtn = document.getElementById('rescan');
+  var grid = document.getElementById('signals');
+  var patterns = document.getElementById('patterns');
+  var filter = 'all';
+
+  document.addEventListener('fdrop:change', function (e) { filter = e.detail.value; });
+
+  function jitter(v, spread, lo, hi) {
+    return Math.max(lo, Math.min(hi, Math.round(v + (Math.random() - 0.5) * spread)));
+  }
+
+  scanBtn.addEventListener('click', function () {
+    if (scanBtn.disabled) return;
+    scanBtn.disabled = true;
+    scanBtn.querySelector('#rescanTx').textContent = 'Scanning';
+    scanBtn.querySelector('svg').classList.add('spin');
+    grid.classList.add('scanning');
+    patterns.closest('.card').classList.add('scanning');
+
+    var steps = ['Reading 60 markets', 'Scoring setups', 'Ranking signals'];
+    var i = 0;
+    var tick = setInterval(function () {
+      i++;
+      if (i < steps.length) window.orbisToast(steps[i], 'radar');
+    }, 700);
+    window.orbisToast(steps[0], 'radar');
+
+    setTimeout(function () {
+      clearInterval(tick);
+
+      /* a fresh scan moves the confidences and can flip a marginal call */
+      SIGNALS.forEach(function (s) {
+        s.conf = jitter(s.conf, 14, 45, 92);
+        if (s.conf < 52 && Math.random() < 0.5) s.dir = s.dir === 'Rise' ? 'Fall' : 'Rise';
+      });
+      SIGNALS.sort(function (a, b) { return b.conf - a.conf; });
+
+      scanBtn.disabled = false;
+      scanBtn.querySelector('#rescanTx').textContent = 'Rescan';
+      grid.classList.remove('scanning');
+      patterns.closest('.card').classList.remove('scanning');
+      render(filter);
+      scanBtn.querySelector('svg').classList.remove('spin');
+      window.orbisToast('Scan complete · ' + SIGNALS.length + ' signals', 'check-circle-2');
+    }, 2100);
+  });
 
   render('all');
 })();

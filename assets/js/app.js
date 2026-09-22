@@ -183,33 +183,19 @@
     ]}
   ];
 
+  /* Only pages that actually run the public shell belong here. Everything else
+     lives inside the trading app and would drop a visitor into it sideways. */
   var PUBLIC_NAV = [
-    { label: 'Markets',      url: '/markets' },
-    { label: 'Academy',      url: '/academy' },
     { label: 'How it works', url: '/#how' },
-    { label: 'Refer & earn', url: '/referrals' },
+    { label: 'Academy',      url: '/academy' },
     { label: 'About',        url: '/about' }
   ];
 
-  /* the phone header carries a menu button instead of a row of links */
   var PUBLIC_DRAWER = [
     { h: 'Platform', items: [
-      ['Markets',      'layers',      '/markets'],
-      ['How it works', 'list-checks', '/#how'],
-      ['Refer & earn', 'gift',        '/referrals']
-    ]},
-    { h: 'Learn', items: [
-      ['Academy',     'graduation-cap', '/academy'],
-      ['Help centre', 'life-buoy',      '/help-centre']
-    ]},
-    { h: 'Company', items: [
-      ['About',      'building-2', '/about'],
-      ['Contact us', 'mail',       '/contact']
-    ]},
-    { h: 'Legal', items: [
-      ['Terms',           'scroll-text',    '/terms'],
-      ['Privacy policy',  'lock',           '/privacy'],
-      ['Risk disclosure', 'triangle-alert', '/risk-disclosure']
+      ['How it works', 'list-checks',    '/#how'],
+      ['Academy',      'graduation-cap', '/academy'],
+      ['About',        'building-2',     '/about']
     ]}
   ];
 
@@ -337,8 +323,17 @@
           ? '<button class="icon-btn" data-modal="' + BODY.dataset.hdrAction + '" aria-label="' +
             (BODY.dataset.hdrLabel || 'Details') + '">' + ic(BODY.dataset.hdrIcon || 'info') + '</button>'
           : '') +
-        '<button class="hdr-deposit" data-modal="deposit" aria-label="Deposit">' +
-          ic('arrow-down-to-line') + '</button>' +
+        /* a page can put a person in the corner instead, the way live chat does */
+        (BODY.dataset.hdrPerson
+          ? '<span class="hdr-person">' +
+              '<span class="avatar">' + BODY.dataset.hdrPerson + '</span>' +
+              '<span class="hdr-person-tx"><b>' + (BODY.dataset.hdrPersonName || '') + '</b>' +
+                '<span><i class="dotlive"></i>' + (BODY.dataset.hdrPersonStatus || 'Online') + '</span></span>' +
+            '</span>'
+          : '') +
+        /* deposit only where money is actually at stake */
+        (full ? '<button class="hdr-deposit" data-modal="deposit" aria-label="Deposit">' +
+                  ic('arrow-down-to-line') + '</button>' : '') +
       '</div></div></header>';
   }
 
