@@ -38,16 +38,24 @@ vercel dev            # or any static server with clean-URL support
 | `cashier.html` | Transaction history — the list alone. Deposit and withdraw are modals. |
 | `referrals.html` | The referral list, nothing else. |
 | `referral-earnings.html` | Weekly payouts and accruals. |
-| `account.html` | The old profile hub. **No longer linked** — Profile goes straight to `profile-details`, and the drawer covers everything the hub listed. Kept on disk, safe to delete. |
-| `profile-details.html` | The profile page — what the Profile tab and the avatar open. |
+| `profile-details.html` | The profile page — what the Profile tab, the avatar and the panel's account strip all open. The old `account.html` hub is gone; the drawer covers what it listed. |
 | `verification.html`, `security.html`, `payments.html`, `preferences.html` | One concern each, reached from the drawer. |
-| `economic-calendar`, `market-news`, `price-alerts`, `watchlists` | Trading tools. |
+| `copy-trading`, `economic-calendar`, `market-news`, `price-alerts`, `watchlists` | Trading tools. |
 | `profit-table`, `trade-confirmations` | Reports. |
 | `help-centre`, `live-chat`, `contact` | Support. |
 | `terms`, `privacy`, `risk-disclosure` | Legal. |
 
 Every link in the drawer now leads to a real page — nothing in it falls back to a
-"not wired up" toast.
+"not wired up" toast. Group order: **Money → Account → Trading tools → Reports →
+Support → Legal.**
+
+## Copy trading
+
+`copy-trading` lists four providers (`OrbisData.providers` in `data.js`) with 30-day
+return, win rate, max drawdown and the minimum allocation each requires — $50, $100,
+$250 and $500. Sort by any of them. **Copy** opens a modal with a stepper that refuses
+anything below that provider's minimum, and states the fee and exit terms before you
+commit.
 
 **Tab bar:** pages reached from the panel set `data-tabbar="hide"` and drop the bottom
 bar, because they are dead ends you return from rather than destinations you switch
@@ -72,6 +80,7 @@ Flows too short to deserve a page live in `assets/js/modals.js`, opened by
 - **Switch account** — Demo / Real with balances, tick on the active one.
 - **Add a method** — payment type, then its one field; opened from Payment methods.
 - **Market read** — the AI page's sentiment/volatility/accuracy figures.
+- **Copy <provider>** — allocation stepper, minimum enforced, fee and exit terms.
 
 Saved destinations are the `SAVED` map at the top of `modals.js`; accounts come from
 `window.orbisAccounts` in `app.js`. Swap both for the account service.

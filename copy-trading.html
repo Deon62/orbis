@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Copy trading · orbisflow</title>
+<meta name="description" content="Follow a trader and copy their contracts automatically.">
+<meta name="theme-color" content="#1C1C1C">
+<link rel="icon" href="/assets/img/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/css/styles.css">
+<script>(function(){try{var t=localStorage.getItem("orbisflow-theme")||(matchMedia("(prefers-color-scheme:dark)").matches?"dark":"light");document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body data-page="copy-trading" data-title="Copy trading" data-tabbar="hide" data-shell="app">
+
+<div id="site-header"></div>
+
+<main class="wrap page-body">
+  <div class="toolbar" style="padding-top:0">
+    <div class="pills" id="sortBy" style="padding:0">
+      <button class="pill active" data-s="ret">Return</button>
+      <button class="pill" data-s="win">Win rate</button>
+      <button class="pill" data-s="min">Minimum</button>
+    </div>
+    <span class="grow"></span>
+    <span class="dim" style="font-size:12.5px">Last 30 days</span>
+  </div>
+
+  <div class="card card-flat" id="providers"></div>
+
+  <p class="hint" style="margin-top:18px;max-width:60ch">
+    You keep control of your funds — allocation stays in your account and you can stop
+    copying at any time. Open contracts run to expiry. Simulated for this prototype.
+  </p>
+</main>
+
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script src="/assets/js/chart.js"></script>
+<script src="/assets/js/data.js"></script>
+<script src="/assets/js/app.js"></script>
+<script src="/assets/js/modals.js"></script>
+<script>
+(function () {
+  var host = document.getElementById('providers');
+
+  function render(sort) {
+    var list = OrbisData.providers.slice().sort(function (a, b) {
+      return sort === 'min' ? a.min - b.min : b[sort] - a[sort];
+    });
+
+    host.innerHTML = list.map(function (p) {
+      return '<div class="prov">' +
+        '<span class="avatar">' + p.initials + '</span>' +
+        '<span class="prov-id">' +
+          '<b>' + p.name + '</b>' +
+          '<span>' + p.style + ' · ' + p.copiers.toLocaleString('en-US') + ' copiers</span>' +
+        '</span>' +
+        '<span class="prov-stats">' +
+          '<span><small>Return</small><b class="mono up">+' + p.ret + '%</b></span>' +
+          '<span><small>Win rate</small><b class="mono">' + p.win + '%</b></span>' +
+          '<span><small>Max drawdown</small><b class="mono">' + p.dd + '%</b></span>' +
+          '<span><small>Minimum</small><b class="mono">' + OrbisData.money(p.min) + '</b></span>' +
+        '</span>' +
+        '<button class="btn btn-ghost btn-sm prov-cta" data-modal="copy" data-provider="' + p.id + '">Copy</button>' +
+      '</div>';
+    }).join('');
+    window.orbisIcons();
+  }
+
+  document.getElementById('sortBy').addEventListener('click', function (e) {
+    var p = e.target.closest('.pill');
+    if (p) render(p.dataset.s);
+  });
+
+  render('ret');
+})();
+</script>
+</body>
+</html>

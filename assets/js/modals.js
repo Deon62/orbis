@@ -364,6 +364,69 @@
     open('Market read', html);
   }
 
+  /* ====================================================== copy trading == */
+  function copyModal(id) {
+    var D = global.OrbisData;
+    var p = D && D.providerById ? D.providerById(id) : null;
+    if (!p) return;
+
+    var html =
+      '<div class="modal-bd">' +
+        '<div class="saved" style="margin-bottom:16px">' +
+          '<span class="avatar">' + p.initials + '</span>' +
+          '<span class="saved-tx"><b>' + p.name + '</b><span>' + p.style + '</span></span>' +
+          '<b class="read-val up">+' + p.ret + '%</b>' +
+        '</div>' +
+
+        '<div class="field">' +
+          '<label class="label" for="cAmt">Amount to allocate</label>' +
+          '<div class="stepper">' +
+            '<button type="button" class="step-btn" data-cstep="-1" aria-label="Less">' + ic('minus', 'i-sm') + '</button>' +
+            '<span class="stepper-val"><span class="cur">$</span>' +
+              '<input id="cAmt" type="number" value="' + p.min + '" min="' + p.min + '" step="10"></span>' +
+            '<button type="button" class="step-btn" data-cstep="1" aria-label="More">' + ic('plus', 'i-sm') + '</button>' +
+          '</div>' +
+          '<p class="hint" id="cHint">Minimum ' + money(p.min) + ' for this provider.</p>' +
+        '</div>' +
+
+        '<div class="kv"><span>Copies each trade at</span><b>Proportional to your balance</b></div>' +
+        '<div class="kv"><span>Performance fee</span><b>20% of profit</b></div>' +
+        '<div class="kv"><span>Stop any time</span><b>Open contracts run to expiry</b></div>' +
+      '</div>' +
+      '<div class="modal-ft">' +
+        '<button class="btn btn-primary btn-block btn-lg" id="cGo">Copy with ' + money(p.min) + '</button>' +
+        '<p class="hint center" style="margin-top:10px">Past performance does not predict future results.</p>' +
+      '</div>';
+
+    open('Copy ' + p.name, html, function (root) {
+      var amt = root.querySelector('#cAmt');
+      var go = root.querySelector('#cGo');
+      var hint = root.querySelector('#cHint');
+
+      function sync() {
+        var v = Number(amt.value) || 0;
+        var ok = v >= p.min;
+        go.disabled = !ok;
+        go.textContent = 'Copy with ' + money(v);
+        hint.textContent = ok ? 'Minimum ' + money(p.min) + ' for this provider.'
+                              : 'Below the ' + money(p.min) + ' minimum.';
+        hint.style.color = ok ? '' : 'var(--down)';
+      }
+      amt.addEventListener('input', sync);
+      root.querySelectorAll('[data-cstep]').forEach(function (b) {
+        b.addEventListener('click', function () {
+          var v = Number(amt.value) || 0;
+          amt.value = Math.max(0, v + 10 * Number(b.dataset.cstep));
+          sync();
+        });
+      });
+      go.addEventListener('click', function () {
+        close();
+        toast('Copying ' + p.name + ' with ' + money(amt.value), 'check-circle-2');
+      });
+    });
+  }
+
   /* =========================================================== triggers = */
   document.addEventListener('click', function (e) {
     var t = e.target.closest('[data-modal]');
@@ -376,9 +439,10 @@
     else if (kind === 'account') accountModal();
     else if (kind === 'add-payment') addPaymentStep1();
     else if (kind === 'market-read') marketReadModal();
+    else if (kind === 'copy') copyModal(t.dataset.provider);
   });
 
   global.orbisModal = { open: open, close: close, deposit: depositStep1,
                       withdraw: withdrawStep1, refer: referModal, account: accountModal,
-                      addPayment: addPaymentStep1, marketRead: marketReadModal };
+                      addPayment: addPaymentStep1, marketRead: marketReadModal, copy: copyModal };
 })(window);

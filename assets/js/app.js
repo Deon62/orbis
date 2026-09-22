@@ -113,7 +113,15 @@
       ['Transaction history', 'receipt',            '/cashier'],
       ['Refer & earn',        'gift',               'modal:refer']
     ]},
+    { h: 'Account', items: [
+      ['Personal details', 'user-round',  '/profile-details'],
+      ['Verification',     'badge-check', '/verification'],
+      ['Security',         'shield',      '/security'],
+      ['Payment methods',  'credit-card', '/payments'],
+      ['Preferences',      'settings',    '/preferences']
+    ]},
     { h: 'Trading tools', items: [
+      ['Copy trading',      'users-round',   '/copy-trading'],
       ['Economic calendar', 'calendar-days', '/economic-calendar'],
       ['Market news',       'newspaper',     '/market-news'],
       ['Price alerts',      'bell-ring',     '/price-alerts'],
@@ -123,12 +131,6 @@
       ['Statements',          'file-text',  '/positions'],
       ['Profit table',        'table',      '/profit-table'],
       ['Trade confirmations', 'file-check', '/trade-confirmations']
-    ]},
-    { h: 'Account', items: [
-      ['Verification',    'badge-check', '/verification'],
-      ['Security',        'shield',      '/security'],
-      ['Payment methods', 'credit-card', '/payments'],
-      ['Preferences',     'settings',    '/preferences']
     ]},
     { h: 'Support', items: [
       ['Help centre', 'life-buoy',      '/help-centre'],
@@ -185,7 +187,7 @@
         '<div class="drawer-hd">' + logo() +
           '<button class="icon-btn" data-drawer-close aria-label="Close menu">' + ic('x') + '</button>' +
         '</div>' +
-        '<a class="drawer-acct" href="' + href('/account') + '">' +
+        '<a class="drawer-acct" href="/profile-details">' +
           '<span class="avatar">AO</span>' +
           '<div><b>Amara Otieno</b><span>Demo · $10,000.00</span></div>' +
         '</a>' +

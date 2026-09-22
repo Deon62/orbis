@@ -110,7 +110,24 @@
     { user:'t•••@proton.me',   joined:'28 Aug 2026', status:'Pending',  volume:0,    earned:0 }
   ];
 
+  /* --------------------------------------------------------- providers -- */
+  var providers = [
+    { id:'wk', name:'Wanjiru Kamau',  initials:'WK', style:'Momentum · majors',
+      min:100, ret:18.4, win:64, copiers:412,  dd:9,  since:'Mar 2025' },
+    { id:'dp', name:'Deshawn Price',  initials:'DP', style:'Synthetics · scalping',
+      min:250, ret:31.2, win:58, copiers:1204, dd:22, since:'Nov 2024' },
+    { id:'at', name:'Aiko Tanaka',    initials:'AT', style:'Yen carry · swing',
+      min:50,  ret:9.1,  win:71, copiers:233,  dd:5,  since:'Jul 2025' },
+    { id:'mf', name:'Marco Ferreira', initials:'MF', style:'Commodities · swing',
+      min:500, ret:24.7, win:61, copiers:786,  dd:15, since:'Jan 2025' }
+  ];
+
   global.OrbisData = {
+    providers: providers,
+    providerById: function (id) {
+      for (var i = 0; i < providers.length; i++) if (providers[i].id === id) return providers[i];
+      return null;
+    },
     markets: markets,
     cats: CATS,
     assetHTML: assetHTML,
