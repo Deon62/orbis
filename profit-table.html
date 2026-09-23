@@ -21,22 +21,35 @@
 <div id="site-header"></div>
 
 <main class="wrap page-body">
-  <div class="card card-flat">
-    <div class="tbl-scroll">
-      <table class="tbl">
-        <thead><tr><th>Date</th><th class="r">Trades</th><th class="r">Won</th><th class="r">Lost</th><th class="r">Turnover</th><th class="r">Net P/L</th></tr></thead>
-        <tbody><tr><td>22 Sep 2026</td><td class="r">14</td><td class="r">9</td><td class="r">5</td><td class="r">$340.00</td><td class="r"><span class="mono up">+$58.20</span></td></tr><tr><td>21 Sep 2026</td><td class="r">11</td><td class="r">6</td><td class="r">5</td><td class="r">$275.00</td><td class="r"><span class="mono up">+$21.40</span></td></tr><tr><td>20 Sep 2026</td><td class="r">18</td><td class="r">8</td><td class="r">10</td><td class="r">$450.00</td><td class="r"><span class="mono down">-$62.00</span></td></tr><tr><td>19 Sep 2026</td><td class="r">9</td><td class="r">6</td><td class="r">3</td><td class="r">$225.00</td><td class="r"><span class="mono up">+$47.80</span></td></tr><tr><td>18 Sep 2026</td><td class="r">12</td><td class="r">7</td><td class="r">5</td><td class="r">$300.00</td><td class="r"><span class="mono up">+$33.10</span></td></tr></tbody>
-      </table>
-    </div>
-  </div>
+  <div class="card card-flat" id="plList"></div>
 </main>
 
 <script src="/assets/js/icons.js"></script>
+<script src="/assets/js/api.js"></script>
 <script src="/assets/js/chart.js"></script>
 <script src="/assets/js/data.js"></script>
 <script src="/assets/js/app.js"></script>
 <script src="/assets/js/qr.js"></script>
 <script src="/assets/js/modals.js"></script>
 
+<script>
+(function () {
+  var A = OrbisAPI, M = A.money;
+
+  A.load({
+    el: '#plList', path: '/reports/profit',
+    empty: { icon: 'table', title: 'Nothing to report yet',
+      text: 'A row for every day you trade: contracts won and lost, turnover and net profit.',
+      action: '<a class="btn btn-primary btn-sm" href="/trade">Start trading</a>' },
+    render: function (d) {
+      return '<div class="tbl-scroll"><table class="tbl"><thead><tr><th>Date</th><th class="r">Trades</th><th class="r">Won</th><th class="r">Lost</th><th class="r">Turnover</th><th class="r">Net P/L</th></tr></thead><tbody>' +
+        d.map(function (r) {
+          return '<tr><td>' + r.date + '</td><td class="r">' + r.trades + '</td><td class="r">' + r.won + '</td><td class="r">' + r.lost + '</td>' +
+            '<td class="r">' + M(r.turnover) + '</td><td class="r"><span class="mono ' + (r.pl >= 0 ? 'up' : 'down') + '">' + (r.pl >= 0 ? '+' : '') + M(r.pl) + '</span></td></tr>';
+        }).join('') + '</tbody></table></div>';
+    }
+  });
+})();
+</script>
 </body>
 </html>

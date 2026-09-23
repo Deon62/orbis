@@ -27,61 +27,70 @@
     <figure class="viz">
       <figcaption class="viz-hd">
         <span class="viz-label">Total accrued</span>
-        <b class="viz-hero mono">$1,496.70</b>
+        <b class="viz-hero mono" id="reTotal">$0.00</b>
       </figcaption>
-
-      <div class="sbar" role="img"
-           aria-label="Paid $1,406.80, 94 percent. Pending $89.90, 6 percent.">
-        <span class="sbar-seg seg-1" style="width:94%" data-tip="Paid · $1,406.80 · 94%"></span>
-        <span class="sbar-seg seg-2" style="width:6%"  data-tip="Pending · $89.90 · 6%"></span>
-      </div>
-
+      <div class="sbar" role="img" id="reBar" aria-label="Nothing accrued yet"></div>
       <div class="viz-legend">
-        <span class="viz-key"><i class="sw sw-1"></i>Paid<b class="mono">$1,406.80</b></span>
-        <span class="viz-key"><i class="sw sw-2"></i>Pending<b class="mono">$89.90</b></span>
+        <span class="viz-key"><i class="sw sw-1"></i>Paid<b class="mono" id="rePaid">$0.00</b></span>
+        <span class="viz-key"><i class="sw sw-2"></i>Pending<b class="mono" id="rePending">$0.00</b></span>
       </div>
     </figure>
 
-    <div class="card card-flat">
-      <div class="tbl-scroll">
-        <table class="tbl">
-          <thead>
-            <tr><th>Period</th><th>Active traders</th><th class="r">Volume</th><th class="r">Amount</th><th>Status</th></tr>
-          </thead>
-          <tbody>
-            <tr><td>15-21 Sep 2026</td><td class="num">21</td><td class="r mono">$34,180.00</td><td class="r mono">$89.90</td><td><span class="tag tag-wait">Pending</span></td></tr>
-            <tr><td>8-14 Sep 2026</td><td class="num">19</td><td class="r mono">$28,640.00</td><td class="r mono up">$74.20</td><td><span class="tag tag-up">Paid</span></td></tr>
-            <tr><td>1-7 Sep 2026</td><td class="num">16</td><td class="r mono">$22,910.00</td><td class="r mono up">$61.40</td><td><span class="tag tag-up">Paid</span></td></tr>
-            <tr><td>25-31 Aug 2026</td><td class="num">14</td><td class="r mono">$19,480.00</td><td class="r mono up">$52.10</td><td><span class="tag tag-up">Paid</span></td></tr>
-            <tr><td>18-24 Aug 2026</td><td class="num">11</td><td class="r mono">$15,220.00</td><td class="r mono up">$40.80</td><td><span class="tag tag-up">Paid</span></td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
+    <div class="card card-flat" id="reList"></div>
   </div>
 </main>
 
 <script src="/assets/js/icons.js"></script>
+<script src="/assets/js/api.js"></script>
 <script src="/assets/js/app.js"></script>
 <script src="/assets/js/qr.js"></script>
 <script src="/assets/js/qr.js"></script>
 <script src="/assets/js/modals.js"></script>
 <script>
-/* per-segment tooltip, the hover layer a chart is expected to carry */
 (function () {
-  var tip;
-  document.querySelectorAll('.sbar-seg').forEach(function (seg) {
-    seg.addEventListener('pointerenter', function () {
-      tip = tip || Object.assign(document.createElement('div'), { className: 'viz-tip' });
-      tip.textContent = seg.dataset.tip;
-      document.body.appendChild(tip);
-      var r = seg.getBoundingClientRect();
-      tip.style.left = Math.round(r.left + r.width / 2) + 'px';
-      tip.style.top = Math.round(r.top + window.scrollY - 10) + 'px';
-      tip.classList.add('show');
-    });
-    seg.addEventListener('pointerleave', function () { if (tip) tip.classList.remove('show'); });
+  var A = OrbisAPI, M = A.money;
+
+  A.load({
+    el: '#reList', path: '/referrals/earnings',
+    empty: { icon: 'banknote', title: 'No earnings yet',
+      text: 'When your referrals trade, your share builds up each week and is paid every Thursday.',
+      action: '<a class="btn btn-ghost btn-sm" href="/referral-how">How referrals pay</a>' },
+    render: function (d) {
+      var paid = d.paid || 0, pending = d.pending || 0, total = paid + pending;
+      var pp = total ? Math.round(paid / total * 100) : 0;
+      document.getElementById('reTotal').textContent = M(total);
+      document.getElementById('rePaid').textContent = M(paid);
+      document.getElementById('rePending').textContent = M(pending);
+      var bar = document.getElementById('reBar');
+      bar.setAttribute('aria-label', 'Paid ' + M(paid) + ', ' + pp + ' percent. Pending ' + M(pending) + ', ' + (100 - pp) + ' percent.');
+      bar.innerHTML = total ? '<span class="sbar-seg seg-1" style="width:' + pp + '%" data-tip="Paid · ' + M(paid) + ' · ' + pp + '%"></span>' +
+        '<span class="sbar-seg seg-2" style="width:' + (100 - pp) + '%" data-tip="Pending · ' + M(pending) + ' · ' + (100 - pp) + '%"></span>' : '';
+      return '<div class="tbl-scroll"><table class="tbl"><thead><tr><th>Period</th><th>Active traders</th><th class="r">Volume</th><th class="r">Amount</th><th>Status</th></tr></thead><tbody>' +
+        (d.weeks || []).map(function (w) {
+          var paidRow = w.status === 'Paid';
+          return '<tr><td>' + w.period + '</td><td class="num">' + w.active + '</td><td class="r mono">' + M(w.volume) + '</td>' +
+            '<td class="r mono ' + (paidRow ? 'up' : '') + '">' + M(w.amount) + '</td><td><span class="tag ' + (paidRow ? 'tag-up' : 'tag-wait') + '">' + w.status + '</span></td></tr>';
+        }).join('') + '</tbody></table></div>';
+    }
   });
+})();
+</script>
+<script>
+/* per-segment tooltip, delegated because the segments arrive with the data */
+(function () {
+  var tip, bar = document.getElementById('reBar');
+  bar.addEventListener('pointerover', function (e) {
+    var seg = e.target.closest('.sbar-seg');
+    if (!seg) return;
+    tip = tip || Object.assign(document.createElement('div'), { className: 'viz-tip' });
+    tip.textContent = seg.dataset.tip;
+    document.body.appendChild(tip);
+    var r = seg.getBoundingClientRect();
+    tip.style.left = Math.round(r.left + r.width / 2) + 'px';
+    tip.style.top = Math.round(r.top + window.scrollY - 10) + 'px';
+    tip.classList.add('show');
+  });
+  bar.addEventListener('pointerleave', function () { if (tip) tip.classList.remove('show'); });
 })();
 </script>
 </body>

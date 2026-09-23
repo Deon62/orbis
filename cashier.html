@@ -22,40 +22,38 @@
 
 <main class="wrap page-body">
   <div class="stack" style="max-width:900px">
-
-    <div class="card card-flat">
-      <div class="tbl-scroll">
-        <table class="tbl">
-          <thead>
-            <tr><th>Date</th><th>Type</th><th>Method</th><th>Reference</th><th>Status</th><th class="r">Amount</th></tr>
-          </thead>
-          <tbody id="txBody"></tbody>
-        </table>
-      </div>
-    </div>
+    <div class="card card-flat" id="txList"></div>
   </div>
 </main>
 
 <script src="/assets/js/icons.js"></script>
+<script src="/assets/js/api.js"></script>
 <script src="/assets/js/chart.js"></script>
 <script src="/assets/js/data.js"></script>
 <script src="/assets/js/app.js"></script>
 <script src="/assets/js/qr.js"></script>
 <script src="/assets/js/modals.js"></script>
 <script>
-document.getElementById('txBody').innerHTML = OrbisData.transactions.map(function (t) {
-  var pos = t.amount >= 0;
-  var cls = t.status === 'Completed' ? 'tag-up' : (t.status === 'Pending' ? 'tag-wait' : '');
-  return '<tr>' +
-    '<td class="dim">' + t.when + '</td>' +
-    '<td><b>' + t.type + '</b></td>' +
-    '<td>' + t.method + '</td>' +
-    '<td class="mono dim">' + t.ref + '</td>' +
-    '<td><span class="tag ' + cls + '">' + t.status + '</span></td>' +
-    '<td class="r mono ' + (pos ? 'up' : '') + '">' + (pos ? '+' : '') + OrbisData.money(t.amount) + '</td>' +
-  '</tr>';
-}).join('');
-window.orbisIcons();
+(function () {
+  var A = OrbisAPI, M = A.money;
+
+  A.load({
+    el: '#txList', path: '/transactions',
+    empty: { icon: 'receipt', title: 'No transactions yet',
+      text: 'Deposits, withdrawals and trade settlements appear here, newest first.',
+      action: '<button class="btn btn-primary btn-sm" data-modal="deposit">Make a deposit</button>' },
+    render: function (d) {
+      return '<div class="tbl-scroll"><table class="tbl"><thead><tr><th>Date</th><th>Type</th><th>Method</th><th>Reference</th><th>Status</th><th class="r">Amount</th></tr></thead><tbody>' +
+        d.map(function (t) {
+          var pos = t.amount >= 0;
+          var cls = t.status === 'Completed' ? 'tag-up' : (t.status === 'Pending' ? 'tag-wait' : '');
+          return '<tr><td class="dim">' + t.when + '</td><td><b>' + t.type + '</b></td><td>' + t.method + '</td>' +
+            '<td class="mono dim">' + t.ref + '</td><td><span class="tag ' + cls + '">' + t.status + '</span></td>' +
+            '<td class="r mono ' + (pos ? 'up' : '') + '">' + (pos ? '+' : '') + M(t.amount) + '</td></tr>';
+        }).join('') + '</tbody></table></div>';
+    }
+  });
+})();
 </script>
 </body>
 </html>

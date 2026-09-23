@@ -25,26 +25,26 @@
       <form data-mock-submit="Saved">
         <div class="field">
           <label class="label" for="atn">Trader name</label>
-          <input class="input" id="atn" value="Amara Otieno">
+          <input class="input" id="atn" placeholder="Your full name" autocomplete="name">
         </div>
 
         <div class="field">
           <label class="label" for="aem">Email</label>
-          <input class="input" id="aem" type="email" value="amara.otieno@orbisflow.com">
+          <input class="input" id="aem" type="email" placeholder="you@example.com" autocomplete="email">
         </div>
 
         <div class="field">
           <label class="label" for="aph">Phone</label>
-          <input class="input" id="aph" type="tel" value="+254 712 000 412">
+          <input class="input" id="aph" type="tel" placeholder="+254 7XX XXX XXX" autocomplete="tel">
         </div>
 
         <!-- kept side by side at every width, so the form fits without scrolling -->
         <div class="row2-tight">
           <div class="field">
             <label class="label">Country</label>
-            <button type="button" class="select ctry-trigger" data-modal="country" data-code="ke">
-              <img class="ctry-flag" src="https://flagcdn.com/w40/ke.png" alt="">
-              <span class="ctry-name">Kenya</span>
+            <button type="button" class="select ctry-trigger" data-modal="country" data-code="">
+              <img class="ctry-flag" src="https://flagcdn.com/w40/un.png" alt="">
+              <span class="ctry-name">Select country</span>
               <i data-lucide="chevron-down" class="i-sm"></i>
             </button>
           </div>
@@ -62,9 +62,29 @@
   </main>
 
 <script src="/assets/js/icons.js"></script>
+<script src="/assets/js/api.js"></script>
 <script src="/assets/js/countries.js"></script>
 <script src="/assets/js/app.js"></script>
 <script src="/assets/js/qr.js"></script>
 <script src="/assets/js/modals.js"></script>
+<script>
+(function () {
+  var A = OrbisAPI, M = A.money;
+
+  A.get('/me').then(function (me) {
+    if (!me) return;
+    if (me.name) document.getElementById('atn').value = me.name;
+    if (me.email) document.getElementById('aem').value = me.email;
+    if (me.phone) document.getElementById('aph').value = me.phone;
+    if (me.currency) document.getElementById('acur').value = me.currency;
+    if (me.country) {
+      var t = document.querySelector('.ctry-trigger');
+      t.dataset.code = me.country.code;
+      t.querySelector('.ctry-flag').src = 'https://flagcdn.com/w40/' + me.country.code + '.png';
+      t.querySelector('.ctry-name').textContent = me.country.name;
+    }
+  }).catch(function () {});
+})();
+</script>
 </body>
 </html>

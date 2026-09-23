@@ -105,50 +105,8 @@
     { id:'OB-948101', sym:'XAU/USD', dir:'Rise', stake:15, entry:'2,319.10', now:'2,318.40', ends:'04:55', pl:-15.0 }
   ];
 
-  var closedTrades = [
-    { id:'OB-947880', sym:'GBP/USD', dir:'Fall', stake:20, entry:'1.27310', exit:'1.27140', result:'won',  pl:+17.4, when:'Today 09:41' },
-    { id:'OB-947812', sym:'US 100',  dir:'Rise', stake:30, entry:'18,600.2', exit:'18,642.1', result:'won', pl:+25.5, when:'Today 09:12' },
-    { id:'OB-947744', sym:'ETH/USD', dir:'Rise', stake:40, entry:'3,441.0', exit:'3,412.6', result:'lost', pl:-40.0, when:'Today 08:36' },
-    { id:'OB-947690', sym:'EUR/USD', dir:'Rise', stake:10, entry:'1.08380', exit:'1.08402', result:'won',  pl:+8.8,  when:'Yesterday 21:04' },
-    { id:'OB-947612', sym:'WTI',     dir:'Fall', stake:25, entry:'78.520',  exit:'78.930',  result:'lost', pl:-25.0, when:'Yesterday 18:47' },
-    { id:'OB-947559', sym:'Volatility 25', dir:'Fall', stake:15, entry:'2,701.4', exit:'2,684.3', result:'won', pl:+13.5, when:'Yesterday 16:22' }
-  ];
-
-  var transactions = [
-    { type:'Deposit',    method:'M-Pesa',        amount:+200,  status:'Completed', ref:'DP-77120', when:'22 Sep 2026, 10:14' },
-    { type:'Trade P/L',  method:'Settlements',   amount:-12.7, status:'Completed', ref:'TR-88191', when:'22 Sep 2026, 09:58' },
-    { type:'Withdrawal', method:'Bank transfer', amount:-150,  status:'Pending',   ref:'WD-40027', when:'21 Sep 2026, 17:31' },
-    { type:'Referral',   method:'Weekly payout', amount:+34.2, status:'Completed', ref:'RF-11934', when:'21 Sep 2026, 00:05' },
-    { type:'Deposit',    method:'Visa ••4417',   amount:+500,  status:'Completed', ref:'DP-77004', when:'19 Sep 2026, 12:02' },
-    { type:'Withdrawal', method:'USDT (TRC-20)', amount:-300,  status:'Completed', ref:'WD-39988', when:'17 Sep 2026, 08:44' }
-  ];
-
-  var referrals = [
-    { user:'j•••@gmail.com',   joined:'18 Sep 2026', status:'Active',   volume:4120, earned:21.40 },
-    { user:'m•••@outlook.com', joined:'14 Sep 2026', status:'Active',   volume:2860, earned:14.80 },
-    { user:'k•••@yahoo.com',   joined:'09 Sep 2026', status:'Active',   volume:9740, earned:52.10 },
-    { user:'a•••@gmail.com',   joined:'02 Sep 2026', status:'Inactive', volume:310,  earned:1.60 },
-    { user:'t•••@proton.me',   joined:'28 Aug 2026', status:'Pending',  volume:0,    earned:0 }
-  ];
-
-  /* --------------------------------------------------------- providers -- */
-  var providers = [
-    { id:'wk', name:'Wanjiru Kamau',  initials:'WK', style:'Momentum · majors',
-      min:100, ret:18.4, win:64, copiers:412,  dd:9,  since:'Mar 2025' },
-    { id:'dp', name:'Deshawn Price',  initials:'DP', style:'Synthetics · scalping',
-      min:250, ret:31.2, win:58, copiers:1204, dd:22, since:'Nov 2024' },
-    { id:'at', name:'Aiko Tanaka',    initials:'AT', style:'Yen carry · swing',
-      min:50,  ret:9.1,  win:71, copiers:233,  dd:5,  since:'Jul 2025' },
-    { id:'mf', name:'Marco Ferreira', initials:'MF', style:'Commodities · swing',
-      min:500, ret:24.7, win:61, copiers:786,  dd:15, since:'Jan 2025' }
-  ];
 
   global.OrbisData = {
-    providers: providers,
-    providerById: function (id) {
-      for (var i = 0; i < providers.length; i++) if (providers[i].id === id) return providers[i];
-      return null;
-    },
     markets: markets,
     cats: CATS,
     assetHTML: assetHTML,
@@ -159,9 +117,6 @@
       return null;
     },
     openTrades: openTrades,
-    closedTrades: closedTrades,
-    transactions: transactions,
-    referrals: referrals,
     money: function (n) {
       return (n < 0 ? '-' : '') + '$' + Math.abs(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     }

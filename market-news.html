@@ -21,15 +21,33 @@
 <div id="site-header"></div>
 
 <main class="wrap page-body">
-  <div class="card card-flat"><a class="news-row" href="#" data-mock="Article"><span class="news-tx"><b>Dollar slips as traders position ahead of CPI</b><span>Reuters · 12 min ago</span></span><span class="tag tag-up">EUR/USD</span></a><a class="news-row" href="#" data-mock="Article"><span class="news-tx"><b>Bitcoin holds above $67k as ETF inflows continue</b><span>Bloomberg · 38 min ago</span></span><span class="tag tag-up">BTC/USD</span></a><a class="news-row" href="#" data-mock="Article"><span class="news-tx"><b>Gold retreats from record as real yields climb</b><span>FT · 1 hour ago</span></span><span class="tag tag-up">XAU/USD</span></a><a class="news-row" href="#" data-mock="Article"><span class="news-tx"><b>Oil steady after surprise inventory draw</b><span>Reuters · 2 hours ago</span></span><span class="tag tag-up">WTI</span></a><a class="news-row" href="#" data-mock="Article"><span class="news-tx"><b>Nasdaq futures firm on chip earnings beat</b><span>CNBC · 3 hours ago</span></span><span class="tag tag-up">US 100</span></a></div>
+  <div class="card card-flat" id="newsList"></div>
 </main>
 
 <script src="/assets/js/icons.js"></script>
+<script src="/assets/js/api.js"></script>
 <script src="/assets/js/chart.js"></script>
 <script src="/assets/js/data.js"></script>
 <script src="/assets/js/app.js"></script>
 <script src="/assets/js/qr.js"></script>
 <script src="/assets/js/modals.js"></script>
 
+<script>
+(function () {
+  var A = OrbisAPI, M = A.money;
+
+  A.load({
+    el: '#newsList', path: '/news',
+    empty: { icon: 'newspaper', title: 'No news right now',
+      text: 'Headlines that move the markets you trade appear here as they break.' },
+    render: function (d) {
+      return d.map(function (n) {
+        return '<a class="news-row" href="' + (n.url || '#') + '" target="_blank" rel="noopener"><span class="news-tx"><b>' + n.title + '</b>' +
+          '<span>' + n.source + ' · ' + n.ago + '</span></span>' + (n.sym ? '<span class="tag">' + n.sym + '</span>' : '') + '</a>';
+      }).join('');
+    }
+  });
+})();
+</script>
 </body>
 </html>

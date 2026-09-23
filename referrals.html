@@ -21,36 +21,35 @@
 <div id="site-header"></div>
 
 <main class="wrap page-body">
-  <div class="card card-flat" style="max-width:780px">
-    <div class="tbl-scroll">
-      <table class="tbl">
-        <thead>
-          <tr><th>User</th><th>Joined</th><th>Status</th><th class="r">Volume</th><th class="r">Earned</th></tr>
-        </thead>
-        <tbody id="refBody"></tbody>
-      </table>
-    </div>
-  </div>
+  <div class="card card-flat" style="max-width:780px" id="refList"></div>
 </main>
 
 <script src="/assets/js/icons.js"></script>
+<script src="/assets/js/api.js"></script>
 <script src="/assets/js/chart.js"></script>
 <script src="/assets/js/data.js"></script>
 <script src="/assets/js/app.js"></script>
 <script src="/assets/js/qr.js"></script>
 <script src="/assets/js/modals.js"></script>
 <script>
-document.getElementById('refBody').innerHTML = OrbisData.referrals.map(function (r) {
-  var cls = r.status === 'Active' ? 'tag-up' : (r.status === 'Pending' ? 'tag-wait' : '');
-  return '<tr>' +
-    '<td class="mono">' + r.user + '</td>' +
-    '<td class="dim">' + r.joined + '</td>' +
-    '<td><span class="tag ' + cls + '">' + r.status + '</span></td>' +
-    '<td class="r mono">' + OrbisData.money(r.volume) + '</td>' +
-    '<td class="r mono ' + (r.earned > 0 ? 'up' : 'dim') + '">' + OrbisData.money(r.earned) + '</td>' +
-  '</tr>';
-}).join('');
-window.orbisIcons();
+(function () {
+  var A = OrbisAPI, M = A.money;
+
+  A.load({
+    el: '#refList', path: '/referrals',
+    empty: { icon: 'users', title: 'No referrals yet',
+      text: 'Share your link. Everyone who signs up with it shows here, with what they trade and what you earn.',
+      action: '<button class="btn btn-primary btn-sm" data-modal="refer">Share your link</button> <a class="btn btn-ghost btn-sm" href="/referral-how">How it works</a>' },
+    render: function (d) {
+      return '<div class="tbl-scroll"><table class="tbl"><thead><tr><th>User</th><th>Joined</th><th>Status</th><th class="r">Volume</th><th class="r">Earned</th></tr></thead><tbody>' +
+        d.map(function (r) {
+          var cls = r.status === 'Active' ? 'tag-up' : (r.status === 'Pending' ? 'tag-wait' : '');
+          return '<tr><td class="mono">' + r.user + '</td><td class="dim">' + r.joined + '</td><td><span class="tag ' + cls + '">' + r.status + '</span></td>' +
+            '<td class="r mono">' + M(r.volume) + '</td><td class="r mono ' + (r.earned > 0 ? 'up' : 'dim') + '">' + M(r.earned) + '</td></tr>';
+        }).join('') + '</tbody></table></div>';
+    }
+  });
+})();
 </script>
 </body>
 </html>

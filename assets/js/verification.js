@@ -41,7 +41,12 @@
   function renderState(item) {
     var k = item.dataset.vf, s = state[k] || {}, host = item.querySelector('.vf-state'), html;
 
-    if (k === 'assessment') {
+    if (k === 'tax') {
+      html = s.status === 'done'
+        ? '<span class="tag tag-up">' + ic('check', 'i-sm') + 'Submitted</span>' +
+          '<button class="btn btn-quiet btn-sm" data-vf-tax>Edit</button>'
+        : '<button class="btn btn-ghost btn-sm" data-vf-tax>Declare</button>';
+    } else if (k === 'assessment') {
       html = s.status === 'done'
         ? (s.result === 'ok'
             ? '<span class="tag tag-up">' + ic('check', 'i-sm') + 'Complete</span>'
@@ -57,7 +62,10 @@
     host.innerHTML = html;
 
     var sub = item.querySelector('.row-line > div > span');
-    if (k !== 'assessment' && s.status === 'review') {
+    if (k === 'tax' && s.status === 'done') {
+      sub.dataset.orig = sub.dataset.orig || sub.textContent;
+      sub.textContent = s.country + ' · declared ' + s.date;
+    } else if (k !== 'assessment' && k !== 'tax' && s.status === 'review') {
       sub.dataset.orig = sub.dataset.orig || sub.textContent;
       sub.textContent = s.docName + ' · submitted ' + s.date + ' · usually reviewed within 24 hours';
     } else if (k === 'assessment' && s.status === 'done') {
@@ -368,6 +376,37 @@
     step(0);
   }
 
+  /* ==================================================== tax residency == */
+  function taxModal(item) {
+    var M = global.orbisModal;
+    if (!M) return;
+    var cur = state.tax || {};
+    var html =
+      '<div class="modal-bd">' +
+        '<div class="field"><label class="label" for="txC">Country of tax residence</label>' +
+          '<input class="input" id="txC" autocomplete="country-name" placeholder="e.g. Kenya" value="' + esc(cur.country || '') + '"></div>' +
+        '<div class="field"><label class="label" for="txN">Tax identification number</label>' +
+          '<input class="input" id="txN" placeholder="Your KRA PIN or national tax number" value="' + esc(cur.tin || '') + '"></div>' +
+        '<label class="check"><input type="checkbox" id="txOk"><span>I confirm this is my only country of tax residence, or I will tell orbisflow if that changes.</span></label>' +
+      '</div>' +
+      '<div class="modal-ft"><button class="btn btn-primary btn-block" id="txGo" disabled>Submit declaration</button></div>';
+    M.open('Tax residency', html, function (root) {
+      var c = root.querySelector('#txC'), n = root.querySelector('#txN'), ok = root.querySelector('#txOk'), go = root.querySelector('#txGo');
+      function check() { go.disabled = !(c.value.trim() && n.value.trim().length >= 4 && ok.checked); }
+      [c, n].forEach(function (x) { x.addEventListener('input', check); });
+      ok.addEventListener('change', check);
+      go.addEventListener('click', function () {
+        var d = new Date();
+        state.tax = { status: 'done', country: c.value.trim(), tin: n.value.trim(),
+          date: d.getDate() + ' ' + d.toLocaleString('en-GB', { month: 'short' }) };
+        save();
+        M.close();
+        renderState(item);
+        toast('Tax residency declared', 'check-circle-2');
+      });
+    });
+  }
+
   /* ============================================================= wire == */
   var items = document.querySelectorAll('.vf-item[data-vf]');
   items.forEach(function (item) {
@@ -375,6 +414,7 @@
     item.addEventListener('click', function (e) {
       if (e.target.closest('[data-vf-open]')) openPanel(item);
       else if (e.target.closest('[data-vf-assess]')) assess(function () { renderState(item); });
+      else if (e.target.closest('[data-vf-tax]')) taxModal(item);
     });
   });
 })(window);

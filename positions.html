@@ -32,66 +32,19 @@
         <button class="fdrop-opt" role="option" data-v="stats" data-panel="stats" aria-selected="false"><span class="fdrop-tx">Statistics</span></button>
       </div>
     </div>
-      <button class="btn btn-ghost btn-sm" data-mock="Statement export"><i data-lucide="download" class="i-sm"></i>Export</button>
+      <button class="btn btn-ghost btn-sm" id="exportBtn" data-mock="Statement export" disabled><i data-lucide="download" class="i-sm"></i>Export</button>
     </div>
 
-    <!-- open -->
-    <div data-panel-id="open" class="tbl-scroll">
-      <table class="tbl">
-        <thead>
-          <tr>
-            <th>Contract</th><th>Market</th><th>Direction</th>
-            <th class="r">Stake</th><th class="r">Entry</th><th class="r">Current</th>
-            <th class="r">Ends in</th><th class="r">P/L</th><th></th>
-          </tr>
-        </thead>
-        <tbody id="openBody"></tbody>
-      </table>
-    </div>
-
-    <!-- settled -->
-    <div data-panel-id="closed" hidden class="tbl-scroll">
-      <table class="tbl">
-        <thead>
-          <tr>
-            <th>Contract</th><th>Market</th><th>Direction</th>
-            <th class="r">Stake</th><th class="r">Entry</th><th class="r">Exit</th>
-            <th>Result</th><th class="r">P/L</th><th class="r">Settled</th>
-          </tr>
-        </thead>
-        <tbody id="closedBody"></tbody>
-      </table>
-    </div>
-
-    <!-- stats -->
-    <div data-panel-id="stats" hidden class="card-pad">
-      <div class="split" style="gap:34px">
-        <div>
-          <h3 style="font-size:15px;margin-bottom:12px">By market</h3>
-          <div class="kv"><span>Volatility 75</span><b class="mono up">+$188.20</b></div>
-          <div class="kv"><span>EUR/USD</span><b class="mono up">+$121.40</b></div>
-          <div class="kv"><span>BTC/USD</span><b class="mono up">+$96.10</b></div>
-          <div class="kv"><span>XAU/USD</span><b class="mono up">+$44.90</b></div>
-          <div class="kv"><span>ETH/USD</span><b class="mono down">-$38.00</b></div>
-        </div>
-        <div>
-          <h3 style="font-size:15px;margin-bottom:12px">By duration</h3>
-          <div class="kv"><span>Under 1 minute</span><b class="mono">18 contracts · 50% won</b></div>
-          <div class="kv"><span>1-5 minutes</span><b class="mono">64 contracts · 64% won</b></div>
-          <div class="kv"><span>5-30 minutes</span><b class="mono">32 contracts · 63% won</b></div>
-          <div class="kv"><span>Over 30 minutes</span><b class="mono">14 contracts · 57% won</b></div>
-        </div>
-      </div>
-      <p class="hint" style="margin-top:20px">
-        Charts and a full performance breakdown land here once the reporting service is wired up.
-      </p>
-    </div>
+    <div data-panel-id="open" id="openPane"></div>
+    <div data-panel-id="closed" id="closedPane" hidden></div>
+    <div data-panel-id="stats" id="statsPane" hidden class="card-pad"></div>
   </section>
 </main>
 
 <div id="site-footer"></div>
 
 <script src="/assets/js/icons.js"></script>
+<script src="/assets/js/api.js"></script>
 <script src="/assets/js/chart.js"></script>
 <script src="/assets/js/data.js"></script>
 <script src="/assets/js/app.js"></script>
@@ -99,36 +52,58 @@
 <script src="/assets/js/modals.js"></script>
 <script>
 (function () {
-  document.getElementById('openBody').innerHTML = OrbisData.openTrades.map(function (t) {
-    return '<tr>' +
-      '<td class="mono dim">' + t.id + '</td>' +
-      '<td><b>' + t.sym + '</b></td>' +
-      '<td><span class="tag ' + (t.dir === 'Rise' ? 'tag-up' : 'tag-down') + '">' + t.dir + '</span></td>' +
-      '<td class="r mono">' + OrbisData.money(t.stake) + '</td>' +
-      '<td class="r mono">' + t.entry + '</td>' +
-      '<td class="r mono">' + t.now + '</td>' +
-      '<td class="r mono">' + t.ends + '</td>' +
-      '<td class="r mono ' + (t.pl >= 0 ? 'up' : 'down') + '">' + (t.pl >= 0 ? '+' : '') + OrbisData.money(t.pl) + '</td>' +
-      '<td class="r"><button class="btn btn-ghost btn-sm" data-mock="Sell back contract">Sell back</button></td>' +
-    '</tr>';
-  }).join('');
+  var A = OrbisAPI, M = A.money;
 
-  document.getElementById('closedBody').innerHTML = OrbisData.closedTrades.map(function (t) {
-    return '<tr>' +
-      '<td class="mono dim">' + t.id + '</td>' +
-      '<td><b>' + t.sym + '</b></td>' +
-      '<td>' + t.dir + '</td>' +
-      '<td class="r mono">' + OrbisData.money(t.stake) + '</td>' +
-      '<td class="r mono">' + t.entry + '</td>' +
-      '<td class="r mono">' + t.exit + '</td>' +
-      '<td><span class="tag ' + (t.result === 'won' ? 'tag-up' : 'tag-down') + '">' +
-        (t.result === 'won' ? 'Won' : 'Lost') + '</span></td>' +
-      '<td class="r mono ' + (t.pl >= 0 ? 'up' : 'down') + '">' + (t.pl >= 0 ? '+' : '') + OrbisData.money(t.pl) + '</td>' +
-      '<td class="r dim">' + t.when + '</td>' +
-    '</tr>';
-  }).join('');
+  function pl(n) { return '<span class="mono ' + (n >= 0 ? 'up' : 'down') + '">' + (n >= 0 ? '+' : '') + M(n) + '</span>'; }
 
-  window.orbisIcons();
+  A.load({
+    el: '#openPane', path: '/trades/open',
+    empty: { icon: 'chart-candlestick', title: 'No open positions',
+      text: 'Contracts you place show here while they run, with live profit and the time left.',
+      action: '<a class="btn btn-primary btn-sm" href="/trade">Place a trade</a>' },
+    render: function (d) {
+      return '<div class="tbl-scroll"><table class="tbl"><thead><tr><th>Contract</th><th>Market</th><th>Direction</th>' +
+        '<th class="r">Stake</th><th class="r">Entry</th><th class="r">Current</th><th class="r">Ends in</th><th class="r">P/L</th><th></th></tr></thead><tbody>' +
+        d.map(function (t) {
+          return '<tr><td class="mono dim">' + t.id + '</td><td><b>' + t.sym + '</b></td>' +
+            '<td><span class="tag ' + (t.dir === 'Rise' ? 'tag-up' : 'tag-down') + '">' + t.dir + '</span></td>' +
+            '<td class="r mono">' + M(t.stake) + '</td><td class="r mono">' + t.entry + '</td><td class="r mono">' + t.now + '</td>' +
+            '<td class="r mono">' + t.ends + '</td><td class="r">' + pl(t.pl) + '</td>' +
+            '<td class="r"><button class="btn btn-ghost btn-sm" data-mock="Sell back contract">Sell back</button></td></tr>';
+        }).join('') + '</tbody></table></div>';
+    }
+  });
+
+  A.load({
+    el: '#closedPane', path: '/trades/closed',
+    empty: { icon: 'receipt-text', title: 'No settled contracts yet',
+      text: 'Every contract lands here once it expires, with its entry, exit and result.' },
+    render: function (d) {
+      return '<div class="tbl-scroll"><table class="tbl"><thead><tr><th>Contract</th><th>Market</th><th>Direction</th>' +
+        '<th class="r">Stake</th><th class="r">Entry</th><th class="r">Exit</th><th>Result</th><th class="r">P/L</th><th class="r">Settled</th></tr></thead><tbody>' +
+        d.map(function (t) {
+          var won = t.result === 'won';
+          return '<tr><td class="mono dim">' + t.id + '</td><td><b>' + t.sym + '</b></td><td>' + t.dir + '</td>' +
+            '<td class="r mono">' + M(t.stake) + '</td><td class="r mono">' + t.entry + '</td><td class="r mono">' + t.exit + '</td>' +
+            '<td><span class="tag ' + (won ? 'tag-up' : 'tag-down') + '">' + (won ? 'Won' : 'Lost') + '</span></td>' +
+            '<td class="r">' + pl(t.pl) + '</td><td class="r dim">' + t.when + '</td></tr>';
+        }).join('') + '</tbody></table></div>';
+    },
+    after: function () { document.getElementById('exportBtn').disabled = false; }
+  });
+
+  A.load({
+    el: '#statsPane', path: '/trades/stats',
+    empty: { icon: 'activity', title: 'No statistics yet',
+      text: 'Once contracts settle, see how you do by market and by duration.' },
+    render: function (d) {
+      return '<div class="split" style="gap:34px"><div><h3 style="font-size:15px;margin-bottom:12px">By market</h3>' +
+        (d.byMarket || []).map(function (r) { return '<div class="kv"><span>' + r[0] + '</span><b>' + pl(r[1]) + '</b></div>'; }).join('') +
+        '</div><div><h3 style="font-size:15px;margin-bottom:12px">By duration</h3>' +
+        (d.byDuration || []).map(function (r) { return '<div class="kv"><span>' + r[0] + '</span><b class="mono">' + r[1] + ' contracts · ' + r[2] + '% won</b></div>'; }).join('') +
+        '</div></div>';
+    }
+  });
 })();
 </script>
 </body>

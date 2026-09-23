@@ -1,7 +1,6 @@
 /* ==========================================================================
-   Status: one row of daily bars per service. Every day is operational
-   unless an incident below says otherwise, so the bars and the incident
-   history can never disagree. Mock data, dated relative to today.
+   Status: one row of daily bars per service, from /status. Until the
+   monitoring API answers, every day reads "No data" rather than a claim.
    ========================================================================== */
 (function (global) {
   'use strict';
@@ -18,24 +17,12 @@
     { k: 'usdt',     name: 'USDT on TRON' },
     { k: 'withdraw', name: 'Withdrawals' },
     { k: 'chat',     name: 'Live chat' },
-    { k: 'academy',  name: 'Academy',            since: 4 }   /* launched four days ago */
+    { k: 'academy',  name: 'Academy' }
   ];
 
-  /* sev: 1 degraded, 2 partial outage, 3 major outage */
-  var INCIDENTS = [
-    { ago: 3,  k: 'card',     sev: 1, mins: 42,  title: 'Slow card approvals',
-      body: 'Card deposits took up to five minutes to approve while Paystack worked through a backlog. No payments were lost.' },
-    { ago: 17, k: 'prices',   sev: 2, mins: 18,  title: 'Delayed prices on crypto markets',
-      body: 'Crypto prices lagged by up to 20 seconds. New crypto contracts were paused until prices caught up, and open ones settled normally.' },
-    { ago: 29, k: 'usdt',     sev: 1, mins: 70,  title: 'USDT deposits confirming slowly',
-      body: 'Congestion on the TRON network slowed confirmations. Every deposit was credited once confirmed.' },
-    { ago: 46, k: 'withdraw', sev: 2, mins: 125, title: 'Bank withdrawals held for review',
-      body: 'A fault in an automatic check sent bank withdrawals to manual review. All were paid the same day.' },
-    { ago: 61, k: 'trading',  sev: 3, mins: 11,  title: 'Contracts could not be placed',
-      body: 'A failed deployment stopped new contracts for 11 minutes. Open contracts settled at their normal expiry. We rolled back and added a check to catch it earlier.' },
-    { ago: 74, k: 'mpesa',    sev: 1, mins: 35,  title: 'M-Pesa confirmations delayed',
-      body: 'M-Pesa deposits took longer than usual to show in balances. Every deposit was credited.' }
-  ];
+  /* filled from /status: DAYS_BY[k][ago] = { sev: 0-3, up: percent } */
+  var DAYS_BY = {};
+  var idle = true;
 
   var SEV = [
     { cls: 'st-good',    label: 'Operational' },
@@ -43,9 +30,6 @@
     { cls: 'st-serious', label: 'Partial outage' },
     { cls: 'st-crit',    label: 'Major outage' }
   ];
-  /* how much of an incident's minutes count against uptime */
-  var WEIGHT = [0, 0.25, 0.5, 1];
-
   function icons() { if (global.orbisIcons) global.orbisIcons(); }
   function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
 
@@ -53,13 +37,10 @@
   function fmtDate(d, year) {
     return d.getDate() + ' ' + d.toLocaleString('en-GB', { month: 'short' }) + (year ? ' ' + d.getFullYear() : '');
   }
-  function fmtMins(m) { return m < 60 ? m + ' min' : Math.floor(m / 60) + 'h ' + (m % 60 ? (m % 60) + 'm' : ''); }
 
   function day(svc, ago) {
-    if (svc.since != null && ago > svc.since) return { sev: -1 };
-    var inc = INCIDENTS.filter(function (i) { return i.k === svc.k && i.ago === ago; })[0];
-    if (!inc) return { sev: 0, up: 100 };
-    return { sev: inc.sev, up: 100 - inc.mins / 1440 * 100 * WEIGHT[inc.sev], inc: inc };
+    var d = DAYS_BY[svc.k] && DAYS_BY[svc.k][ago];
+    return d ? { sev: d.sev, up: d.up, note: d.note } : { sev: -1 };
   }
 
   function uptime(svc, days) {
@@ -85,17 +66,17 @@
       }
       var up = uptime(svc, DAYS);
       var today = day(svc, 0);
-      var now = SEV[today.sev < 0 ? 0 : today.sev];
+      var now = today.sev < 0 ? { cls: 'st-none', label: 'No data' } : SEV[today.sev];
       return '<div class="st-row">' +
         '<div class="st-row-hd">' +
           '<div><b>' + svc.name + '</b>' + (svc.note ? '<span>' + svc.note + '</span>' : '') + '</div>' +
           '<span class="st-now ' + now.cls + '">' +
-            '<i data-lucide="' + (today.sev > 0 ? 'triangle-alert' : 'check') + '" class="i-sm"></i>' + now.label + '</span>' +
+            '<i data-lucide="' + (today.sev > 0 ? 'triangle-alert' : today.sev < 0 ? 'minus' : 'check') + '" class="i-sm"></i>' + now.label + '</span>' +
         '</div>' +
         '<div class="st-bars" style="--n:' + DAYS + '" role="img" aria-label="' + svc.name + ': ' +
           (up == null ? 'no data' : up.toFixed(2) + '% uptime') + ' over ' + DAYS + ' days">' + bars + '</div>' +
-        '<div class="st-axis"><span>' + (svc.since != null && svc.since < DAYS ? 'Launched ' + fmtDate(dayDate(svc.since)) : DAYS + ' days ago') + '</span>' +
-          '<b class="mono">' + (up == null ? '' : up.toFixed(2) + '% uptime') + '</b><span>Today</span></div>' +
+        '<div class="st-axis"><span>' + DAYS + ' days ago</span>' +
+          '<b class="mono">' + (up == null ? 'No data yet' : up.toFixed(2) + '% uptime') + '</b><span>Today</span></div>' +
       '</div>';
     }).join('');
     icons();
@@ -109,11 +90,11 @@
     var svc = SERVICES[Number(bar.dataset.s)], a = Number(bar.dataset.a);
     var d = day(svc, a);
     var html = '<b>' + fmtDate(dayDate(a), true) + '</b>';
-    if (d.sev < 0) html += '<span class="st-tip-row"><i class="st-sw st-none"></i>No data, not yet launched</span>';
+    if (d.sev < 0) html += '<span class="st-tip-row"><i class="st-sw st-none"></i>No data for this day</span>';
     else {
       html += '<span class="st-tip-row"><i class="st-sw ' + SEV[d.sev].cls + '"></i>' + SEV[d.sev].label +
               '<em class="mono">' + d.up.toFixed(2) + '%</em></span>';
-      if (d.inc) html += '<span class="st-tip-inc">' + esc(d.inc.title) + ' · ' + fmtMins(d.inc.mins) + '</span>';
+      if (d.note) html += '<span class="st-tip-inc">' + esc(d.note) + '</span>';
       else html += '<span class="st-tip-inc">No incidents recorded</span>';
     }
     tip.innerHTML = html;
@@ -157,27 +138,37 @@
     b.addEventListener('click', function () { DAYS = Number(b.dataset.days); paintSeg(); hide(); render(); });
   });
   paintSeg();
-  render();
 
-  /* ======================================================= incidents == */
-  var inc = document.getElementById('stInc');
-  inc.innerHTML = INCIDENTS.map(function (i) {
-    var svc = SERVICES.filter(function (s) { return s.k === i.k; })[0];
-    return '<article class="st-inc-item">' +
-      '<div class="st-inc-hd">' +
-        '<span class="st-now ' + SEV[i.sev].cls + '"><i data-lucide="triangle-alert" class="i-sm"></i>' + SEV[i.sev].label + '</span>' +
-        '<time>' + fmtDate(dayDate(i.ago), true) + '</time>' +
-      '</div>' +
-      '<h3>' + i.title + '</h3>' +
-      '<p>' + i.body + '</p>' +
-      '<p class="st-inc-meta">' + svc.name + ' · lasted ' + fmtMins(i.mins) + ' · <span class="up">Resolved</span></p>' +
-    '</article>';
-  }).join('');
-  icons();
+  /* ========================================================== banner == */
+  function banner() {
+    var head = document.getElementById('stHead');
+    var box = document.getElementById('stBanner');
+    var worst = -1;
+    SERVICES.forEach(function (svc) { worst = Math.max(worst, day(svc, 0).sev); });
+    var B = worst < 0 ? ['st-idle', 'activity', 'Live monitoring is being connected']
+          : worst === 0 ? ['', 'check', 'All systems operational']
+          : worst === 1 ? ['st-b-warn', 'triangle-alert', 'Some services are degraded']
+          : worst === 2 ? ['st-b-serious', 'triangle-alert', 'Partial outage']
+          : ['st-b-crit', 'triangle-alert', 'Major outage'];
+    box.className = 'st-banner ' + B[0];
+    box.querySelector('.st-banner-ic').innerHTML = '<i data-lucide="' + B[1] + '" class="i"></i>';
+    head.textContent = B[2];
+    idle = worst < 0;
+    if (idle) document.getElementById('stUpdated').textContent = 'Daily uptime for each service will show here once it starts.';
+    icons();
+  }
+
+  global.OrbisAPI.get('/status').then(function (d) {
+    (d && d.services || []).forEach(function (svc) {
+      DAYS_BY[svc.k] = {};
+      (svc.days || []).forEach(function (x) { DAYS_BY[svc.k][x.ago] = x; });
+    });
+  }).catch(function () {}).then(function () { render(); banner(); });
 
   /* ========================================================= updated == */
   var upd = document.getElementById('stUpdated'), t0 = Date.now();
   setInterval(function () {
+    if (idle) return;
     var s = Math.round((Date.now() - t0) / 1000);
     upd.textContent = s < 60 ? 'Checked ' + (s < 5 ? 'just now' : s + ' seconds ago') : 'Checked ' + Math.floor(s / 60) + ' min ago';
   }, 5000);

@@ -21,21 +21,34 @@
 <div id="site-header"></div>
 
 <main class="wrap page-body">
-  <div class="card card-flat"><div class="row-line"><div><b>EUR/USD</b><span>Price rises above 1.0900</span></div><span class="tag tag-up">Active</span></div><div class="row-line"><div><b>BTC/USD</b><span>Price falls below 65,000.00</span></div><span class="tag tag-up">Active</span></div><div class="row-line"><div><b>XAU/USD</b><span>Price rises above 2,350.00</span></div><span class="tag tag-wait">Paused</span></div><div class="row-line"><div><b>US 100</b><span>Daily change exceeds 1.5%</span></div><span class="tag tag-down">Triggered</span></div></div>
-
-  <div class="center-action">
-    <button class="btn btn-primary" data-mock="New alert">
-      <i data-lucide="plus" class="i-sm"></i>New alert
-    </button>
-  </div>
+  <div class="card card-flat" id="alertList"></div>
 </main>
 
 <script src="/assets/js/icons.js"></script>
+<script src="/assets/js/api.js"></script>
 <script src="/assets/js/chart.js"></script>
 <script src="/assets/js/data.js"></script>
 <script src="/assets/js/app.js"></script>
 <script src="/assets/js/qr.js"></script>
 <script src="/assets/js/modals.js"></script>
 
+<script>
+(function () {
+  var A = OrbisAPI, M = A.money;
+
+  var NEW = '<button class="btn btn-primary btn-sm" data-mock="New alert"><i data-lucide="plus" class="i-sm"></i>New alert</button>';
+  A.load({
+    el: '#alertList', path: '/alerts',
+    empty: { icon: 'bell-ring', title: 'No price alerts',
+      text: 'Pick a market and a price, and we will tell you the moment it gets there.', action: NEW },
+    render: function (d) {
+      return d.map(function (a) {
+        return '<div class="row-line"><div><b>' + a.sym + '</b><span>' + a.rule + '</span></div>' +
+          '<span class="tag ' + (a.status === 'Active' ? 'tag-up' : 'tag-wait') + '">' + a.status + '</span></div>';
+      }).join('') + '<div class="center-action">' + NEW + '</div>';
+    }
+  });
+})();
+</script>
 </body>
 </html>

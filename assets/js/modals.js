@@ -19,10 +19,10 @@
   var CARD_FEE = 0.015;          /* what the card processor takes */
 
   var SAVED = {
-    mpesa: { label: 'M-Pesa', masked: '+254 7•• ••• 412', icon: 'smartphone' },
+    mpesa: { label: 'M-Pesa', masked: 'Your verified M-Pesa number', icon: 'smartphone' },
     card:  { label: 'Paystack', masked: 'Visa, Mastercard, Verve', icon: 'credit-card' },
-    bank:  { label: 'Bank transfer', masked: 'Equity ••••4417', icon: 'building-2' },
-    usdt:  { label: 'USDT (TRC-20)', masked: 'T••••••••••••x92', icon: 'bitcoin' }
+    bank:  { label: 'Bank transfer', masked: 'Your verified bank account', icon: 'building-2' },
+    usdt:  { label: 'USDT (TRC-20)', masked: 'Your verified TRON wallet', icon: 'bitcoin' }
   };
 
   var WITHDRAW_FEE = 1;          /* flat platform fee on every withdrawal */
@@ -365,11 +365,11 @@
       '<div style="border-top:1px solid var(--line)">' +
         '<a class="link-row" href="/referrals">' +
           '<span class="lr-ic">' + ic('users') + '</span>' +
-          '<span class="lr-tx"><b>Your referrals</b><span>37 signed up, 21 active</span></span>' +
+          '<span class="lr-tx"><b>Your referrals</b><span>Everyone who joined with your link</span></span>' +
           ic('chevron-right', 'i-sm') + '</a>' +
         '<a class="link-row" href="/referral-earnings">' +
           '<span class="lr-ic">' + ic('banknote') + '</span>' +
-          '<span class="lr-tx"><b>Referral earnings</b><span>$1,406.80 earned, $89.90 pending</span></span>' +
+          '<span class="lr-tx"><b>Referral earnings</b><span>What you have earned, and when it pays</span></span>' +
           ic('chevron-right', 'i-sm') + '</a>' +
       '</div>';
 
@@ -450,7 +450,7 @@
             '</div>' +
             '<div class="field">' +
               '<label class="label" for="mName">Name on the account</label>' +
-              '<input class="input" id="mName" value="Amara Otieno">' +
+              '<input class="input" id="mName" placeholder="As it appears on your ID" autocomplete="name">' +
             '</div>' +
             '<p class="hint">The name must match your verified identity, or withdrawals are held.</p>') +
       '</div>' +
@@ -489,8 +489,8 @@
 
   /* ====================================================== copy trading == */
   function copyModal(id) {
-    var D = global.OrbisData;
-    var p = D && D.providerById ? D.providerById(id) : null;
+    /* the copy-trading page hands over the traders it loaded */
+    var p = (global.orbisProviders || []).filter(function (x) { return x.id === id; })[0] || null;
     if (!p) return;
 
     var html =

@@ -107,7 +107,7 @@
      centred modal to switch between them */
   var ACCOUNTS = [
     { id: 'demo', label: 'Demo account', short: 'Demo', amount: '$10,000.00', icon: 'flask-conical' },
-    { id: 'real', label: 'Real account', short: 'Real', amount: '$1,384.40',  icon: 'wallet' }
+    { id: 'real', label: 'Real account', short: 'Real', amount: '$0.00',      icon: 'wallet' }
   ];
   var activeAccount = 'demo';
   /* the account card belongs where money is at stake */
@@ -233,8 +233,8 @@
           '<button class="icon-btn" data-drawer-close aria-label="Close menu">' + ic('x') + '</button>' +
         '</div>' +
         '<a class="drawer-acct" href="/profile-details">' +
-          '<span class="avatar">AO</span>' +
-          '<div><b>Amara Otieno</b><span>Demo · $10,000.00</span></div>' +
+          '<span class="avatar">' + ic('user-round', 'i-sm') + '</span>' +
+          '<div><b>Your account</b><span>Demo · $10,000.00</span></div>' +
         '</a>' +
         '<div class="drawer-scroll">' + groups + '</div>' +
         /* pinned, so log out and the theme switch never need scrolling to */

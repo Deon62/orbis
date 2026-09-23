@@ -21,41 +21,35 @@
 
 <main class="wrap page-body">
   <div class="stack" style="max-width:720px">
-    <div class="card card-flat">
-      <div class="row-line">
-        <div style="display:flex;align-items:center;gap:12px">
-          <span class="method-ic"><i data-lucide="smartphone" class="i"></i></span>
-          <div><b>M-Pesa</b><span>+254 7•• ••• 412 · default</span></div>
-        </div>
-        <span class="tag tag-up">Verified</span>
-      </div>
-      <div class="row-line">
-        <div style="display:flex;align-items:center;gap:12px">
-          <span class="method-ic"><i data-lucide="credit-card" class="i"></i></span>
-          <div><b>Visa ••••4417</b><span>via Paystack · expires 09/28</span></div>
-        </div>
-        <button class="btn btn-quiet btn-sm" data-mock="Remove card">Remove</button>
-      </div>
-      <div class="row-line">
-        <div style="display:flex;align-items:center;gap:12px">
-          <span class="method-ic"><i data-lucide="bitcoin" class="i"></i></span>
-          <div><b>USDT (TRC-20)</b><span>T••••••••••••x92</span></div>
-        </div>
-        <button class="btn btn-quiet btn-sm" data-mock="Remove wallet">Remove</button>
-      </div>
-    </div>
-
-    <div class="center-action">
-      <button class="btn btn-primary" data-modal="add-payment">
-        <i data-lucide="plus" class="i-sm"></i>Add a method
-      </button>
-    </div>
+    <div class="card card-flat" id="pmList"></div>
   </div>
 </main>
 
 <script src="/assets/js/icons.js"></script>
+<script src="/assets/js/api.js"></script>
 <script src="/assets/js/app.js"></script>
 <script src="/assets/js/qr.js"></script>
 <script src="/assets/js/modals.js"></script>
+<script>
+(function () {
+  var A = OrbisAPI, M = A.money;
+
+  var ICON = { mpesa: 'smartphone', card: 'credit-card', bank: 'building-2', usdt: 'bitcoin' };
+  var ADD = '<button class="btn btn-primary btn-sm" data-modal="add-payment"><i data-lucide="plus" class="i-sm"></i>Add a method</button>';
+  A.load({
+    el: '#pmList', path: '/payment-methods',
+    empty: { icon: 'wallet', title: 'No payment methods yet',
+      text: 'Add M-Pesa, a bank account or a USDT wallet in your own name. Withdrawals are only paid to verified methods.', action: ADD },
+    render: function (d) {
+      return d.map(function (m) {
+        return '<div class="row-line"><div style="display:flex;align-items:center;gap:12px">' +
+          '<span class="method-ic"><i data-lucide="' + (ICON[m.kind] || 'wallet') + '" class="i"></i></span>' +
+          '<div><b>' + m.label + '</b><span>' + m.masked + (m.isDefault ? ' · default' : '') + '</span></div></div>' +
+          (m.status === 'Verified' ? '<span class="tag tag-up">Verified</span>' : '<span class="tag tag-wait">' + m.status + '</span>') + '</div>';
+      }).join('') + '<div class="center-action">' + ADD + '</div>';
+    }
+  });
+})();
+</script>
 </body>
 </html>

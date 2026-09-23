@@ -17,15 +17,15 @@
 <script>(function(){try{var t=localStorage.getItem("orbisflow-theme")||(matchMedia("(prefers-color-scheme:dark)").matches?"dark":"light");document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
 </head>
 <body data-page="live-chat" data-title="Live chat" data-tabbar="hide"
-      data-hdr-person-img="/assets/img/support.png" data-hdr-person-name="Sam" data-hdr-person-status="Online"
+      data-hdr-person-img="/assets/img/support.png" data-hdr-person-name="Support" data-hdr-person-status="Online"
       data-shell="app">
 
 <div id="site-header"></div>
 
 <main class="wrap page-body">
   <div class="chat">
-    <div class="chat-log"><div class="bubble bubble-in"><p>Hi Amara, you are through to support. How can I help?</p><time>11:02</time></div><div class="bubble bubble-out"><p>My withdrawal from yesterday is still pending.</p><time>11:03</time></div><div class="bubble bubble-in"><p>Let me check that. I can see WD-40027 for $150.00, submitted 21 Sep 17:31.</p><time>11:03</time></div><div class="bubble bubble-in"><p>It is waiting on proof of address. Once that is uploaded it releases same day.</p><time>11:04</time></div><div class="bubble bubble-out"><p>Ah, I will upload it now.</p><time>11:05</time></div></div>
-    <form class="composer" data-mock-submit="Message sent">
+    <div class="chat-log" id="chatLog"></div>
+    <form class="composer" id="chatForm">
       <input class="input" placeholder="Write a message" aria-label="Message">
       <button class="btn btn-primary" type="submit" aria-label="Send"><i data-lucide="send" class="i-sm"></i></button>
     </form>
@@ -33,11 +33,48 @@
 </main>
 
 <script src="/assets/js/icons.js"></script>
+<script src="/assets/js/api.js"></script>
 <script src="/assets/js/chart.js"></script>
 <script src="/assets/js/data.js"></script>
 <script src="/assets/js/app.js"></script>
 <script src="/assets/js/qr.js"></script>
 <script src="/assets/js/modals.js"></script>
 
+<script>
+(function () {
+  var A = OrbisAPI, M = A.money;
+
+  var log = document.getElementById('chatLog');
+  var form = document.getElementById('chatForm');
+  var input = form.querySelector('input');
+  function esc(t) { return String(t).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function time(d) { return (d ? new Date(d) : new Date()).toTimeString().slice(0, 5); }
+  function bubble(m) {
+    return '<div class="bubble ' + (m.from === 'me' ? 'bubble-out' : 'bubble-in') + '"><p>' + esc(m.text) + '</p><time>' + time(m.at) + '</time></div>';
+  }
+  var greeted = false;
+
+  A.load({
+    el: log, path: '/support/messages',
+    empty: { icon: 'message-square', title: 'How can we help?',
+      text: 'Write your question below and a member of the team will reply here. We are online 24/7.' },
+    render: function (d) { greeted = true; return d.map(bubble).join(''); }
+  });
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var text = input.value.trim();
+    if (!text) return;
+    if (log.querySelector('.es')) log.innerHTML = '';
+    log.insertAdjacentHTML('beforeend', bubble({ from: 'me', text: text }));
+    if (!greeted) {
+      greeted = true;
+      log.insertAdjacentHTML('beforeend', '<p class="chat-note">Sent. The next available agent will reply here.</p>');
+    }
+    input.value = '';
+    log.scrollTop = log.scrollHeight;
+  });
+})();
+</script>
 </body>
 </html>

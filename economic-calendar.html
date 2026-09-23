@@ -34,22 +34,41 @@
     <span class="dim" style="font-size:12.5px">All times UTC · actual vs forecast</span>
   </div>
 
-  <div class="card card-flat">
-    <div class="tbl-scroll">
-      <table class="tbl" style="min-width:760px">
-        <thead><tr><th>Time</th><th>Currency</th><th>Event</th><th>Impact</th><th class="r">Forecast</th><th class="r">Previous</th><th class="r">Actual</th></tr></thead>
-        <tbody><tr><td><span class="mono">12:30</span></td><td><img src="https://flagcdn.com/w40/us.png" alt="" class="acct-flag" style="width:18px;height:18px"> USD</td><td><b>CPI y/y</b></td><td><span class="imp imp-high">High</span></td><td class="r mono fc">3.2%</td><td class="r mono dim">3.4%</td><td class="r mono dim">-</td></tr><tr><td><span class="mono">14:00</span></td><td><img src="https://flagcdn.com/w40/us.png" alt="" class="acct-flag" style="width:18px;height:18px"> USD</td><td><b>Fed speech</b></td><td><span class="imp imp-med">Medium</span></td><td class="r mono dim">-</td><td class="r mono dim">-</td><td class="r mono dim">-</td></tr><tr><td><span class="mono">08:00</span></td><td><img src="https://flagcdn.com/w40/gb.png" alt="" class="acct-flag" style="width:18px;height:18px"> GBP</td><td><b>GDP q/q</b></td><td><span class="imp imp-high">High</span></td><td class="r mono fc">0.2%</td><td class="r mono dim">0.1%</td><td class="r mono up">0.3%</td></tr><tr><td><span class="mono">07:00</span></td><td><img src="https://flagcdn.com/w40/de.png" alt="" class="acct-flag" style="width:18px;height:18px"> EUR</td><td><b>Factory orders</b></td><td><span class="imp imp-med">Medium</span></td><td class="r mono fc">1.1%</td><td class="r mono dim">-0.4%</td><td class="r mono down">0.9%</td></tr><tr><td><span class="mono">23:50</span></td><td><img src="https://flagcdn.com/w40/jp.png" alt="" class="acct-flag" style="width:18px;height:18px"> JPY</td><td><b>Trade balance</b></td><td><span class="imp imp-low">Low</span></td><td class="r mono fc">-0.4T</td><td class="r mono dim">-0.6T</td><td class="r mono dim">-</td></tr></tbody>
-      </table>
-    </div>
-  </div>
+  <div class="card card-flat" id="calList"></div>
 </main>
 
 <script src="/assets/js/icons.js"></script>
+<script src="/assets/js/api.js"></script>
 <script src="/assets/js/chart.js"></script>
 <script src="/assets/js/data.js"></script>
 <script src="/assets/js/app.js"></script>
 <script src="/assets/js/qr.js"></script>
 <script src="/assets/js/modals.js"></script>
 
+<script>
+(function () {
+  var A = OrbisAPI, M = A.money;
+
+  var WHEN = { today: 'today', tomorrow: 'tomorrow', week: 'this week' };
+  function load(range) {
+    A.load({
+      el: '#calList', path: '/calendar?range=' + range,
+      empty: { icon: 'calendar-days', title: 'No events ' + WHEN[range],
+        text: 'Rate decisions, inflation and jobs data show here with their forecast, previous and actual figures.' },
+      render: function (d) {
+        return '<div class="tbl-scroll"><table class="tbl" style="min-width:760px"><thead><tr><th>Time</th><th>Currency</th><th>Event</th><th>Impact</th><th class="r">Forecast</th><th class="r">Previous</th><th class="r">Actual</th></tr></thead><tbody>' +
+          d.map(function (e) {
+            return '<tr><td><span class="mono">' + e.time + '</span></td>' +
+              '<td>' + (e.flag ? '<img src="https://flagcdn.com/w40/' + e.flag + '.png" alt="" class="acct-flag" style="width:18px;height:18px"> ' : '') + e.ccy + '</td>' +
+              '<td><b>' + e.event + '</b></td><td><span class="imp imp-' + String(e.impact).toLowerCase() + '">' + e.impact + '</span></td>' +
+              '<td class="r mono fc">' + (e.forecast || '-') + '</td><td class="r mono dim">' + (e.previous || '-') + '</td><td class="r mono">' + (e.actual || '-') + '</td></tr>';
+          }).join('') + '</tbody></table></div>';
+      }
+    });
+  }
+  document.addEventListener('fdrop:change', function (e) { load(e.detail.value); });
+  load('today');
+})();
+</script>
 </body>
 </html>

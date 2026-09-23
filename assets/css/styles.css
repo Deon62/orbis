@@ -2179,12 +2179,18 @@ a.contact-way:hover{ border-color:var(--line-strong); }
   background:var(--st-good); color:#fff;
 }
 .st-banner-ic .i{ width:18px; height:18px; stroke-width:2.4; }
+.st-banner.st-idle{ border-left-color:var(--line-strong); }
+.st-banner.st-idle .st-banner-ic{ background:var(--panel-2); color:var(--ink-3); }
+.st-banner.st-b-warn{ border-left-color:var(--st-warn); } .st-b-warn .st-banner-ic{ background:var(--st-warn); }
+.st-banner.st-b-serious{ border-left-color:var(--st-serious); } .st-b-serious .st-banner-ic{ background:var(--st-serious); }
+.st-banner.st-b-crit{ border-left-color:var(--st-crit); } .st-b-crit .st-banner-ic{ background:var(--st-crit); }
+.st-now.st-none svg{ color:var(--ink-3); }
 .st-banner b{ display:block; font-size:16.5px; letter-spacing:-.01em; }
 .st-banner span{ display:block; margin-top:2px; font-size:12.5px; color:var(--ink-3); }
 
 .st-sec{ padding-top:30px; }
 .st-bar-hd{ display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap; }
-.st-bar-hd h2, .st-inc-h{ font-size:20px; }
+.st-bar-hd h2{ font-size:20px; }
 .st-legend{ display:flex; flex-wrap:wrap; gap:8px 16px; margin:14px 0 16px; font-size:12px; color:var(--ink-2); }
 .st-legend span{ display:inline-flex; align-items:center; gap:6px; }
 .st-sw{ width:10px; height:10px; border-radius:2px; display:inline-block; flex:none; }
@@ -2226,14 +2232,36 @@ a.contact-way:hover{ border-color:var(--line-strong); }
 .st-tip-row em{ margin-left:auto; font-style:normal; color:var(--ink-2); }
 .st-tip-inc{ display:block; margin-top:6px; padding-top:6px; border-top:1px solid var(--line-soft); color:var(--ink-3); line-height:1.45; }
 
-.st-inc-h{ margin:44px 0 14px; }
-.st-inc{ border-top:1px solid var(--line); }
-.st-inc-item{ padding:20px 0; border-bottom:1px solid var(--line-soft); }
-.st-inc-hd{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:8px; }
-.st-inc-hd time{ font-size:12.5px; color:var(--ink-3); }
-.st-inc-item h3{ font-size:16px; margin-bottom:6px; }
-.st-inc-item p{ font-size:14px; line-height:1.6; color:var(--ink-2); }
-.st-inc-meta{ margin-top:8px; font-size:12.5px !important; color:var(--ink-3) !important; }
-.st-inc-meta .up{ color:var(--up); font-weight:600; }
-.st-sub{ margin-top:26px; font-size:13.5px; color:var(--ink-3); }
-.st-sub a{ color:var(--ink); font-weight:600; text-decoration:underline; text-underline-offset:2px; }
+
+
+/* ======================================================== empty states ==
+   what a page shows before it has anything of yours: an icon, one line
+   that names the gap, one that says what will fill it, and the next step */
+.es{ padding:52px 20px 56px; text-align:center; }
+.es-ic{
+  width:48px; height:48px; margin:0 auto 16px; display:grid; place-items:center;
+  border:1px solid var(--line); border-radius:50%; background:var(--panel-2); color:var(--ink-3);
+}
+.es-ic .i{ width:21px; height:21px; }
+.es b{ display:block; font-size:15.5px; font-weight:600; letter-spacing:-.01em; color:var(--ink); }
+.es p{ max-width:44ch; margin:6px auto 0; font-size:13.5px; line-height:1.6; color:var(--ink-3); }
+.es-act{ display:flex; flex-wrap:wrap; justify-content:center; gap:8px; margin-top:18px; }
+.es-err .es-ic{ color:var(--down); }
+.grid > .es, #signals > .es{ border:1px solid var(--line); background:var(--panel); }
+
+/* loading: a few quiet bars, not a spinner, so the page keeps its shape */
+.es-skel{ display:grid; gap:12px; padding:22px 16px; }
+.es-skel span{
+  display:block; height:12px; border-radius:3px;
+  background:linear-gradient(90deg, var(--panel-2) 0%, var(--line) 50%, var(--panel-2) 100%);
+  background-size:200% 100%; animation:esShimmer 1.3s ease-in-out infinite;
+}
+@keyframes esShimmer{ from{ background-position:100% 0; } to{ background-position:-100% 0; } }
+@media(prefers-reduced-motion:reduce){ .es-skel span{ animation:none; } }
+
+/* live chat: the empty conversation still fills the card */
+.chat-log .es{ padding-block:64px; }
+.chat-note{ align-self:center; font-size:12px; color:var(--ink-3); margin-top:4px; }
+
+.sbar:empty{ background:var(--line); border-radius:4px; }
+.drawer-acct .avatar svg{ width:16px; height:16px; }

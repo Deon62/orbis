@@ -6,41 +6,54 @@
 (function (global) {
   'use strict';
 
-  var D = global.OrbisData;
+  var A = global.OrbisAPI;
   var list = document.getElementById('confList');
-  if (!D || !list) return;
+  if (!A || !list) return;
 
-  var TRADES = D.closedTrades;
-  var ACCOUNT = { name: 'Amara Otieno', id: 'CR-5521904', ccy: 'USD' };
+  var TRADES = [];
+  /* filled from /me; the PDF leaves a line out rather than invent it */
+  var ACCOUNT = { name: '', id: '', ccy: 'USD' };
 
   function ic(n, c) { return '<i data-lucide="' + n + '" class="' + (c || 'i') + '"></i>'; }
   function icons() { if (global.orbisIcons) global.orbisIcons(); }
   function toast(m, i) { if (global.orbisToast) global.orbisToast(m, i); }
-  var money = D.money;
+  var money = A.money;
 
   /* "Today 09:41" into a real date, so the document carries one */
   function settledAt(t) {
-    var p = t.when.split(' '), d = new Date();
+    var p = String(t.when).split(' '), d = new Date();
     if (p[0] === 'Yesterday') d.setDate(d.getDate() - 1);
     var date = d.getDate() + ' ' + d.toLocaleString('en-GB', { month: 'short' }) + ' ' + d.getFullYear();
     return { date: date, time: p[1], full: date + ', ' + p[1] + ' UTC' };
   }
 
   /* ============================================================ rows == */
-  list.innerHTML = TRADES.map(function (t, i) {
-    var s = settledAt(t), won = t.result === 'won';
-    return '<div class="row-line conf-row">' +
-      '<div><b>' + t.id + '</b>' +
-        '<span>' + t.sym + ' · ' + t.dir + ' · ' + money(t.stake) + ' · settled ' + t.when.toLowerCase() + '</span></div>' +
-      '<span class="conf-pl mono ' + (won ? 'up' : 'down') + '">' + (won ? '+' : '') + money(t.pl) + '</span>' +
-      '<button class="conf-dl" data-i="' + i + '" aria-label="Download confirmation ' + t.id + '">' +
-        '<span class="conf-ic">' + ic('download', 'i-sm') + '</span>' +
-        '<span class="conf-ok">' + ic('check', 'i-sm') + '</span>' +
-        '<svg class="conf-ring" viewBox="0 0 36 36" aria-hidden="true"><circle cx="18" cy="18" r="15"/></svg>' +
-      '</button>' +
-    '</div>';
-  }).join('');
-  icons();
+  function rowsHTML(d) {
+    return d.map(function (t, i) {
+      var won = t.result === 'won';
+      return '<div class="row-line conf-row">' +
+        '<div><b>' + t.id + '</b>' +
+          '<span>' + t.sym + ' · ' + t.dir + ' · ' + money(t.stake) + ' · settled ' + String(t.when).toLowerCase() + '</span></div>' +
+        '<span class="conf-pl mono ' + (won ? 'up' : 'down') + '">' + (won ? '+' : '') + money(t.pl) + '</span>' +
+        '<button class="conf-dl" data-i="' + i + '" aria-label="Download confirmation ' + t.id + '">' +
+          '<span class="conf-ic">' + ic('download', 'i-sm') + '</span>' +
+          '<span class="conf-ok">' + ic('check', 'i-sm') + '</span>' +
+          '<svg class="conf-ring" viewBox="0 0 36 36" aria-hidden="true"><circle cx="18" cy="18" r="15"/></svg>' +
+        '</button>' +
+      '</div>';
+    }).join('');
+  }
+
+  A.load({
+    el: list, path: '/confirmations',
+    empty: { icon: 'file-check', title: 'No confirmations yet',
+      text: 'Every settled contract gets a PDF confirmation here, ready to download for your records.',
+      action: '<a class="btn btn-primary btn-sm" href="/trade">Start trading</a>' },
+    render: function (d) { TRADES = d; return rowsHTML(d); }
+  });
+  A.get('/me').then(function (me) {
+    if (me) { ACCOUNT.name = me.name || ''; ACCOUNT.id = me.accountId || ''; ACCOUNT.ccy = me.currency || 'USD'; }
+  }).catch(function () {});
 
   /* ======================================================= tiny PDF == */
   function pdfText(s) {
@@ -62,8 +75,8 @@
     text(360, 764, 'Contract ' + t.id, 'F1', 10, 0.35);
     rule(740, 1);
 
-    text(56, 712, 'Account holder', 'F1', 9, 0.45); text(200, 712, ACCOUNT.name, 'F1', 10);
-    text(56, 694, 'Account', 'F1', 9, 0.45);        text(200, 694, ACCOUNT.id + ' (' + ACCOUNT.ccy + ')', 'F1', 10);
+    text(56, 712, 'Account holder', 'F1', 9, 0.45); text(200, 712, ACCOUNT.name || '-', 'F1', 10);
+    text(56, 694, 'Account', 'F1', 9, 0.45);        text(200, 694, (ACCOUNT.id ? ACCOUNT.id + ' ' : '') + '(' + ACCOUNT.ccy + ')', 'F1', 10);
     text(56, 676, 'Issued', 'F1', 9, 0.45);         text(200, 676, new Date().toUTCString().replace('GMT', 'UTC'), 'F1', 10);
     rule(656);
 

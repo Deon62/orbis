@@ -52,6 +52,7 @@
 </main>
 
 <script src="/assets/js/icons.js"></script>
+<script src="/assets/js/api.js"></script>
 <script src="/assets/js/chart.js"></script>
 <script src="/assets/js/data.js"></script>
 <script src="/assets/js/app.js"></script>
@@ -59,44 +60,41 @@
 <script src="/assets/js/modals.js"></script>
 <script>
 (function () {
+  var A = OrbisAPI, M = A.money;
+
   var host = document.getElementById('providers');
-  /* the headline figure is a 30-day number, scaled down for shorter windows */
   var SCALE = { '1h': 0.015, '12h': 0.09, '24h': 0.16, '7d': 0.42, '30d': 1 };
-  var sortBy = 'ret', range = '30d';
+  var sortBy = 'ret', range = '30d', data = null;
 
-  function render(sort) {
-    var list = OrbisData.providers.slice().sort(function (a, b) {
-      return sort === 'min' ? a.min - b.min : b[sort] - a[sort];
-    });
-
+  function draw() {
+    if (!data) return;
+    var list = data.slice().sort(function (a, b) { return sortBy === 'min' ? a.min - b.min : b[sortBy] - a[sortBy]; });
     host.innerHTML = list.map(function (p) {
-      var ret = (p.ret * SCALE[range]);
-      ret = (ret >= 10 ? ret.toFixed(1) : ret.toFixed(2));
-      return '<div class="prov">' +
-        '<span class="avatar">' + p.initials + '</span>' +
-        '<span class="prov-id">' +
-          '<b>' + p.name + '</b>' +
-          '<span>' + p.style + ' · ' + p.copiers.toLocaleString('en-US') + ' copiers</span>' +
-        '</span>' +
-        '<span class="prov-stats">' +
-          '<span><small>Return</small><b class="mono up">+' + ret + '%</b></span>' +
-          '<span><small>Win rate</small><b class="mono brandtxt">' + p.win + '%</b></span>' +
-          '<span><small>Max drawdown</small><b class="mono down">' + p.dd + '%</b></span>' +
-          '<span><small>Minimum</small><b class="mono">' + OrbisData.money(p.min) + '</b></span>' +
-        '</span>' +
-        '<button class="btn btn-dark btn-sm prov-cta" data-modal="copy" data-provider="' + p.id + '">Copy</button>' +
-      '</div>';
+      var ret = p.ret * SCALE[range];
+      ret = ret >= 10 ? ret.toFixed(1) : ret.toFixed(2);
+      return '<div class="prov"><span class="avatar">' + p.initials + '</span>' +
+        '<span class="prov-id"><b>' + p.name + '</b><span>' + p.style + ' · ' + p.copiers.toLocaleString('en-US') + ' copiers</span></span>' +
+        '<span class="prov-stats"><span><small>Return</small><b class="mono up">+' + ret + '%</b></span>' +
+        '<span><small>Win rate</small><b class="mono brandtxt">' + p.win + '%</b></span>' +
+        '<span><small>Max drawdown</small><b class="mono down">' + p.dd + '%</b></span>' +
+        '<span><small>Minimum</small><b class="mono">' + M(p.min) + '</b></span></span>' +
+        '<button class="btn btn-dark btn-sm prov-cta" data-modal="copy" data-provider="' + p.id + '">Copy</button></div>';
     }).join('');
     window.orbisIcons();
   }
 
   document.addEventListener('fdrop:change', function (e) {
-    if (e.target.id === 'rangeDrop') range = e.detail.value;
-    else sortBy = e.detail.value;
-    render(sortBy);
+    if (e.target.id === 'rangeDrop') range = e.detail.value; else sortBy = e.detail.value;
+    draw();
   });
 
-  render(sortBy);
+  A.load({
+    el: host, path: '/copy/providers',
+    empty: { icon: 'users-round', title: 'No traders to copy yet',
+      text: 'Verified traders who open their results to copying will be listed here, with their return, win rate and drawdown.' },
+    render: function (d) { data = d; window.orbisProviders = d; return ''; },
+    after: draw
+  });
 })();
 </script>
 </body>

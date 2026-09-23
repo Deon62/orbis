@@ -23,7 +23,7 @@
   <div class="stack" style="max-width:720px">
     <div class="card card-flat">
       <div class="row-line">
-        <div><b>Password</b><span>Last changed 12 Sep 2026</span></div>
+        <div><b>Password</b><span>Change it any time, and on every device you sign out of</span></div>
         <button class="btn btn-ghost btn-sm" data-mock="Change password">Change</button>
       </div>
       <div class="row-line">
@@ -42,21 +42,34 @@
 
     <div class="card card-flat">
       <div class="card-hd"><h3>Active sessions</h3><button class="btn btn-ghost btn-sm" data-mock="Sign out all devices">Sign out all</button></div>
-      <div class="row-line">
-        <div><b>Chrome · Windows</b><span>Nairobi, Kenya</span></div>
-        <span class="tag tag-up">This device</span>
-      </div>
-      <div class="row-line">
-        <div><b>orbisflow iOS</b><span>Nairobi, Kenya · 3 hours ago</span></div>
-        <button class="btn btn-quiet btn-sm" data-mock="Revoke session">Revoke</button>
-      </div>
+      <div id="sessList"></div>
     </div>
   </div>
 </main>
 
 <script src="/assets/js/icons.js"></script>
+<script src="/assets/js/api.js"></script>
 <script src="/assets/js/app.js"></script>
 <script src="/assets/js/qr.js"></script>
 <script src="/assets/js/modals.js"></script>
+<script>
+(function () {
+  var A = OrbisAPI, M = A.money;
+
+  /* this device is known from the browser itself; the others come from the API */
+  var ua = navigator.userAgent;
+  var browser = /Edg\//.test(ua) ? 'Edge' : /OPR\//.test(ua) ? 'Opera' : /Chrome\//.test(ua) ? 'Chrome' : /Safari\//.test(ua) ? 'Safari' : /Firefox\//.test(ua) ? 'Firefox' : 'Browser';
+  var os = /Windows/.test(ua) ? 'Windows' : /Android/.test(ua) ? 'Android' : /iPhone|iPad/.test(ua) ? 'iOS' : /Mac OS X/.test(ua) ? 'macOS' : /Linux/.test(ua) ? 'Linux' : '';
+  var here = '<div class="row-line"><div><b>' + browser + (os ? ' · ' + os : '') + '</b><span>Signed in now</span></div><span class="tag tag-up">This device</span></div>';
+  var list = document.getElementById('sessList');
+  list.innerHTML = here;
+  A.get('/sessions').then(function (d) {
+    (d || []).filter(function (x) { return !x.current; }).forEach(function (x) {
+      list.insertAdjacentHTML('beforeend', '<div class="row-line"><div><b>' + x.device + '</b><span>' + x.place + ' · ' + x.lastSeen + '</span></div>' +
+        '<button class="btn btn-quiet btn-sm" data-mock="Revoke session">Revoke</button></div>');
+    });
+  }).catch(function () {});
+})();
+</script>
 </body>
 </html>

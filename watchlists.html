@@ -26,7 +26,6 @@
       <button class="fdrop-btn" aria-haspopup="listbox" aria-expanded="false"><span class="fdrop-val">Default</span><i data-lucide="chevron-down" class="i-sm chev"></i></button>
       <div class="fdrop-menu" hidden role="listbox">
         <button class="fdrop-opt" role="option" data-v="default" aria-selected="true"><span class="fdrop-tx">Default</span></button>
-        <button class="fdrop-opt" role="option" data-v="crypto" aria-selected="false"><span class="fdrop-tx">Crypto</span></button>
       </div>
     </div>
     <span class="grow"></span>
@@ -37,17 +36,28 @@
 </main>
 
 <script src="/assets/js/icons.js"></script>
+<script src="/assets/js/api.js"></script>
 <script src="/assets/js/chart.js"></script>
 <script src="/assets/js/data.js"></script>
 <script src="/assets/js/app.js"></script>
 <script src="/assets/js/qr.js"></script>
 <script src="/assets/js/modals.js"></script>
 <script>
-document.getElementById('wlist').innerHTML =
-  ['EUR/USD','BTC/USD','XAU/USD','US 100','Volatility 75']
-    .map(function (s, i) { return OrbisData.rowHTML(OrbisData.bySymbol(s), i); }).join('');
-OrbisData.drawSparklines();
-window.orbisIcons();
+(function () {
+  var A = OrbisAPI, M = A.money;
+
+  A.load({
+    el: '#wlist', path: '/watchlists',
+    empty: { icon: 'star', title: 'Your watchlist is empty',
+      text: 'Star a market from the markets list or the trade screen to keep it here.',
+      action: '<a class="btn btn-primary btn-sm" href="/markets">Browse markets</a>' },
+    render: function (d) {
+      var list = (d[0] && d[0].symbols) || [];
+      return list.map(function (sym, i) { var m = OrbisData.bySymbol(sym); return m ? OrbisData.rowHTML(m, i) : ''; }).join('');
+    },
+    after: function () { OrbisData.drawSparklines(); }
+  });
+})();
 </script>
 </body>
 </html>

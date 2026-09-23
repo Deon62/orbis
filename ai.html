@@ -39,18 +39,13 @@
           <i data-lucide="radar" class="i-sm"></i><span id="rescanTx">Rescan</span>
         </button>
       </div>
-      <div class="grid g3" id="signals"></div>
+      <div id="signals"></div>
     </div>
 
     <!-- pattern watch ---------------------------------------------------- -->
     <div class="card card-flat">
       <div class="card-hd"><h3>Pattern watch</h3><span class="dim" style="font-size:12.5px">Detected in the last hour</span></div>
-      <div class="tbl-scroll">
-        <table class="tbl">
-          <thead><tr><th>Market</th><th>Pattern</th><th>Timeframe</th><th>Bias</th><th class="r">Detected</th></tr></thead>
-          <tbody id="patterns"></tbody>
-        </table>
-      </div>
+      <div id="patterns"></div>
     </div>
 
     <p class="ai-note">
@@ -61,6 +56,7 @@
 </main>
 
 <script src="/assets/js/icons.js"></script>
+<script src="/assets/js/api.js"></script>
 <script src="/assets/js/chart.js"></script>
 <script src="/assets/js/data.js"></script>
 <script src="/assets/js/app.js"></script>
@@ -68,105 +64,73 @@
 <script src="/assets/js/modals.js"></script>
 <script>
 (function () {
-  var SIGNALS = [
-    { sym:'EUR/USD',       dir:'Rise', conf:78, tf:'5m',  stake:25, why:'Holding above the session VWAP with rising volume; dollar softening into the New York open.' },
-    { sym:'BTC/USD',       dir:'Rise', conf:71, tf:'15m', stake:50, why:'Broke the overnight range high and retested it as support. Funding still neutral.' },
-    { sym:'XAU/USD',       dir:'Fall', conf:66, tf:'5m',  stake:25, why:'Rejected the 2,320 level three times. Real yields ticking up ahead of CPI.' },
-    { sym:'USD/JPY',       dir:'Rise', conf:63, tf:'1h',  stake:25, why:'Carry demand intact; no intervention rhetoric in the last two sessions.' },
-    { sym:'ETH/USD',       dir:'Fall', conf:59, tf:'15m', stake:25, why:'Lower highs against bitcoin for six hours. Momentum fading on the hourly.' },
-    { sym:'Volatility 75', dir:'Rise', conf:54, tf:'1m',  stake:10, why:'Mean-reversion setup after a two-sigma move down. Low conviction, size small.' }
-  ];
+  var A = OrbisAPI, M = A.money;
 
-  var PATTERNS = [
-    ['GBP/USD', 'Double top',        '15m', 'Fall', '4 min ago'],
-    ['US 100',  'Bull flag',         '5m',  'Rise', '11 min ago'],
-    ['WTI',     'Falling wedge',     '1h',  'Rise', '18 min ago'],
-    ['SOL/USD', 'Breakout retest',   '5m',  'Rise', '24 min ago'],
-    ['XAG/USD', 'Head and shoulders','1h',  'Fall', '38 min ago']
-  ];
+  var filter = 'all', signals = [];
+  var grid = document.getElementById('signals');
+  var scanBtn = document.getElementById('rescan');
 
-  function render(filter) {
-    var rows = SIGNALS.filter(function (s) { return filter === 'all' || s.dir === filter; });
-    document.getElementById('signals').innerHTML = rows.map(function (s) {
+  function cards() {
+    var rows = signals.filter(function (s) { return filter === 'all' || s.dir === filter; });
+    if (!rows.length) {
+      grid.innerHTML = A.empty({ icon: 'radar', title: 'No ' + (filter === 'all' ? '' : filter.toLowerCase() + ' ') + 'signals right now',
+        text: 'The model only calls a setup when it clears its confidence bar. Rescan in a few minutes.' });
+      return window.orbisIcons();
+    }
+    grid.innerHTML = '<div class="grid g3">' + rows.map(function (s) {
       var m = OrbisData.bySymbol(s.sym) || { sym: s.sym, name: '', icon: {} };
       var up = s.dir === 'Rise';
-      return '<div class="signal">' +
-        '<div class="signal-hd">' + OrbisData.assetHTML(m) +
-          '<span class="nm"><b>' + s.sym + '</b><span>' + s.tf + ' contract · $' + s.stake + '</span></span>' +
-          '<span class="tag ' + (up ? 'tag-up' : 'tag-down') + '">' +
-          '<i data-lucide="' + (up ? 'trending-up' : 'trending-down') + '" class="i-sm"></i>' + s.dir + '</span>' +
-        '</div>' +
-        '<div style="display:flex;justify-content:space-between;font-size:12px;color:var(--ink-3)">' +
-          '<span>Confidence</span><b class="mono" style="color:var(--ink)">' + s.conf + '%</b></div>' +
-        '<div class="conf"><i style="width:' + s.conf + '%;background:' +
-          (up ? 'var(--up)' : 'var(--down)') + '"></i></div>' +
+      return '<div class="signal"><div class="signal-hd">' + OrbisData.assetHTML(m) +
+        '<span class="nm"><b>' + s.sym + '</b><span>' + s.tf + ' contract · $' + s.stake + '</span></span>' +
+        '<span class="tag ' + (up ? 'tag-up' : 'tag-down') + '"><i data-lucide="' + (up ? 'trending-up' : 'trending-down') + '" class="i-sm"></i>' + s.dir + '</span></div>' +
+        '<div style="display:flex;justify-content:space-between;font-size:12px;color:var(--ink-3)"><span>Confidence</span><b class="mono" style="color:var(--ink)">' + s.conf + '%</b></div>' +
+        '<div class="conf"><i style="width:' + s.conf + '%;background:' + (up ? 'var(--up)' : 'var(--down)') + '"></i></div>' +
         '<p>' + s.why + '</p>' +
-        '<a class="btn btn-ghost btn-sm btn-block" style="margin-top:12px" href="/trade?symbol=' +
-          encodeURIComponent(s.sym) + '&dir=' + s.dir + '&tf=' + s.tf + '&stake=' + s.stake +
-          '">Trade this signal<i data-lucide="arrow-right" class="i-sm"></i></a>' +
-      '</div>';
-    }).join('');
+        '<a class="btn btn-ghost btn-sm btn-block" style="margin-top:12px" href="/trade?symbol=' + encodeURIComponent(s.sym) +
+          '&dir=' + s.dir + '&tf=' + s.tf + '&stake=' + s.stake + '">Trade this signal<i data-lucide="arrow-right" class="i-sm"></i></a></div>';
+    }).join('') + '</div>';
     window.orbisIcons();
   }
 
-  document.addEventListener('fdrop:change', function (e) { render(e.detail.value); });
-
-  document.getElementById('patterns').innerHTML = PATTERNS.map(function (r) {
-    var up = r[3] === 'Rise';
-    return '<tr><td><b>' + r[0] + '</b></td><td>' + r[1] + '</td><td class="mono">' + r[2] + '</td>' +
-      '<td><span class="tag ' + (up ? 'tag-up' : 'tag-down') + '">' + r[3] + '</span></td>' +
-      '<td class="r dim">' + r[4] + '</td></tr>';
-  }).join('');
-
-  /* ------------------------------------------------------------- scan --- */
-  var scanBtn = document.getElementById('rescan');
-  var grid = document.getElementById('signals');
-  var patterns = document.getElementById('patterns');
-  var filter = 'all';
-
-  document.addEventListener('fdrop:change', function (e) { filter = e.detail.value; });
-
-  function jitter(v, spread, lo, hi) {
-    return Math.max(lo, Math.min(hi, Math.round(v + (Math.random() - 0.5) * spread)));
+  function loadSignals() {
+    grid.innerHTML = A.loading(3);
+    return A.get('/signals').then(function (d) { signals = d || []; cards(); })
+      .catch(function () { signals = []; cards(); });
   }
+
+  function loadPatterns() {
+    return A.load({
+      el: '#patterns', path: '/patterns',
+      empty: { icon: 'chart-candlestick', title: 'No patterns in the last hour',
+        text: 'Double tops, flags and breakouts show here as the scanner finds them.' },
+      render: function (d) {
+        return '<div class="tbl-scroll"><table class="tbl"><thead><tr><th>Market</th><th>Pattern</th><th>Timeframe</th><th>Bias</th><th class="r">Detected</th></tr></thead><tbody>' +
+          d.map(function (r) {
+            var up = r.bias === 'Rise';
+            return '<tr><td><b>' + r.sym + '</b></td><td>' + r.pattern + '</td><td class="mono">' + r.tf + '</td>' +
+              '<td><span class="tag ' + (up ? 'tag-up' : 'tag-down') + '">' + r.bias + '</span></td><td class="r dim">' + r.ago + '</td></tr>';
+          }).join('') + '</tbody></table></div>';
+      }
+    });
+  }
+
+  document.addEventListener('fdrop:change', function (e) { filter = e.detail.value; cards(); });
 
   scanBtn.addEventListener('click', function () {
     if (scanBtn.disabled) return;
     scanBtn.disabled = true;
     scanBtn.querySelector('#rescanTx').textContent = 'Scanning';
-    scanBtn.querySelector('svg').classList.add('spin');
-    grid.classList.add('scanning');
-    patterns.closest('.card').classList.add('scanning');
-
-    var steps = ['Reading 60 markets', 'Scoring setups', 'Ranking signals'];
-    var i = 0;
-    var tick = setInterval(function () {
-      i++;
-      if (i < steps.length) window.orbisToast(steps[i], 'radar');
-    }, 700);
-    window.orbisToast(steps[0], 'radar');
-
-    setTimeout(function () {
-      clearInterval(tick);
-
-      /* a fresh scan moves the confidences and can flip a marginal call */
-      SIGNALS.forEach(function (s) {
-        s.conf = jitter(s.conf, 14, 45, 92);
-        if (s.conf < 52 && Math.random() < 0.5) s.dir = s.dir === 'Rise' ? 'Fall' : 'Rise';
-      });
-      SIGNALS.sort(function (a, b) { return b.conf - a.conf; });
-
+    var svg = scanBtn.querySelector('svg'); if (svg) svg.classList.add('spin');
+    Promise.all([loadSignals(), loadPatterns()]).then(function () {
       scanBtn.disabled = false;
       scanBtn.querySelector('#rescanTx').textContent = 'Rescan';
-      grid.classList.remove('scanning');
-      patterns.closest('.card').classList.remove('scanning');
-      render(filter);
-      scanBtn.querySelector('svg').classList.remove('spin');
-      window.orbisToast('Scan complete · ' + SIGNALS.length + ' signals', 'check-circle-2');
-    }, 2100);
+      var svg = scanBtn.querySelector('svg'); if (svg) svg.classList.remove('spin');
+      window.orbisToast(signals.length ? 'Scan complete · ' + signals.length + ' signals' : 'Scan complete · no signals right now', 'radar');
+    });
   });
 
-  render('all');
+  loadSignals();
+  loadPatterns();
 })();
 </script>
 </body>
