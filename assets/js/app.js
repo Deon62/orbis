@@ -172,7 +172,6 @@
       ['Trade confirmations', 'file-check', '/trade-confirmations']
     ]},
     { h: 'Support', items: [
-      ['Help centre', 'life-buoy',      '/help-centre'],
       ['Live chat',   'message-square', '/live-chat'],
       ['Contact us',  'mail',           '/contact']
     ]}
@@ -354,7 +353,7 @@
       ['AI insights', '/ai'], ['Positions', '/positions'],
       ['Cashier', '/cashier'], ['Refer & earn', '/referrals']] },
     { h: 'Company', links: [['About', '/about'], ['Academy', '/academy'], ['Newsroom', '/newsroom'], ['Careers', null], ['Contact', '/contact-us']] },
-    { h: 'Support', links: [['Help centre', null], ['Payment methods', null], ['Verification', null], ['Status', null]] },
+    { h: 'Support', links: [['Contact us', '/contact-us'], ['Payment methods', null], ['Verification', null], ['Status', null]] },
     { h: 'Legal', links: [['Terms', '/terms'], ['Privacy', '/privacy'], ['Risk disclosure', '/risk-disclosure'], ['AML policy', '/aml-policy'], ['Cookies', '/cookies']] }
   ];
 

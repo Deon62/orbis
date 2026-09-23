@@ -21,7 +21,13 @@
 <div id="site-header"></div>
 
 <main class="wrap page-body">
-  <div class="card card-flat"><div class="row-line"><div><b>OB-947880</b><span>GBP/USD · Fall · $20.00 · settled today 09:41</span></div><button class="btn btn-quiet btn-sm" data-mock="Download confirmation"><i data-lucide="download" class="i-sm"></i></button></div><div class="row-line"><div><b>OB-947812</b><span>US 100 · Rise · $30.00 · settled today 09:12</span></div><button class="btn btn-quiet btn-sm" data-mock="Download confirmation"><i data-lucide="download" class="i-sm"></i></button></div><div class="row-line"><div><b>OB-947744</b><span>ETH/USD · Rise · $40.00 · settled today 08:36</span></div><button class="btn btn-quiet btn-sm" data-mock="Download confirmation"><i data-lucide="download" class="i-sm"></i></button></div><div class="row-line"><div><b>OB-947690</b><span>EUR/USD · Rise · $10.00 · settled yesterday 21:04</span></div><button class="btn btn-quiet btn-sm" data-mock="Download confirmation"><i data-lucide="download" class="i-sm"></i></button></div><div class="row-line"><div><b>OB-947612</b><span>WTI · Fall · $25.00 · settled yesterday 18:47</span></div><button class="btn btn-quiet btn-sm" data-mock="Download confirmation"><i data-lucide="download" class="i-sm"></i></button></div></div>
+  <div class="conf" style="max-width:780px">
+    <div class="conf-hd">
+      <p>One PDF per settled contract, with entry, exit and result. Keep them for your records.</p>
+      <button class="btn btn-ghost btn-sm" id="confAll"><i data-lucide="download" class="i-sm"></i><span>Download all</span></button>
+    </div>
+    <div class="card card-flat" id="confList"></div>
+  </div>
 </main>
 
 <script src="/assets/js/icons.js"></script>
@@ -30,6 +36,7 @@
 <script src="/assets/js/app.js"></script>
 <script src="/assets/js/qr.js"></script>
 <script src="/assets/js/modals.js"></script>
+<script src="/assets/js/confirmations.js"></script>
 
 </body>
 </html>

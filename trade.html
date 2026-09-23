@@ -466,6 +466,7 @@
     var stake = $('#aStake'), target = $('#aTarget'), loss = $('#aLoss');
     var run = $('#aRun'), session = $('#aSession'), net = $('#aNet');
     var timer = null, pnl = 0, trades = 0;
+    var wins = 0, staked = 0, best = 0, worst = 0, started = 0, market = '', startStake = 0;
 
     document.querySelectorAll('[data-astep]').forEach(function (b) {
       b.addEventListener('click', function () {
@@ -494,14 +495,24 @@
       run.classList.add('btn-primary');
       window.orbisIcons();
       paint();
-      window.orbisToast('Auto trading stopped · ' + why, 'circle-stop');
+      /* a session that placed trades ends on a result, like a manual contract */
+      if (trades && window.orbisModal && window.orbisModal.autoResult) {
+        window.orbisModal.autoResult({
+          why: why, market: market, trades: trades, wins: wins, pnl: pnl, staked: staked,
+          best: best, worst: worst, stake: startStake, secs: Math.round((Date.now() - started) / 1000)
+        });
+      } else {
+        window.orbisToast('Auto trading stopped · ' + why, 'circle-stop');
+      }
     }
 
     run.addEventListener('click', function () {
       if (timer) return stop('by you');
 
-      pnl = 0; trades = 0;
+      pnl = 0; trades = 0; wins = 0; staked = 0; best = 0; worst = 0;
+      started = Date.now(); market = current.sym;
       var size = Number(stake.value) || 1;
+      startStake = size;
       var martingale = $('#aMartingale').classList.contains('on');
       run.innerHTML = '<i data-lucide="square" class="i-sm"></i>Stop auto trading';
       run.classList.remove('btn-primary');
@@ -512,8 +523,13 @@
 
       timer = setInterval(function () {
         var won = Math.random() < 0.5;
-        pnl += won ? size * (current.payout / 100) : -size;
+        var delta = won ? size * (current.payout / 100) : -size;
+        pnl += delta;
+        staked += size;
         trades++;
+        if (won) wins++;
+        best = Math.max(best, delta);
+        worst = Math.min(worst, delta);
         size = (martingale && !won) ? size * 2 : (Number(stake.value) || 1);
         paint();
         if (pnl >= Number(target.value)) return stop('target profit reached');

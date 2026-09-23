@@ -360,6 +360,7 @@
           '<canvas id="mQr" aria-label="QR code for your referral link" role="img"></canvas>' +
           '<span class="hint">Point a camera at this to open your link</span>' +
         '</div>' +
+        '<a class="ref-how" href="/referral-how">How it works' + ic('arrow-right', 'i-sm') + '</a>' +
       '</div>' +
       '<div style="border-top:1px solid var(--line)">' +
         '<a class="link-row" href="/referrals">' +
@@ -633,6 +634,45 @@
 
     open(won ? 'Won' : 'Lost', html);
     if (global.orbisBeep) global.orbisBeep(won ? 'win' : 'lose');
+  }
+
+  /* an auto session ends the way a manual contract does: one result, the
+     session's numbers under it */
+  function autoResultModal(r) {
+    var up = r.pnl >= 0;
+    var mins = Math.floor(r.secs / 60), secs = r.secs % 60;
+    var reason = { 'target profit reached': 'Target profit reached',
+                   'stop loss reached': 'Stop loss reached',
+                   'by you': 'Stopped by you' }[r.why] || r.why;
+
+    var html =
+      '<div class="modal-bd center">' +
+        '<div class="result ' + (up ? 'result-won' : 'result-lost') + '">' +
+          ic(up ? 'trending-up' : 'trending-down', 'i-lg') + '</div>' +
+        '<h3 style="margin-top:14px">' + (up ? 'Session in profit' : 'Session at a loss') + '</h3>' +
+        '<p class="run-amount ' + (up ? 'up' : 'down') + ' mono">' + (up ? '+' : '') + money(r.pnl) + '</p>' +
+        '<p class="hint">' + reason + ' · ' + (mins ? mins + 'm ' : '') + secs + 's</p>' +
+        '<div class="auto-sum">' +
+          '<div><b class="mono">' + r.trades + '</b><span>Trades</span></div>' +
+          '<div><b class="mono up">' + r.wins + '</b><span>Won</span></div>' +
+          '<div><b class="mono down">' + (r.trades - r.wins) + '</b><span>Lost</span></div>' +
+        '</div>' +
+        '<div style="text-align:left;margin-top:14px">' +
+          '<div class="kv"><span>Market</span><b>' + r.market + '</b></div>' +
+          '<div class="kv"><span>Starting stake</span><b class="mono">' + money(r.stake) + '</b></div>' +
+          '<div class="kv"><span>Total staked</span><b class="mono">' + money(r.staked) + '</b></div>' +
+          '<div class="kv"><span>Win rate</span><b class="mono">' + Math.round(r.wins / r.trades * 100) + '%</b></div>' +
+          '<div class="kv"><span>Best trade</span><b class="mono up">' + (r.best > 0 ? '+' + money(r.best) : money(0)) + '</b></div>' +
+          '<div class="kv"><span>Worst trade</span><b class="mono down">' + money(r.worst) + '</b></div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="modal-ft" style="display:grid;grid-template-columns:1fr 1fr;gap:8px">' +
+        '<button class="btn btn-ghost" data-close>Close</button>' +
+        '<a class="btn btn-primary" href="/positions">See positions</a>' +
+      '</div>';
+
+    open('Auto trading ended', html);
+    if (global.orbisBeep) global.orbisBeep(up ? 'win' : 'lose');
   }
 
   /* ========================================================== country === */
@@ -978,7 +1018,7 @@
     else if (kind === 'enrol') enrolInfo(t.dataset.course);
   });
 
-  global.orbisModal = { open: open, close: close, deposit: depositStep1,
+  global.orbisModal = { open: open, close: close, autoResult: autoResultModal, deposit: depositStep1,
                       withdraw: withdrawStep1, refer: referModal, account: accountModal,
                       addPayment: addPaymentStep1, marketRead: marketReadModal, copy: copyModal,
                       trade: tradeModal, country: countryModal, enrol: enrolInfo };
