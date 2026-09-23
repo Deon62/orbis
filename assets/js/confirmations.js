@@ -21,6 +21,13 @@
 
   /* "Today 09:41" into a real date, so the document carries one */
   function settledAt(t) {
+    /* the API sends the real moment; older data only had "Today 09:41" */
+    if (t.settledAt) {
+      var at = new Date(t.settledAt);
+      var day = at.getDate() + ' ' + at.toLocaleString('en-GB', { month: 'short' }) + ' ' + at.getFullYear();
+      var hm = ('0' + at.getHours()).slice(-2) + ':' + ('0' + at.getMinutes()).slice(-2);
+      return { date: day, time: hm, full: day + ', ' + hm };
+    }
     var p = String(t.when).split(' '), d = new Date();
     if (p[0] === 'Yesterday') d.setDate(d.getDate() - 1);
     var date = d.getDate() + ' ' + d.toLocaleString('en-GB', { month: 'short' }) + ' ' + d.getFullYear();
@@ -33,7 +40,7 @@
       var won = t.result === 'won';
       return '<div class="row-line conf-row">' +
         '<div><b>' + t.id + '</b>' +
-          '<span>' + t.sym + ' · ' + t.dir + ' · ' + money(t.stake) + ' · settled ' + String(t.when).toLowerCase() + '</span></div>' +
+          '<span>' + t.sym + ' · ' + t.dir + ' · ' + money(t.stake) + ' · settled ' + settledAt(t).full + '</span></div>' +
         '<span class="conf-pl mono ' + (won ? 'up' : 'down') + '">' + (won ? '+' : '') + money(t.pl) + '</span>' +
         '<button class="conf-dl" data-i="' + i + '" aria-label="Download confirmation ' + t.id + '">' +
           '<span class="conf-ic">' + ic('download', 'i-sm') + '</span>' +

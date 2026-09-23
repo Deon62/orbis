@@ -9,7 +9,8 @@
   function ic(n, c) { return '<i data-lucide="' + n + '" class="' + (c || 'i') + '"></i>'; }
   function icons() { if (global.lucide) global.lucide.createIcons({ nameAttr: 'data-lucide' }); }
   function money(n) {
-    return '$' + Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    n = Number(n);
+    return (n < 0 ? '-' : '') + '$' + Math.abs(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   }
   function toast(m, i) { if (global.orbisToast) global.orbisToast(m, i); }
 
@@ -712,8 +713,21 @@
       pop.classList.remove('in');
       setTimeout(function () { pop.remove(); }, 200);
       emit('orbis:trade-end', { contract: c, settled: settled });
-      if (settled) settleModal(c);
-      else toast('Sold back · ' + money(c.stake * 0.75) + ' returned', 'undo-2');
+      var T = global.OrbisTrading;
+      if (!T || !c.trade) {                              /* no ledger: the old simulation */
+        if (settled) settleModal(c);
+        else toast('Sold back · ' + money(c.stake * 0.75) + ' returned', 'undo-2');
+        return;
+      }
+      /* the money moves here: settled against the price on the chart now,
+         or sold back for 75% of the stake */
+      if (settled) {
+        T.settle(c.trade).then(function (res) { settleModal(c, res); })
+          .catch(function (err) { toast(err.message, 'triangle-alert'); });
+      } else {
+        T.sell(c.trade).then(function (r) { toast('Sold back · ' + money(r.returned) + ' returned', 'undo-2'); })
+          .catch(function (err) { toast(err.message, 'triangle-alert'); });
+      }
     }
 
     /* the ticket exposes a stop, because a running contract should be
@@ -733,10 +747,12 @@
     if (global.orbisBeep) global.orbisBeep('place');
   }
 
-  function settleModal(c) {
-    var won = Math.random() < 0.5;          /* a coin flip, like the contract */
+  function settleModal(c, res) {
+    /* res is the settled trade from the ledger; without one, the old coin flip */
+    var won = res ? res.won : Math.random() < 0.5;
     var profit = c.stake * (c.payout / 100);
-    var delta = won ? profit : -c.stake;
+    var delta = res ? res.profit : (won ? profit : -c.stake);
+    var back = res ? res.returned : (won ? c.stake + profit : 0);
 
     var html =
       '<div class="modal-bd center">' +
@@ -749,8 +765,9 @@
           '<div class="kv"><span>Market</span><b>' + c.sym + '</b></div>' +
           '<div class="kv"><span>Direction</span><b>' + c.dir + '</b></div>' +
           '<div class="kv"><span>Stake</span><b class="mono">' + money(c.stake) + '</b></div>' +
-          '<div class="kv"><span>Returned</span><b class="mono">' +
-            money(won ? c.stake + profit : 0) + '</b></div>' +
+          (res ? '<div class="kv"><span>Entry → exit</span><b class="mono">' + res.entry + ' → ' + res.exit + '</b></div>' : '') +
+          '<div class="kv"><span>Returned</span><b class="mono">' + money(back) + '</b></div>' +
+          (res ? '<div class="kv"><span>Balance</span><b class="mono">' + money(res.balance) + '</b></div>' : '') +
         '</div>' +
       '</div>' +
       '<div class="modal-ft" style="display:grid;grid-template-columns:1fr 1fr;gap:8px">' +

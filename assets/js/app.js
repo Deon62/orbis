@@ -173,6 +173,13 @@
   }
   window.orbisRefreshAccount = refreshAccount;
   window.orbisBalance = balanceOf;
+  /* a trade moved the money: the card, and anything listening, follow */
+  window.orbisSetBalance = function (kind, amount) {
+    var a = ACCOUNTS.filter(function (x) { return x.id === kind; })[0];
+    if (!a || amount == null || isNaN(amount)) return;
+    a.amount = '$' + Number(amount).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    setAccount(activeAccount);
+  };
 
   /* ============================================================== nav ==== */
   /* these six are the bottom tab bar and the desktop rail, and so are

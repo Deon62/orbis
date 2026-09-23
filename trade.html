@@ -99,7 +99,8 @@
             <div class="fund-note" id="fundNote" hidden>
               <i data-lucide="wallet" class="i-sm"></i>
               <span id="fundTx"></span>
-              <button type="button" class="linkish" data-modal="deposit">Deposit</button>
+              <button type="button" class="linkish" data-modal="deposit" id="fundDeposit">Deposit</button>
+              <button type="button" class="linkish" id="fundReset" hidden>Reset demo</button>
             </div>
           </div>
 
@@ -171,7 +172,7 @@
         <span class="lr-ic"><i data-lucide="receipt-text" class="i"></i></span>
         <span class="lr-tx">
           <b>Open positions</b>
-          <span><span id="openN">4</span> contracts · $100.00 at risk</span>
+          <span id="openTx">No open contracts</span>
         </span>
         <i data-lucide="chevron-right" class="i-sm dim"></i>
       </a>
@@ -184,6 +185,7 @@
 <script src="/assets/js/chart.js"></script>
 <script src="/assets/js/data.js"></script>
 <script src="/assets/js/app.js"></script>
+<script src="/assets/js/trading.js"></script>
 <script src="/assets/js/qr.js"></script>
 <script src="/assets/js/modals.js"></script>
 <script>
@@ -361,10 +363,18 @@
   function acct() { return window.orbisActiveAccount ? window.orbisActiveAccount() : 'demo'; }
   function funds() { return window.orbisBalance ? window.orbisBalance() : Infinity; }
   function shortBy(stake) { return stake > funds(); }
+  var T = window.OrbisTrading;
+  /* real money waits for server-side prices; practice runs on Demo */
+  function blocked() { return !!(T && !T.canTrade()); }
   function shortMsg() {
+    if (blocked()) return 'Real-money trading is not open yet. Switch to Demo to practise.';
     var bal = funds();
+    if (acct() === 'demo') {
+      return bal <= 0 ? 'Your demo balance is ' + OrbisData.money(0) + '. Reset it to keep practising.'
+        : 'Stake is more than your demo balance of ' + OrbisData.money(bal) + '.';
+    }
     return bal <= 0
-      ? 'Your ' + (acct() === 'real' ? 'real' : 'demo') + ' balance is ' + OrbisData.money(0) + '. Deposit to trade.'
+      ? 'Your real balance is ' + OrbisData.money(0) + '. Deposit to trade.'
       : 'Stake is more than your balance of ' + OrbisData.money(bal) + '.';
   }
 
@@ -372,18 +382,22 @@
     var stake = Number($('#stake').value) || 0;
     var payout = stake + stake * (current.payout / 100);
     var sub = current.payout + '% · ' + OrbisData.money(payout);
-    var short = shortBy(stake);
+    var short = shortBy(stake) || blocked();
     var note = $('#fundNote');
     note.hidden = !short;
     if (short) $('#fundTx').textContent = shortMsg();
+    /* demo money is topped up, not deposited */
+    $('#fundReset').hidden = !(short && acct() === 'demo');
+    $('#fundDeposit').hidden = !(short && acct() === 'real' && !blocked());
     /* a running contract keeps its sell-back button; only idle ones lock */
     var running = document.querySelector('[data-dir].busy');
     document.querySelectorAll('[data-dir]').forEach(function (b) {
       if (running) return;
       b.disabled = short;
     });
-    $('#upSub').textContent = short ? 'Not enough balance' : sub;
-    $('#downSub').textContent = short ? 'Not enough balance' : sub;
+    var why = blocked() ? 'Demo only for now' : 'Not enough balance';
+    $('#upSub').textContent = short ? why : sub;
+    $('#downSub').textContent = short ? why : sub;
     if (window.orbisAutoFunds) window.orbisAutoFunds();
   }
   document.addEventListener('orbis:account', function () { calc(); });
@@ -404,6 +418,34 @@
   });
   calc();
 
+  /* the open-positions line: how many contracts are live and what is on them */
+  var open = { n: 0, risk: 0 };
+  function paintOpen() {
+    var el = $('#openTx');
+    if (!el) return;
+    el.textContent = open.n ? open.n + ' contract' + (open.n === 1 ? '' : 's') + ' · ' +
+      OrbisData.money(open.risk) + ' at risk' : 'No open contracts';
+  }
+  function opened(stake) { open.n++; open.risk += stake; paintOpen(); }
+  function closed(stake) { open.n = Math.max(0, open.n - 1); open.risk = Math.max(0, open.risk - stake); paintOpen(); }
+  if (window.OrbisAPI && OrbisAPI.connected && OrbisAPI.signedIn()) {
+    OrbisAPI.get('/trades/open').then(function (list) {
+      (list || []).forEach(function (t) { opened(t.stake); });
+    }).catch(function () {});
+  }
+  document.addEventListener('orbis:trade-end', function (e) { closed(e.detail.contract.stake); });
+
+  $('#fundReset').addEventListener('click', function () {
+    var btn = this;
+    btn.disabled = true;
+    T.resetDemo().then(function (r) {
+      window.orbisToast('Demo balance reset to ' + OrbisData.money(r.balance), 'check-circle-2');
+      calc();
+    }).catch(function (err) { window.orbisToast(err.message, 'triangle-alert'); })
+      .then(function () { btn.disabled = false; });
+  });
+
+  var placing = false;
   document.querySelectorAll('[data-dir]').forEach(function (b) {
     b.addEventListener('click', function () {
       /* while a contract runs this button sells it back instead */
@@ -411,21 +453,23 @@
         if (window.orbisTradeStop) window.orbisTradeStop();
         return;
       }
+      if (placing) return;
       var stake = Number($('#stake').value) || 0;
-      if (shortBy(stake)) { calc(); window.orbisToast(shortMsg(), 'wallet'); return; }
-      OrbisData.openTrades.unshift({
-        id: 'OB-' + (948000 + Math.floor(Math.random() * 900)),
-        sym: current.sym, dir: b.dataset.dir, stake: stake,
-        entry: $('#price').textContent, now: $('#price').textContent,
-        ends: duration(), pl: 0
-      });
-      var n = $('#openN');
-      if (n) n.textContent = OrbisData.openTrades.length;
+      if (shortBy(stake) || blocked()) { calc(); window.orbisToast(shortMsg(), 'wallet'); return; }
 
-      window.orbisModal.trade({
-        sym: current.sym, dir: b.dataset.dir, stake: stake,
-        payout: current.payout, duration: duration(), entry: $('#price').textContent
-      });
+      var c = { sym: current.sym, dir: b.dataset.dir, stake: stake, payout: current.payout,
+                duration: duration(), seconds: 6, entry: $('#price').textContent };
+      placing = true;
+      document.querySelectorAll('[data-dir]').forEach(function (x) { x.disabled = true; });
+      T.place(c).then(function (t) {
+        c.trade = t;
+        opened(stake);
+        window.orbisModal.trade(c);
+      }).catch(function (err) {
+        window.orbisToast(err.message, 'triangle-alert');
+        document.querySelectorAll('[data-dir]').forEach(function (x) { x.disabled = false; });
+        calc();
+      }).then(function () { placing = false; });
     });
   });
 
@@ -495,7 +539,7 @@
   (function auto() {
     var stake = $('#aStake'), target = $('#aTarget'), loss = $('#aLoss');
     var run = $('#aRun'), session = $('#aSession'), net = $('#aNet');
-    var timer = null, pnl = 0, trades = 0;
+    var running = false, pnl = 0, trades = 0;
     var wins = 0, staked = 0, best = 0, worst = 0, started = 0, market = '', startStake = 0;
 
     document.querySelectorAll('[data-astep]').forEach(function (b) {
@@ -508,11 +552,13 @@
     stake.addEventListener('input', autoFunds);
 
     function autoFunds() {
-      if (timer) return;
-      var short = shortBy(Number(stake.value) || 0);
+      if (running) return;
+      var short = shortBy(Number(stake.value) || 0) || blocked();
       run.disabled = short;
       run.innerHTML = short
-        ? '<i data-lucide="wallet" class="i-sm"></i>' + (funds() <= 0 ? 'Deposit to auto trade' : 'Stake is more than your balance')
+        ? '<i data-lucide="wallet" class="i-sm"></i>' + (blocked() ? 'Demo only for now'
+            : funds() <= 0 ? (acct() === 'demo' ? 'Reset demo to auto trade' : 'Deposit to auto trade')
+            : 'Stake is more than your balance')
         : '<i data-lucide="play" class="i-sm"></i>Start auto trading';
       window.orbisIcons();
     }
@@ -522,8 +568,8 @@
     function paint() {
       net.textContent = (pnl >= 0 ? '+' : '') + OrbisData.money(pnl);
       net.className = 'mono ' + (pnl >= 0 ? 'up' : 'down');
-      session.textContent = timer ? trades + ' trade' + (trades === 1 ? '' : 's') : 'Not running';
-      if (timer && window.orbisAuto) {
+      session.textContent = running ? trades + ' trade' + (trades === 1 ? '' : 's') : 'Not running';
+      if (running && window.orbisAuto) {
         window.orbisAuto.update(
           trades + ' trade' + (trades === 1 ? '' : 's') + ' · ' +
           (pnl >= 0 ? '+' : '') + OrbisData.money(pnl), pnl >= 0);
@@ -531,8 +577,8 @@
     }
 
     function stop(why) {
-      clearInterval(timer);
-      timer = null;
+      if (!running) return;
+      running = false;
       if (window.orbisAuto) window.orbisAuto.stop();
       run.innerHTML = '<i data-lucide="play" class="i-sm"></i>Start auto trading';
       run.classList.remove('btn-dark');
@@ -552,9 +598,9 @@
     }
 
     run.addEventListener('click', function () {
-      if (timer) return stop('by you');
+      if (running) return stop('by you');
 
-      if (shortBy(Number(stake.value) || 0)) { autoFunds(); window.orbisToast(shortMsg(), 'wallet'); return; }
+      if (shortBy(Number(stake.value) || 0) || blocked()) { autoFunds(); window.orbisToast(shortMsg(), 'wallet'); return; }
       pnl = 0; trades = 0; wins = 0; staked = 0; best = 0; worst = 0;
       started = Date.now(); market = current.sym;
       var size = Number(stake.value) || 1;
@@ -567,21 +613,34 @@
       if (window.orbisAuto) window.orbisAuto.start(function () { stop('by you'); });
       paint();
 
-      timer = setInterval(function () {
-        var won = Math.random() < 0.5;
-        var delta = won ? size * (current.payout / 100) : -size;
-        pnl += delta;
-        staked += size;
-        trades++;
-        if (won) wins++;
-        best = Math.max(best, delta);
-        worst = Math.min(worst, delta);
-        size = (martingale && !won) ? size * 2 : (Number(stake.value) || 1);
-        paint();
-        if (pnl >= Number(target.value)) return stop('target profit reached');
-        if (pnl <= -Number(loss.value)) return stop('stop loss reached');
-        if (size > funds() + pnl) return stop('not enough balance for the next stake');
-      }, 1400);
+      /* one real contract at a time: placed, held for its second and a
+         half, settled against the price the chart shows then */
+      running = true;
+      function wait(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+      (function next() {
+        if (!running) return;
+        if (size > funds()) return stop('not enough balance for the next stake');
+        var s = size;
+        var dir = Math.random() < 0.5 ? 'Rise' : 'Fall';
+        T.place({ sym: current.sym, dir: dir, stake: s, payout: current.payout, seconds: 1,
+                  entry: $('#price').textContent })
+          .then(function (t) { return wait(1400).then(function () { return T.settle(t); }); })
+          .then(function (res) {
+            pnl = Math.round((pnl + res.profit) * 100) / 100;
+            staked += s;
+            trades++;
+            if (res.won) wins++;
+            best = Math.max(best, res.profit);
+            worst = Math.min(worst, res.profit);
+            size = (martingale && !res.won) ? s * 2 : (Number(stake.value) || 1);
+            paint();
+            if (!running) return;
+            if (pnl >= Number(target.value)) return stop('target profit reached');
+            if (pnl <= -Number(loss.value)) return stop('stop loss reached');
+            next();
+          })
+          .catch(function (err) { stop(err.message || 'an error'); });
+      })();
     });
   })();
 
