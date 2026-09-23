@@ -2265,3 +2265,20 @@ a.contact-way:hover{ border-color:var(--line-strong); }
 
 .sbar:empty{ background:var(--line); border-radius:4px; }
 .drawer-acct .avatar svg{ width:16px; height:16px; }
+
+
+/* an amount under the minimum: the hint turns red instead of a new message appearing */
+.hint-err{ color:var(--down) !important; }
+
+
+/* the ticket when the stake is more than the account holds */
+.fund-note{
+  display:flex; align-items:center; gap:8px; margin-top:10px; padding:9px 11px;
+  background:color-mix(in srgb, var(--down) 8%, transparent); border-left:2px solid var(--down);
+  font-size:12.5px; line-height:1.4; color:var(--ink-2);
+}
+.fund-note[hidden]{ display:none; }
+.fund-note svg{ color:var(--down); flex:none; }
+.fund-note span{ flex:1; }
+.fund-note .linkish{ flex:none; font-weight:600; color:var(--ink); }
+#aRun:disabled{ opacity:.55; cursor:not-allowed; }

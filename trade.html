@@ -96,6 +96,11 @@
               <button class="chip" data-stake="50">50</button>
               <button class="chip" data-stake="100">100</button>
             </div>
+            <div class="fund-note" id="fundNote" hidden>
+              <i data-lucide="wallet" class="i-sm"></i>
+              <span id="fundTx"></span>
+              <button type="button" class="linkish" data-modal="deposit">Deposit</button>
+            </div>
           </div>
 
           <!-- on phones this row is fixed just above the tab bar -->
@@ -351,13 +356,36 @@
     return b ? b.textContent.trim() : '1m';
   }
 
+  /* ------------------------------------------ you cannot stake money you do not have -- */
+  function acct() { return window.orbisActiveAccount ? window.orbisActiveAccount() : 'demo'; }
+  function funds() { return window.orbisBalance ? window.orbisBalance() : Infinity; }
+  function shortBy(stake) { return stake > funds(); }
+  function shortMsg() {
+    var bal = funds();
+    return bal <= 0
+      ? 'Your ' + (acct() === 'real' ? 'real' : 'demo') + ' balance is ' + OrbisData.money(0) + '. Deposit to trade.'
+      : 'Stake is more than your balance of ' + OrbisData.money(bal) + '.';
+  }
+
   function calc() {
     var stake = Number($('#stake').value) || 0;
     var payout = stake + stake * (current.payout / 100);
     var sub = current.payout + '% · ' + OrbisData.money(payout);
-    $('#upSub').textContent = sub;
-    $('#downSub').textContent = sub;
+    var short = shortBy(stake);
+    var note = $('#fundNote');
+    note.hidden = !short;
+    if (short) $('#fundTx').textContent = shortMsg();
+    /* a running contract keeps its sell-back button; only idle ones lock */
+    var running = document.querySelector('[data-dir].busy');
+    document.querySelectorAll('[data-dir]').forEach(function (b) {
+      if (running) return;
+      b.disabled = short;
+    });
+    $('#upSub').textContent = short ? 'Not enough balance' : sub;
+    $('#downSub').textContent = short ? 'Not enough balance' : sub;
+    if (window.orbisAutoFunds) window.orbisAutoFunds();
   }
+  document.addEventListener('orbis:account', function () { calc(); });
   $('#stake').addEventListener('input', calc);
 
   /* bigger jumps once the stake is past pocket change */
@@ -383,6 +411,7 @@
         return;
       }
       var stake = Number($('#stake').value) || 0;
+      if (shortBy(stake)) { calc(); window.orbisToast(shortMsg(), 'wallet'); return; }
       OrbisData.openTrades.unshift({
         id: 'OB-' + (948000 + Math.floor(Math.random() * 900)),
         sym: current.sym, dir: b.dataset.dir, stake: stake,
@@ -472,8 +501,22 @@
       b.addEventListener('click', function () {
         var v = Number(stake.value) || 0;
         stake.value = Math.max(1, v + (v >= 20 ? 5 : 1) * Number(b.dataset.astep));
+        autoFunds();
       });
     });
+    stake.addEventListener('input', autoFunds);
+
+    function autoFunds() {
+      if (timer) return;
+      var short = shortBy(Number(stake.value) || 0);
+      run.disabled = short;
+      run.innerHTML = short
+        ? '<i data-lucide="wallet" class="i-sm"></i>' + (funds() <= 0 ? 'Deposit to auto trade' : 'Stake is more than your balance')
+        : '<i data-lucide="play" class="i-sm"></i>Start auto trading';
+      window.orbisIcons();
+    }
+    window.orbisAutoFunds = autoFunds;
+    autoFunds();
 
     function paint() {
       net.textContent = (pnl >= 0 ? '+' : '') + OrbisData.money(pnl);
@@ -495,6 +538,7 @@
       run.classList.add('btn-primary');
       window.orbisIcons();
       paint();
+      autoFunds();
       /* a session that placed trades ends on a result, like a manual contract */
       if (trades && window.orbisModal && window.orbisModal.autoResult) {
         window.orbisModal.autoResult({
@@ -509,6 +553,7 @@
     run.addEventListener('click', function () {
       if (timer) return stop('by you');
 
+      if (shortBy(Number(stake.value) || 0)) { autoFunds(); window.orbisToast(shortMsg(), 'wallet'); return; }
       pnl = 0; trades = 0; wins = 0; staked = 0; best = 0; worst = 0;
       started = Date.now(); market = current.sym;
       var size = Number(stake.value) || 1;
@@ -534,6 +579,7 @@
         paint();
         if (pnl >= Number(target.value)) return stop('target profit reached');
         if (pnl <= -Number(loss.value)) return stop('stop loss reached');
+        if (size > funds() + pnl) return stop('not enough balance for the next stake');
       }, 1400);
     });
   })();

@@ -25,7 +25,24 @@
     usdt:  { label: 'USDT (TRC-20)', masked: 'Your verified TRON wallet', icon: 'bitcoin' }
   };
 
-  var WITHDRAW_FEE = 1;          /* flat platform fee on every withdrawal */
+  var WITHDRAW_FEE = 1;          /* flat platform fee, charged on top of the amount */
+  var MIN_DEPOSIT = 2;
+  var MIN_WITHDRAW = 5;          /* what arrives, before the fee is added */
+
+  /* M-Pesa moves shillings, so every M-Pesa amount is shown in KSh too.
+     The fallback is indicative; /rates replaces it once the API is set. */
+  var USD_KES = 129.5;
+  if (global.OrbisAPI) {
+    global.OrbisAPI.get('/rates').then(function (r) { if (r && r.USD_KES) USD_KES = Number(r.USD_KES); })
+      .catch(function () {});
+  }
+  function kes(usd) { return 'KSh ' + Math.round(usd * USD_KES).toLocaleString('en-US'); }
+
+  /* the real account's balance, from the account card in the header */
+  function realBalance() {
+    var a = (global.orbisAccounts || []).filter(function (x) { return x.id === 'real'; })[0];
+    return a ? Number(String(a.amount).replace(/[^0-9.]/g, '')) || 0 : 0;
+  }
   var REF_LINK = 'https://orbisflow.com/r/ORBIS-4K92';
 
   /* ============================================================= shell == */
@@ -130,7 +147,7 @@
           'cannot be recovered.</span></div>' +
 
         '<p class="hint center" style="margin-top:12px">' +
-          'Minimum $10.00 · credited after 1 network confirmation</p>' +
+          'Minimum ' + money(MIN_DEPOSIT) + ' · credited after 1 network confirmation</p>' +
       '</div>' +
       '<div class="modal-ft">' +
         '<button class="btn btn-primary btn-block btn-lg" id="mGo">I have sent it</button>' +
@@ -158,8 +175,9 @@
     var card = key === 'card';
     var mpesa = key === 'mpesa';
     var cta = function (v) {
+      if (v < MIN_DEPOSIT) return 'Minimum deposit is ' + money(MIN_DEPOSIT);
       return card ? 'Continue to Paystack · ' + money(v)
-           : mpesa ? 'Send STK push · ' + money(v)
+           : mpesa ? 'Send STK push · ' + kes(v)
            : 'Deposit ' + money(v);
     };
 
@@ -179,7 +197,8 @@
         '<div class="field" style="margin:16px 0 10px">' +
           '<label class="label" for="mAmt">Amount</label>' +
           '<div class="input-wrap"><span class="input-prefix">$</span>' +
-            '<input class="input" id="mAmt" type="number" value="100" min="5"></div>' +
+            '<input class="input" id="mAmt" type="number" value="100" min="' + MIN_DEPOSIT + '" step="any" inputmode="decimal"></div>' +
+          '<p class="hint" id="mMin" style="margin-top:6px">Minimum ' + money(MIN_DEPOSIT) + '</p>' +
           '<div class="stake-row">' +
             [20, 100, 250, 500].map(function (v) {
               return '<button class="chip' + (v === 100 ? ' active' : '') + '" data-amt="' + v + '">' + v + '</button>';
@@ -189,8 +208,11 @@
 
         '<div class="kv"><span>' + (card ? 'Processor fee · 1.5%' : 'Fee') + '</span>' +
           '<b class="mono" id="mFee">' + money(card ? 100 * CARD_FEE : 0) + '</b></div>' +
+        (mpesa ? '<div class="kv"><span>You pay by M-Pesa</span><b class="mono" id="mKes">' + kes(100) + '</b></div>' : '') +
         '<div class="kv"><span>Credited</span><b class="mono" id="mNet">' +
           money(card ? 100 * (1 - CARD_FEE) : 100) + '</b></div>' +
+        (mpesa ? '<p class="hint" style="margin-top:8px">At KSh <span id="mRate">' + USD_KES.toFixed(2) + '</span> to $1. ' +
+          'The rate is fixed when you approve the prompt.</p>' : '') +
       '</div>' +
       '<div class="modal-ft">' +
         '<button class="btn btn-primary btn-block btn-lg" id="mGo">' + cta(100) + '</button>' +
@@ -207,8 +229,15 @@
       function sync() {
         var v = Number(amt.value) || 0;
         var fee = card ? v * CARD_FEE : 0;
+        var low = v < MIN_DEPOSIT;
         root.querySelector('#mFee').textContent = money(fee);
-        root.querySelector('#mNet').textContent = money(v - fee);
+        root.querySelector('#mNet').textContent = money(Math.max(0, v - fee));
+        if (mpesa) {
+          root.querySelector('#mKes').textContent = kes(v);
+          root.querySelector('#mRate').textContent = USD_KES.toFixed(2);
+        }
+        root.querySelector('#mMin').classList.toggle('hint-err', low && amt.value !== '');
+        go.disabled = low;
         go.textContent = cta(v);
         root.querySelectorAll('[data-amt]').forEach(function (c) {
           c.classList.toggle('active', Number(c.dataset.amt) === v);
@@ -236,8 +265,9 @@
         /* leaving for the processor is a wait with nothing on screen, so it
            gets the loader rather than a toast that outlives the page */
         if (card && global.orbisVeil) global.orbisVeil('Opening Paystack checkout');
-        else toast(mpesa ? 'STK push sent to ' + dest : 'Deposit started', 'check-circle-2');
+        else toast(mpesa ? 'STK push for ' + kes(Number(amt.value)) + ' sent to ' + dest : 'Deposit started', 'check-circle-2');
       });
+      sync();
     }, depositStep1);
   }
 
@@ -264,7 +294,12 @@
 
   function withdrawStep2(key) {
     var s = SAVED[key];
-    var AVAILABLE = 1284.40;
+    var mpesa = key === 'mpesa';
+    var AVAILABLE = realBalance();
+    /* the fee comes on top, so the most you can take out is the balance less the fee */
+    var MAX = Math.max(0, Math.floor((AVAILABLE - WITHDRAW_FEE) * 100) / 100);
+    var start = MAX >= MIN_WITHDRAW ? Math.min(MAX, 50) : MIN_WITHDRAW;
+
     var html =
       '<div class="modal-bd">' +
         '<div class="saved">' +
@@ -273,27 +308,32 @@
           '<button class="linkish" data-other>Use another</button>' +
         '</div>' +
         '<div id="mOther" hidden style="margin-top:10px">' +
-          '<input class="input" id="mOtherInput" placeholder="Account or wallet">' +
+          '<input class="input" id="mOtherInput" placeholder="' + (mpesa ? '+254 7XX XXX XXX' : 'Account or wallet') + '">' +
         '</div>' +
 
         '<div class="field" style="margin:16px 0 10px">' +
-          '<label class="label" for="mAmt">Amount</label>' +
+          '<label class="label" for="mAmt">Amount to receive</label>' +
           '<div class="input-wrap"><span class="input-prefix">$</span>' +
-            '<input class="input" id="mAmt" type="number" value="250" min="10"></div>' +
+            '<input class="input" id="mAmt" type="number" value="' + start + '" min="' + MIN_WITHDRAW + '" step="any" inputmode="decimal"></div>' +
+          '<p class="hint" id="mMin" style="margin-top:6px">Minimum ' + money(MIN_WITHDRAW) + ', plus the ' + money(WITHDRAW_FEE) + ' fee</p>' +
           '<div class="stake-row">' +
-            '<button class="chip" data-amt="50">50</button>' +
-            '<button class="chip active" data-amt="250">250</button>' +
-            '<button class="chip" data-amt="500">500</button>' +
-            '<button class="chip" data-amt="1284">All</button>' +
+            [5, 20, 50].map(function (v) {
+              return '<button class="chip" data-amt="' + v + '">' + v + '</button>';
+            }).join('') +
+            '<button class="chip" data-amt="' + MAX + '">All</button>' +
           '</div>' +
         '</div>' +
 
         '<div class="kv"><span>Available</span><b class="mono">' + money(AVAILABLE) + '</b></div>' +
+        '<div class="kv"><span>You receive</span><b class="mono" id="mNet"></b></div>' +
+        (mpesa ? '<div class="kv"><span>To your M-Pesa</span><b class="mono" id="mKes"></b></div>' : '') +
         '<div class="kv"><span>Platform fee</span><b class="mono">' + money(WITHDRAW_FEE) + '</b></div>' +
-        '<div class="kv"><span>You receive</span><b class="mono" id="mNet">$249.00</b></div>' +
+        '<div class="kv"><span>Taken from your balance</span><b class="mono" id="mTotal"></b></div>' +
+        (mpesa ? '<p class="hint" style="margin-top:8px">At KSh <span id="mRate">' + USD_KES.toFixed(2) + '</span> to $1. ' +
+          'The rate is fixed when the withdrawal is approved.</p>' : '') +
       '</div>' +
       '<div class="modal-ft">' +
-        '<button class="btn btn-dark btn-block btn-lg" id="mGo">Request $250.00</button>' +
+        '<button class="btn btn-dark btn-block btn-lg" id="mGo"></button>' +
       '</div>';
 
     open('Withdraw', html, function (root) {
@@ -301,10 +341,25 @@
       var go = root.querySelector('#mGo');
       function sync() {
         var v = Number(amt.value) || 0;
-        var ok = v > WITHDRAW_FEE;
-        root.querySelector('#mNet').textContent = money(Math.max(0, v - WITHDRAW_FEE));
-        go.disabled = !ok;
-        go.textContent = ok ? 'Request ' + money(v) : 'More than ' + money(WITHDRAW_FEE) + ' please';
+        var total = v + WITHDRAW_FEE;
+        var low = v < MIN_WITHDRAW;
+        var over = total > AVAILABLE;
+        root.querySelector('#mNet').textContent = money(v);
+        root.querySelector('#mTotal').textContent = money(total);
+        if (mpesa) {
+          root.querySelector('#mKes').textContent = kes(v);
+          root.querySelector('#mRate').textContent = USD_KES.toFixed(2);
+        }
+        root.querySelector('#mMin').classList.toggle('hint-err', low && amt.value !== '');
+        root.querySelectorAll('[data-amt]').forEach(function (c) {
+          c.classList.toggle('active', Number(c.dataset.amt) === v);
+        });
+        go.disabled = low || over;
+        go.textContent = low ? 'Minimum withdrawal is ' + money(MIN_WITHDRAW)
+          : over ? (AVAILABLE < MIN_WITHDRAW + WITHDRAW_FEE
+              ? 'You need ' + money(MIN_WITHDRAW + WITHDRAW_FEE) + ' to withdraw'
+              : 'Not enough balance, the most is ' + money(MAX))
+          : 'Withdraw ' + (mpesa ? kes(v) : money(v));
       }
       amt.addEventListener('input', sync);
       root.querySelectorAll('[data-amt]').forEach(function (c) {
@@ -316,8 +371,9 @@
         if (!o.hidden) root.querySelector('#mOtherInput').focus();
       });
       go.addEventListener('click', function () {
+        var v = Number(amt.value) || 0;
         close();
-        toast('Withdrawal submitted for review', 'check-circle-2');
+        toast('Withdrawal of ' + (mpesa ? kes(v) : money(v)) + ' submitted for review', 'check-circle-2');
       });
       sync();
     }, withdrawStep1);
@@ -643,7 +699,8 @@
     var mins = Math.floor(r.secs / 60), secs = r.secs % 60;
     var reason = { 'target profit reached': 'Target profit reached',
                    'stop loss reached': 'Stop loss reached',
-                   'by you': 'Stopped by you' }[r.why] || r.why;
+                   'by you': 'Stopped by you',
+                   'not enough balance for the next stake': 'Not enough balance for the next stake' }[r.why] || r.why;
 
     var html =
       '<div class="modal-bd center">' +

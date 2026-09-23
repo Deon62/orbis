@@ -129,11 +129,19 @@
       if (old) old.outerHTML = accountCardHTML();
       drawIcons();
     }
+    document.dispatchEvent(new CustomEvent('orbis:account', { detail: { id: id } }));
+  }
+
+  /* what the active account can stake, as a number */
+  function balanceOf(id) {
+    var a = ACCOUNTS.filter(function (x) { return x.id === (id || activeAccount); })[0];
+    return a ? Number(String(a.amount).replace(/[^0-9.]/g, '')) || 0 : 0;
   }
 
   window.orbisAccounts = ACCOUNTS;
   window.orbisActiveAccount = function () { return activeAccount; };
   window.orbisSetAccount = setAccount;
+  window.orbisBalance = balanceOf;
 
   /* ============================================================== nav ==== */
   /* these six are the bottom tab bar and the desktop rail, and so are
