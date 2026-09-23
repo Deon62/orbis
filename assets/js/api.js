@@ -7,7 +7,7 @@
    │ Empty = offline: pages show their empty states and the auth forms   │
    │ and payments run their local simulation.                            │
    └──────────────────────────────────────────────────────────────────────┘ */
-var API_BASE = '';
+var API_BASE = 'https://backend-xv27.onrender.com';
 /*
    It can also be set per page with <html data-api="…">, or with
    window.ORBIS_API_BASE before this file loads.
