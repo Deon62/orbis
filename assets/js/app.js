@@ -186,16 +186,18 @@
   /* Only pages that actually run the public shell belong here. Everything else
      lives inside the trading app and would drop a visitor into it sideways. */
   var PUBLIC_NAV = [
-    { label: 'How it works', url: '/#how' },
-    { label: 'Academy',      url: '/academy' },
-    { label: 'About',        url: '/about' }
+    { id: 'home',     label: 'Home',     url: '/' },
+    { id: 'academy',  label: 'Academy',  url: '/academy' },
+    { id: 'newsroom', label: 'Newsroom', url: '/newsroom' },
+    { id: 'about',    label: 'About',    url: '/about' }
   ];
 
   var PUBLIC_DRAWER = [
     { h: 'Platform', items: [
-      ['How it works', 'list-checks',    '/#how'],
-      ['Academy',      'graduation-cap', '/academy'],
-      ['About',        'building-2',     '/about']
+      ['Home',     'home',           '/',         'home'],
+      ['Academy',  'graduation-cap', '/academy',  'academy'],
+      ['Newsroom', 'newspaper',      '/newsroom', 'newsroom'],
+      ['About',    'building-2',     '/about',    'about']
     ]}
   ];
 
@@ -263,7 +265,9 @@
   function publicDrawerHTML() {
     var groups = PUBLIC_DRAWER.map(function (g) {
       return '<div class="drawer-grp"><h4>' + g.h + '</h4>' + g.items.map(function (it) {
-        return '<a href="' + it[2] + '">' + ic(it[1]) + it[0] + '</a>';
+        var on = ACTIVE === it[3];
+        return '<a href="' + it[2] + '"' + (on ? ' class="active" aria-current="page"' : '') + '>' +
+               ic(it[1]) + it[0] + '</a>';
       }).join('') + '</div>';
     }).join('');
 
@@ -294,7 +298,9 @@
 
     if (SHELL === 'public') {
       var nav = PUBLIC_NAV.map(function (n) {
-        return '<a href="' + href(n.url) + '">' + n.label + '</a>';
+        var on = ACTIVE === n.id;
+        return '<a href="' + href(n.url) + '"' + (on ? ' class="active" aria-current="page"' : '') + '>' +
+               n.label + '</a>';
       }).join('');
       return '<header class="hdr"><div class="wrap hdr-in">' + logo() +
         '<nav class="hdr-nav">' + nav + '</nav>' +
@@ -352,7 +358,7 @@
     { h: 'Platform', links: [['Trade', '/trade'], ['Markets', '/markets'],
       ['AI insights', '/ai'], ['Positions', '/positions'],
       ['Cashier', '/cashier'], ['Refer & earn', '/referrals']] },
-    { h: 'Company', links: [['About', null], ['Careers', null], ['Newsroom', null], ['Contact', null]] },
+    { h: 'Company', links: [['About', '/about'], ['Academy', '/academy'], ['Newsroom', '/newsroom'], ['Careers', null], ['Contact', '/contact']] },
     { h: 'Support', links: [['Help centre', null], ['Payment methods', null], ['Verification', null], ['Status', null]] },
     { h: 'Legal', links: [['Terms', null], ['Privacy', null], ['Risk disclosure', null], ['AML policy', null], ['Cookies', null]] }
   ];
@@ -629,6 +635,19 @@
     document.documentElement.style.overflow = 'hidden';
     return el;
   }
+
+  /* ============================================================== faq == */
+  /* one answer open at a time: opening a question closes whichever was open.
+     The shared name on <details> does this natively in newer browsers; this
+     covers the rest */
+  document.querySelectorAll('.faq details').forEach(function (d) {
+    d.addEventListener('toggle', function () {
+      if (!d.open) return;
+      d.closest('.faq').querySelectorAll('details[open]').forEach(function (o) {
+        if (o !== d) o.open = false;
+      });
+    });
+  });
 
   window.orbisVeil = veil;
   window.orbisIcons = drawIcons;
