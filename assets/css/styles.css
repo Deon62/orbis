@@ -1519,20 +1519,38 @@ body:has(.chart-full) .tabbar{ display:none; }
 .course-dark .btn-file:hover{ background:var(--black-3); color:var(--on-black); border-color:var(--on-black-2); }
 /* on a dark page the island has to go the other way to still read as one */
 :root[data-theme="dark"] .course-dark{ background:#0D0D0C; border-color:#3D3D3A; }
-.course-in{ padding:22px 20px; display:flex; flex-direction:column; flex:1; }
+.course-in{ padding:28px 26px 26px; display:flex; flex-direction:column; flex:1; }
+@media(max-width:599px){ .course-in{ padding:24px 20px 20px; } }
 
-.course-hd{ display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
-.course-price{ font-size:21px; font-weight:600; letter-spacing:-.02em; }
-.course h3{ font-size:21px; letter-spacing:-.02em; margin-bottom:6px; }
-.course-lead{ color:var(--ink-2); font-size:13.5px; line-height:1.55; margin-bottom:16px; }
-.course-meta{
-  margin-top:14px; padding-top:12px; border-top:1px solid var(--line-soft);
-  font-size:12px; color:var(--ink-3);
+.course-hd{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:20px; }
+.course h3{ font-size:22px; letter-spacing:-.02em; margin-bottom:8px; }
+.course-price{
+  display:flex; align-items:baseline; gap:6px; margin-bottom:14px;
+  font-size:34px; font-weight:600; letter-spacing:-.03em; line-height:1;
 }
-.course-ft{ margin-top:16px; display:grid; gap:8px; }
+.course-price small{ font-family:Inter,sans-serif; font-size:12.5px; font-weight:500; letter-spacing:0; color:var(--ink-3); }
+.course-lead{ color:var(--ink-2); font-size:14px; line-height:1.6; margin-bottom:20px; }
+.course .ticks{ padding-top:20px; border-top:1px solid var(--line-soft); }
+.course-meta{
+  display:flex; align-items:center; gap:7px;
+  margin-top:22px; padding-top:14px; border-top:1px solid var(--line-soft);
+  font-size:12.5px; color:var(--ink-3);
+}
+.course-ft{ margin-top:18px; display:grid; gap:10px; }
+.course-ft .btn{ height:46px; }
+.course-ft .btn-file{ height:auto; min-height:42px; padding-block:8px; white-space:normal; text-align:center; }
 /* the three cards carry different numbers of benefits, so the footers are
    pushed down to a common line rather than floating at three heights */
-@media(min-width:760px){ .course-meta{ margin-top:auto; } }
+@media(min-width:760px){ .course-meta{ margin-top:auto; } .course .ticks{ margin-bottom:24px; } }
+
+.course-pop{
+  font-size:10.5px; font-weight:600; letter-spacing:.12em; text-transform:uppercase;
+  color:var(--brand);
+}
+
+.course-h{ margin-bottom:18px; }
+.course-grid{ gap:16px; align-items:stretch; }
+@media(min-width:760px){ .course-grid{ gap:18px; } }
 
 /* a benefit list, ticked */
 .ticks{ list-style:none; display:grid; gap:9px; }
@@ -1548,23 +1566,6 @@ body:has(.chart-full) .tabbar{ display:none; }
   color:var(--ink-2); gap:8px; padding-inline:10px;
 }
 .btn-file:hover{ border-color:var(--line-strong); color:var(--ink); background:var(--panel-2); }
-
-/* on a phone each course owns the screen, so they are compared one at a time */
-@media(max-width:759px) and (prefers-reduced-motion:no-preference){
-  .course-sec{ padding-block:0 0; }
-  .course-h{ padding-top:34px; margin-bottom:2px; }
-  .course{
-    /* the sticky header eats the top of a snapped screen, so the card is
-       short by exactly that much and scrolls to just below it */
-    min-height:calc(100svh - var(--nav-h)); scroll-snap-align:start;
-    scroll-margin-top:var(--nav-h); justify-content:center;
-    border-width:1px 0 0; padding-block:20px;
-  }
-  .course:last-child{ border-bottom:1px solid var(--line); margin-bottom:34px; }
-  .course-in{ padding-inline:0; flex:0; }
-}
-@media(max-width:759px){ .course-grid{ gap:0; } }
-
 
 /* ========================================================== the loader ==
    cssloaders.github.io diamond, re-coloured onto our own tokens: the source
