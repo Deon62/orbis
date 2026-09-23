@@ -2282,3 +2282,11 @@ a.contact-way:hover{ border-color:var(--line-strong); }
 .fund-note span{ flex:1; }
 .fund-note .linkish{ flex:none; font-weight:600; color:var(--ink); }
 #aRun:disabled{ opacity:.55; cursor:not-allowed; }
+
+
+/* AI scan: when it last ran, and the cards arriving one after another */
+.scan-at{ font-size:12px; color:var(--ink-3); margin-right:10px; white-space:nowrap; font-variant-numeric:tabular-nums; }
+@media(max-width:520px){ .scan-at{ display:none; } }
+.sig-in{ animation:sigIn .35s ease both; }
+@keyframes sigIn{ from{ opacity:0; transform:translateY(6px); } to{ opacity:1; transform:none; } }
+@media(prefers-reduced-motion:reduce){ .sig-in{ animation:none; } }

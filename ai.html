@@ -35,8 +35,9 @@
       </div>
     </div>
         <span class="grow"></span>
+        <span class="scan-at" id="scanAt"></span>
         <button class="btn btn-primary btn-sm" id="rescan">
-          <i data-lucide="radar" class="i-sm"></i><span id="rescanTx">Rescan</span>
+          <i data-lucide="radar" class="i-sm"></i><span id="rescanTx">Scan</span>
         </button>
       </div>
       <div id="signals"></div>
@@ -59,28 +60,54 @@
 <script src="/assets/js/api.js"></script>
 <script src="/assets/js/chart.js"></script>
 <script src="/assets/js/data.js"></script>
+<script src="/assets/js/ai-engine.js"></script>
 <script src="/assets/js/app.js"></script>
 <script src="/assets/js/qr.js"></script>
 <script src="/assets/js/modals.js"></script>
 <script>
 (function () {
-  var A = OrbisAPI, M = A.money;
-
-  var filter = 'all', signals = [];
+  var A = OrbisAPI;
+  var KEY = 'orbisflow-ai-scan';
+  var filter = 'all', last = null;
   var grid = document.getElementById('signals');
-  var scanBtn = document.getElementById('rescan');
+  var pats = document.getElementById('patterns');
+  var btn = document.getElementById('rescan');
+  var btnTx = document.getElementById('rescanTx');
+  var at = document.getElementById('scanAt');
 
-  function cards() {
-    var rows = signals.filter(function (s) { return filter === 'all' || s.dir === filter; });
-    if (!rows.length) {
-      grid.innerHTML = A.empty({ icon: 'radar', title: 'No ' + (filter === 'all' ? '' : filter.toLowerCase() + ' ') + 'signals right now',
-        text: 'The model only calls a setup when it clears its confidence bar. Rescan in a few minutes.' });
+  /* with a backend, ask it; without one, the stand-in engine answers */
+  function fetchScan(onStep) {
+    if (A.connected) {
+      return Promise.all([A.get('/signals'), A.get('/patterns')]).then(function (r) {
+        return { signals: r[0] || [], patterns: r[1] || [], scannedAt: Date.now() };
+      });
+    }
+    return OrbisAIEngine.scan(onStep);
+  }
+
+  function ago(t) {
+    var m = Math.round((Date.now() - t) / 60000);
+    return m < 1 ? 'Scanned just now' : 'Scanned ' + m + ' min ago';
+  }
+
+  function drawSignals() {
+    if (!last) {
+      grid.innerHTML = A.empty({ icon: 'radar', title: 'No scan yet',
+        text: 'Scan the markets and the model ranks the setups it finds, with a direction, a confidence and its reason.',
+        action: '<button class="btn btn-primary btn-sm" data-scan-now><i data-lucide="radar" class="i-sm"></i>Scan the markets</button>' });
       return window.orbisIcons();
     }
-    grid.innerHTML = '<div class="grid g3">' + rows.map(function (s) {
+    var rows = last.signals.filter(function (s) { return filter === 'all' || s.dir === filter; });
+    if (!rows.length) {
+      grid.innerHTML = A.empty({ icon: 'radar',
+        title: 'No ' + (filter === 'all' ? '' : filter.toLowerCase() + ' ') + 'signals in this scan',
+        text: 'Nothing cleared the confidence bar. Markets move quickly, so scan again in a few minutes.' });
+      return window.orbisIcons();
+    }
+    grid.innerHTML = '<div class="grid g3">' + rows.map(function (s, i) {
       var m = OrbisData.bySymbol(s.sym) || { sym: s.sym, name: '', icon: {} };
       var up = s.dir === 'Rise';
-      return '<div class="signal"><div class="signal-hd">' + OrbisData.assetHTML(m) +
+      return '<div class="signal sig-in" style="animation-delay:' + (i * 60) + 'ms"><div class="signal-hd">' + OrbisData.assetHTML(m) +
         '<span class="nm"><b>' + s.sym + '</b><span>' + s.tf + ' contract · $' + s.stake + '</span></span>' +
         '<span class="tag ' + (up ? 'tag-up' : 'tag-down') + '"><i data-lucide="' + (up ? 'trending-up' : 'trending-down') + '" class="i-sm"></i>' + s.dir + '</span></div>' +
         '<div style="display:flex;justify-content:space-between;font-size:12px;color:var(--ink-3)"><span>Confidence</span><b class="mono" style="color:var(--ink)">' + s.conf + '%</b></div>' +
@@ -92,45 +119,60 @@
     window.orbisIcons();
   }
 
-  function loadSignals() {
-    grid.innerHTML = A.loading(3);
-    return A.get('/signals').then(function (d) { signals = d || []; cards(); })
-      .catch(function () { signals = []; cards(); });
+  function drawPatterns() {
+    if (!last || !last.patterns.length) {
+      pats.innerHTML = A.empty({ icon: 'chart-candlestick',
+        title: last ? 'No patterns in this scan' : 'No patterns yet',
+        text: 'Double tops, flags, wedges and breakouts show here as a scan finds them.' });
+      return window.orbisIcons();
+    }
+    pats.innerHTML = '<div class="tbl-scroll"><table class="tbl"><thead><tr><th>Market</th><th>Pattern</th><th>Timeframe</th><th>Bias</th><th class="r">Detected</th></tr></thead><tbody>' +
+      last.patterns.map(function (r) {
+        var up = r.bias === 'Rise';
+        return '<tr><td><b>' + r.sym + '</b></td><td>' + r.pattern + '</td><td class="mono">' + r.tf + '</td>' +
+          '<td><span class="tag ' + (up ? 'tag-up' : 'tag-down') + '">' + r.bias + '</span></td><td class="r dim">' + r.ago + '</td></tr>';
+      }).join('') + '</tbody></table></div>';
   }
 
-  function loadPatterns() {
-    return A.load({
-      el: '#patterns', path: '/patterns',
-      empty: { icon: 'chart-candlestick', title: 'No patterns in the last hour',
-        text: 'Double tops, flags and breakouts show here as the scanner finds them.' },
-      render: function (d) {
-        return '<div class="tbl-scroll"><table class="tbl"><thead><tr><th>Market</th><th>Pattern</th><th>Timeframe</th><th>Bias</th><th class="r">Detected</th></tr></thead><tbody>' +
-          d.map(function (r) {
-            var up = r.bias === 'Rise';
-            return '<tr><td><b>' + r.sym + '</b></td><td>' + r.pattern + '</td><td class="mono">' + r.tf + '</td>' +
-              '<td><span class="tag ' + (up ? 'tag-up' : 'tag-down') + '">' + r.bias + '</span></td><td class="r dim">' + r.ago + '</td></tr>';
-          }).join('') + '</tbody></table></div>';
-      }
+  function paintAt() { at.textContent = last ? ago(last.scannedAt) : ''; }
+
+  function scan() {
+    if (btn.disabled) return;
+    btn.disabled = true;
+    btnTx.textContent = 'Scanning';
+    var svg = btn.querySelector('svg'); if (svg) svg.classList.add('spin');
+    grid.classList.add('scanning');
+    pats.closest('.card').classList.add('scanning');
+    if (!last) { grid.innerHTML = A.loading(3); pats.innerHTML = A.loading(4); }
+
+    fetchScan(function (step) { at.textContent = step + '…'; }).then(function (r) {
+      last = r;
+      try { sessionStorage.setItem(KEY, JSON.stringify(r)); } catch (e) {}
+      window.orbisToast(r.signals.length ? 'Scan complete · ' + r.signals.length + ' signal' + (r.signals.length === 1 ? '' : 's')
+                                          : 'Scan complete · nothing cleared the bar', 'radar');
+    }).catch(function () {
+      window.orbisToast('The scan did not finish. Try again.', 'triangle-alert');
+    }).then(function () {
+      btn.disabled = false;
+      btnTx.textContent = last ? 'Rescan' : 'Scan';
+      var svg = btn.querySelector('svg'); if (svg) svg.classList.remove('spin');
+      grid.classList.remove('scanning');
+      pats.closest('.card').classList.remove('scanning');
+      drawSignals(); drawPatterns(); paintAt();
     });
   }
 
-  document.addEventListener('fdrop:change', function (e) { filter = e.detail.value; cards(); });
+  btn.addEventListener('click', scan);
+  grid.addEventListener('click', function (e) { if (e.target.closest('[data-scan-now]')) scan(); });
+  document.addEventListener('fdrop:change', function (e) { filter = e.detail.value; drawSignals(); });
 
-  scanBtn.addEventListener('click', function () {
-    if (scanBtn.disabled) return;
-    scanBtn.disabled = true;
-    scanBtn.querySelector('#rescanTx').textContent = 'Scanning';
-    var svg = scanBtn.querySelector('svg'); if (svg) svg.classList.add('spin');
-    Promise.all([loadSignals(), loadPatterns()]).then(function () {
-      scanBtn.disabled = false;
-      scanBtn.querySelector('#rescanTx').textContent = 'Rescan';
-      var svg = scanBtn.querySelector('svg'); if (svg) svg.classList.remove('spin');
-      window.orbisToast(signals.length ? 'Scan complete · ' + signals.length + ' signals' : 'Scan complete · no signals right now', 'radar');
-    });
-  });
-
-  loadSignals();
-  loadPatterns();
+  /* a scan from the last half hour survives moving between pages */
+  try {
+    var saved = JSON.parse(sessionStorage.getItem(KEY));
+    if (saved && Date.now() - saved.scannedAt < 30 * 60000) { last = saved; btnTx.textContent = 'Rescan'; }
+  } catch (e) {}
+  drawSignals(); drawPatterns(); paintAt();
+  setInterval(paintAt, 30000);
 })();
 </script>
 </body>
