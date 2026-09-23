@@ -144,8 +144,16 @@
 
   /* ================================================ the simulated wait == */
   /* preparing, then a ring that fills as the "file" arrives, then a tick */
+  function lock(on) {
+    list.classList.toggle('conf-locked', on);
+    list.querySelectorAll('.conf-dl').forEach(function (b) {
+      if (!b.classList.contains('is-busy')) b.disabled = on;
+    });
+  }
+
   function run(btn, trades, name, done) {
-    if (btn.classList.contains('is-busy')) return;
+    if (list.classList.contains('conf-locked')) return;
+    lock(true);
     var ring = btn.querySelector('.conf-ring circle');
     var C = 2 * Math.PI * 15;
     btn.classList.add('is-busy', 'is-prep');
@@ -165,6 +173,7 @@
         btn.classList.remove('is-busy');
         btn.classList.add('is-done');
         btn.removeAttribute('aria-busy');
+        lock(false);
         if (done && done.finish) done.finish();
         setTimeout(function () {
           btn.classList.remove('is-done');
@@ -183,21 +192,4 @@
     });
   });
 
-  var all = document.getElementById('confAll');
-  if (all) {
-    all.addEventListener('click', function () {
-      if (all.classList.contains('is-busy')) return;
-      var label = all.querySelector('span');
-      var orig = label.textContent;
-      label.textContent = 'Preparing ' + TRADES.length + ' confirmations';
-      run(all, TRADES, 'orbisflow-confirmations-' + new Date().toISOString().slice(0, 10) + '.pdf', {
-        progress: function (p) { label.textContent = 'Downloading · ' + Math.floor(p) + '%'; },
-        finish: function () {
-          label.textContent = 'Downloaded';
-          toast(TRADES.length + ' confirmations downloaded as one PDF', 'file-check');
-          setTimeout(function () { label.textContent = orig; }, 2600);
-        }
-      });
-    });
-  }
 })(window);

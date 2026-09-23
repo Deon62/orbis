@@ -353,7 +353,7 @@
       ['AI insights', '/ai'], ['Positions', '/positions'],
       ['Cashier', '/cashier'], ['Refer & earn', '/referrals']] },
     { h: 'Company', links: [['About', '/about'], ['Academy', '/academy'], ['Newsroom', '/newsroom'], ['Careers', null], ['Contact', '/contact-us']] },
-    { h: 'Support', links: [['Contact us', '/contact-us'], ['Payment methods', null], ['Verification', null], ['Status', null]] },
+    { h: 'Support', links: [['Contact us', '/contact-us'], ['Payment methods', null], ['Verification', null], ['Status', '/status']] },
     { h: 'Legal', links: [['Terms', '/terms'], ['Privacy', '/privacy'], ['Risk disclosure', '/risk-disclosure'], ['AML policy', '/aml-policy'], ['Cookies', '/cookies']] }
   ];
 
