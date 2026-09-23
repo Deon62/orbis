@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en" class="snap">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Contact us · orbisflow</title>
+<meta name="description" content="Email, call or write to the orbisflow team.">
+<meta name="theme-color" content="#1C1C1C">
+<link rel="icon" href="/assets/img/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://cdn.simpleicons.org" crossorigin>
+<link rel="preload" as="script" href="/assets/js/icons.js">
+<link rel="preload" as="script" href="/assets/js/app.js">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/css/styles.css">
+<script>(function(){try{var t=localStorage.getItem("orbisflow-theme")||(matchMedia("(prefers-color-scheme:dark)").matches?"dark":"light");document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
+</head>
+<body data-page="contact-us" data-shell="public">
+
+<div id="site-header"></div>
+
+<section class="page-hero contact-hero">
+  <div class="wrap">
+    <p class="sec-eyebrow">Contact us</p>
+    <h1>Talk to a person, not a queue.</h1>
+    <p class="sec-lead">Questions about an account, a payment, the Academy or the press. Pick the way that suits you and the team will come back to you.</p>
+  </div>
+</section>
+
+<section class="sec contact-sec">
+  <div class="wrap contact-grid">
+    <div class="contact-ways">
+      <a class="contact-way" href="mailto:support@orbisflow.com">
+        <span class="lr-ic"><i data-lucide="mail" class="i"></i></span>
+        <span><b>Email</b><span>support@orbisflow.com</span><small>Replies within 12 hours</small></span>
+      </a>
+      <a class="contact-way" href="tel:+254200000000">
+        <span class="lr-ic"><i data-lucide="phone" class="i"></i></span>
+        <span><b>Phone</b><span>+254 20 000 0000</span><small>08:00 to 20:00 EAT, every day</small></span>
+      </a>
+      <div class="contact-way">
+        <span class="lr-ic"><i data-lucide="map-pin" class="i"></i></span>
+        <span><b>Head office</b><span>Nairobi, Kenya</span><small>Visits by appointment</small></span>
+      </div>
+      <div class="contact-way">
+        <span class="lr-ic"><i data-lucide="message-square" class="i"></i></span>
+        <span><b>Already trading?</b><span>Use live chat inside your account</span><small>Fastest, open 24/7</small></span>
+      </div>
+    </div>
+
+    <form class="contact-form" data-mock-submit="Message sent. We will be in touch soon.">
+      <h2>Send us a message</h2>
+      <div class="contact-row">
+        <div class="field">
+          <label class="label" for="c-name">Full name</label>
+          <input class="input" id="c-name" type="text" autocomplete="name" required>
+        </div>
+        <div class="field">
+          <label class="label" for="c-email">Email</label>
+          <input class="input" id="c-email" type="email" autocomplete="email" placeholder="you@example.com" required>
+        </div>
+      </div>
+      <div class="field">
+        <label class="label" for="c-topic">Topic</label>
+        <select class="select" id="c-topic">
+          <option>My account</option>
+          <option>Deposits and withdrawals</option>
+          <option>The Academy</option>
+          <option>Press and partnerships</option>
+          <option>Something else</option>
+        </select>
+      </div>
+      <div class="field">
+        <label class="label" for="c-msg">Message</label>
+        <textarea class="input" id="c-msg" rows="6" placeholder="How can we help?" required></textarea>
+      </div>
+      <p class="contact-fine">We use what you send only to answer you. See our <a href="/privacy">Privacy policy</a>.</p>
+      <button class="btn btn-primary btn-lg btn-block" type="submit">Send message</button>
+    </form>
+  </div>
+</section>
+
+<div id="site-footer"></div>
+
+<script src="/assets/js/icons.js"></script>
+<script src="/assets/js/app.js"></script>
+</body>
+</html>

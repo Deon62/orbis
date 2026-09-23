@@ -175,11 +175,6 @@
       ['Help centre', 'life-buoy',      '/help-centre'],
       ['Live chat',   'message-square', '/live-chat'],
       ['Contact us',  'mail',           '/contact']
-    ]},
-    { h: 'Legal', items: [
-      ['Terms',           'scroll-text',    '/terms'],
-      ['Privacy policy',  'lock',           '/privacy'],
-      ['Risk disclosure', 'triangle-alert', '/risk-disclosure']
     ]}
   ];
 
@@ -358,9 +353,9 @@
     { h: 'Platform', links: [['Trade', '/trade'], ['Markets', '/markets'],
       ['AI insights', '/ai'], ['Positions', '/positions'],
       ['Cashier', '/cashier'], ['Refer & earn', '/referrals']] },
-    { h: 'Company', links: [['About', '/about'], ['Academy', '/academy'], ['Newsroom', '/newsroom'], ['Careers', null], ['Contact', '/contact']] },
+    { h: 'Company', links: [['About', '/about'], ['Academy', '/academy'], ['Newsroom', '/newsroom'], ['Careers', null], ['Contact', '/contact-us']] },
     { h: 'Support', links: [['Help centre', null], ['Payment methods', null], ['Verification', null], ['Status', null]] },
-    { h: 'Legal', links: [['Terms', null], ['Privacy', null], ['Risk disclosure', null], ['AML policy', null], ['Cookies', null]] }
+    { h: 'Legal', links: [['Terms', '/terms'], ['Privacy', '/privacy'], ['Risk disclosure', '/risk-disclosure'], ['AML policy', '/aml-policy'], ['Cookies', '/cookies']] }
   ];
 
   function footerHTML() {
@@ -391,10 +386,10 @@
       '<div class="ftr-bottom">' +
         '<span>&copy; ' + new Date().getFullYear() + ' orbisflow Markets Ltd.</span>' +
         '<nav>' +
-          '<a href="#" data-mock="Terms">Terms</a>' +
-          '<a href="#" data-mock="Privacy">Privacy</a>' +
-          '<a href="#" data-mock="Cookies">Cookies</a>' +
-          '<a href="#" data-mock="Licensing">Licensing</a>' +
+          '<a href="' + href('/terms') + '">Terms</a>' +
+          '<a href="' + href('/privacy') + '">Privacy</a>' +
+          '<a href="' + href('/risk-disclosure') + '">Risk disclosure</a>' +
+          '<a href="' + href('/cookies') + '">Cookies</a>' +
         '</nav>' +
       '</div></div></footer>';
   }

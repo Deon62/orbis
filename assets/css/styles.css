@@ -1868,3 +1868,89 @@ body:has(.chart-full) .tabbar{ display:none; }
 }
 :root[data-theme="dark"] .news-more{ color:var(--brand); }
 .news-more:hover{ gap:9px; }
+
+
+/* =============================================================== legal ==
+   one column of numbered sections, "01 / Heading", with the short version
+   first. Nothing boxed but the summary; the text does the work */
+.legal-wrap{ max-width:880px; }
+.legal-hero{ padding:48px 0 34px; border-bottom:1px solid var(--line); }
+@media(min-width:900px){ .legal-hero{ padding:72px 0 44px; } }
+.legal-tabs{ display:flex; flex-wrap:wrap; gap:6px; margin-bottom:30px; }
+.legal-tabs a{
+  font-size:12.5px; font-weight:500; color:var(--ink-2);
+  padding:6px 11px; border:1px solid var(--line); border-radius:999px;
+}
+.legal-tabs a:hover{ color:var(--ink); border-color:var(--line-strong); }
+.legal-tabs a.active{ color:#fff; background:var(--brand-strong); border-color:var(--brand-strong); }
+.legal-hero h1{ font-size:clamp(32px,5vw,50px); letter-spacing:-.035em; }
+.legal-lead{ margin-top:16px; max-width:62ch; font-size:17px; line-height:1.6; color:var(--ink-2); }
+.legal-date{ margin-top:18px; font-size:13px; color:var(--ink-3); }
+
+.legal{ padding-bottom:72px; }
+.legal-sec{ display:grid; gap:12px; padding:34px 0; border-bottom:1px solid var(--line-soft); }
+@media(min-width:760px){ .legal-sec{ grid-template-columns:220px minmax(0,1fr); gap:32px; padding:40px 0; } }
+.legal-n{
+  font-family:"IBM Plex Mono",monospace; font-size:12.5px; font-weight:500; letter-spacing:.02em;
+  color:var(--ink-3); padding-top:3px;
+}
+@media(min-width:760px){ .legal-n{ position:sticky; top:calc(var(--nav-h) + 20px); align-self:start; } }
+.legal-body h2{ font-size:22px; margin-bottom:12px; }
+.legal-body h3{ font-size:15.5px; margin:20px 0 6px; }
+.legal-body h3:first-child{ margin-top:0; }
+.legal-body p{ font-size:15.5px; line-height:1.75; color:var(--ink-2); margin-bottom:12px; }
+.legal-body p:last-child{ margin-bottom:0; }
+.legal-body ul{ margin:0 0 12px; padding:0; list-style:none; display:grid; gap:9px; }
+.legal-body ul:last-child{ margin-bottom:0; }
+.legal-body li{ position:relative; padding-left:20px; font-size:15.5px; line-height:1.65; color:var(--ink-2); }
+.legal-body li::before{
+  content:""; position:absolute; left:3px; top:.72em; width:6px; height:6px;
+  border-radius:50%; background:var(--brand);
+}
+.legal-body a{ color:var(--brand-strong); font-weight:500; text-decoration:underline; text-underline-offset:3px; }
+:root[data-theme="dark"] .legal-body a{ color:var(--brand); }
+
+/* the summary is the one thing set apart */
+.legal-short .legal-n{ color:var(--brand-strong); }
+:root[data-theme="dark"] .legal-short .legal-n{ color:var(--brand); }
+.legal-short .legal-body{ padding:22px 24px; background:var(--surface); border-left:2px solid var(--brand); }
+.legal-short li{ color:var(--ink); }
+
+.legal-contact{ border-bottom:0; }
+.legal-contact-list{ margin-top:18px !important; border-top:1px solid var(--line); gap:0 !important; }
+.legal-contact-list li{
+  display:flex; align-items:center; gap:12px; padding:13px 0 !important;
+  border-bottom:1px solid var(--line); font-size:14.5px;
+}
+.legal-contact-list li::before{ display:none; }
+.legal-contact-list svg{ color:var(--ink-3); flex:none; }
+.legal-contact-list span{ width:70px; color:var(--ink-3); font-size:13px; }
+.legal-contact-list b{ font-weight:500; color:var(--ink); }
+
+
+/* ========================================================== contact us == */
+.contact-sec{ padding-top:24px; }
+.contact-grid{ display:grid; gap:28px; grid-template-columns:1fr; align-items:start; }
+@media(min-width:900px){ .contact-grid{ grid-template-columns:minmax(0,1fr) minmax(0,1.25fr); gap:56px; } }
+.contact-ways{ display:grid; gap:10px; }
+.contact-way{
+  display:flex; gap:16px; align-items:flex-start; padding:20px 22px;
+  border:1px solid var(--line); background:var(--panel); transition:border-color .2s;
+}
+a.contact-way:hover{ border-color:var(--line-strong); }
+.contact-way .lr-ic{
+  width:40px; height:40px; border:1px solid var(--line); display:grid; place-items:center; flex:none;
+  color:var(--brand-strong);
+}
+:root[data-theme="dark"] .contact-way .lr-ic{ color:var(--brand); }
+.contact-way b{ display:block; font-size:15px; margin-bottom:3px; }
+.contact-way > span:last-child > span{ display:block; font-size:14px; color:var(--ink); }
+.contact-way small{ display:block; margin-top:3px; font-size:12.5px; color:var(--ink-3); }
+
+.contact-form{ padding:28px 24px; border:1px solid var(--line); background:var(--panel); }
+@media(min-width:900px){ .contact-form{ padding:36px 34px; } }
+.contact-form h2{ font-size:22px; margin-bottom:22px; }
+.contact-row{ display:grid; gap:0 14px; grid-template-columns:1fr; }
+@media(min-width:600px){ .contact-row{ grid-template-columns:1fr 1fr; } }
+.contact-fine{ font-size:12.5px; color:var(--ink-3); margin:4px 0 16px; }
+.contact-fine a, .auth-legal a{ color:var(--ink-2); text-decoration:underline; text-underline-offset:2px; }
