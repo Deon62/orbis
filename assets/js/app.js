@@ -141,6 +141,37 @@
   window.orbisAccounts = ACCOUNTS;
   window.orbisActiveAccount = function () { return activeAccount; };
   window.orbisSetAccount = setAccount;
+
+  /* with the API connected: the real balances into the account card, and the
+     person into the drawer */
+  function money(n) {
+    return '$' + Number(n || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+  function applyAccounts(list) {
+    (list || []).forEach(function (a) {
+      var mine = ACCOUNTS.filter(function (x) { return x.id === a.kind; })[0];
+      if (mine) mine.amount = money(a.balance);
+    });
+    setAccount(activeAccount);
+  }
+  function applyProfile(p) {
+    if (!p) return;
+    var name = p.name || p.email || 'Your account';
+    var initials = name.split(/[\s@.]+/).filter(Boolean).slice(0, 2).map(function (w) { return w[0].toUpperCase(); }).join('');
+    document.querySelectorAll('[data-me-name]').forEach(function (el) { el.textContent = name; });
+    document.querySelectorAll('[data-me-email]').forEach(function (el) { el.textContent = p.email || ''; });
+    document.querySelectorAll('[data-me-initials]').forEach(function (el) { el.textContent = initials || '?'; });
+  }
+  function refreshAccount() {
+    if (!signedIn()) return Promise.resolve();
+    var s = OrbisAPI.session();
+    if (s && s.profile) applyProfile(s.profile);
+    return Promise.all([
+      OrbisAPI.get('/accounts').then(applyAccounts),
+      OrbisAPI.get('/me').then(function (p) { if (p) { OrbisAPI.setProfile(p); applyProfile(p); } })
+    ]).catch(function () {});
+  }
+  window.orbisRefreshAccount = refreshAccount;
   window.orbisBalance = balanceOf;
 
   /* ============================================================== nav ==== */
@@ -219,7 +250,7 @@
         '<button class="rail-item" data-theme-toggle title="Theme">' +
           '<span data-theme-icon>' + ic(currentTheme() === 'dark' ? 'sun' : 'moon', 'i-lg') + '</span>' +
           '<span>Theme</span></button>' +
-        '<a class="rail-item rail-item-danger" href="' + href('/') + '" title="Log out">' + ic('log-out', 'i-lg') + '<span>Log out</span></a>' +
+        '<a class="rail-item rail-item-danger" href="' + href('/') + '" title="Log out" data-logout>' + ic('log-out', 'i-lg') + '<span>Log out</span></a>' +
       '</div></nav>';
   }
 
@@ -241,8 +272,8 @@
           '<button class="icon-btn" data-drawer-close aria-label="Close menu">' + ic('x') + '</button>' +
         '</div>' +
         '<a class="drawer-acct" href="/profile-details">' +
-          '<span class="avatar">' + ic('user-round', 'i-sm') + '</span>' +
-          '<div><b>Your account</b><span>Demo · $10,000.00</span></div>' +
+          '<span class="avatar" data-me-initials>' + ic('user-round', 'i-sm') + '</span>' +
+          '<div><b data-me-name>Your account</b><span data-me-email>Demo · $10,000.00</span></div>' +
         '</a>' +
         '<div class="drawer-scroll">' + groups + '</div>' +
         /* pinned, so log out and the theme switch never need scrolling to */
@@ -259,7 +290,7 @@
             '<span class="switch' + (currentTheme() === 'dark' ? ' on' : '') +
               '" data-theme-switch role="switch" aria-checked="' + (currentTheme() === 'dark') + '"></span>' +
           '</button>' +
-          '<a class="drawer-act drawer-act-danger" href="' + href('/') + '">' + ic('log-out') + '<span>Log out</span></a>' +
+          '<a class="drawer-act drawer-act-danger" href="' + href('/') + '" data-logout>' + ic('log-out') + '<span>Log out</span></a>' +
         '</div>' +
       '</aside>';
   }
@@ -294,6 +325,8 @@
       '</aside>';
   }
 
+  function signedIn() { return !!(window.OrbisAPI && OrbisAPI.connected && OrbisAPI.signedIn()); }
+
   /* =========================================================== header ==== */
   function headerHTML() {
     if (SHELL === 'bare') return '';
@@ -307,8 +340,10 @@
       return '<header class="hdr"><div class="wrap hdr-in">' + logo() +
         '<nav class="hdr-nav">' + nav + '</nav>' +
         '<div class="hdr-right">' + themeBtn() +
-          '<a class="btn btn-quiet btn-sm hide-mobile" href="' + href('/login') + '">Log in</a>' +
-          '<a class="btn btn-primary btn-sm hide-mobile" href="' + href('/signup') + '">Create account</a>' +
+          (signedIn()
+            ? '<a class="btn btn-primary btn-sm hide-mobile" href="' + href('/trade') + '">Open trading</a>'
+            : '<a class="btn btn-quiet btn-sm hide-mobile" href="' + href('/login') + '">Log in</a>' +
+              '<a class="btn btn-primary btn-sm hide-mobile" href="' + href('/signup') + '">Create account</a>') +
           '<button class="icon-btn hide-desk" data-drawer-open aria-label="Open menu">' + ic('menu', 'i-lg') + '</button>' +
         '</div></div></header>';
     }
@@ -414,6 +449,7 @@
     BODY.insertAdjacentHTML('afterbegin', publicDrawerHTML());
   }
   mount('#site-header', headerHTML());
+  if (SHELL === 'app') setTimeout(refreshAccount, 0);
   mount('#site-footer', footerHTML());
   if (SHELL === 'app') {
     if (BODY.dataset.tabbar === 'hide') BODY.classList.add('no-tabbar');
@@ -461,6 +497,17 @@
     if (e.target.closest('[data-sound-toggle]')) { setSound(!soundOn()); return; }
     if (e.target.closest('[data-drawer-open]')) { setDrawer(true); return; }
     if (e.target.closest('[data-drawer-close]')) { setDrawer(false); return; }
+
+    var out = e.target.closest('[data-logout]');
+    if (out && window.OrbisAPI && OrbisAPI.connected) {
+      e.preventDefault();
+      veil('Signing you out');
+      OrbisAPI.post('/auth/logout').catch(function () {}).then(function () {
+        OrbisAPI.clearSession();
+        window.location.href = '/';
+      });
+      return;
+    }
 
     /* "Continue with Google", signs straight into the demo account */
     var g = e.target.closest('[data-login]');

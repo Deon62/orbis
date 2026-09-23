@@ -26,6 +26,32 @@ at all):
 vercel dev            # or any static server with clean-URL support
 ```
 
+## Connecting the API
+
+The backend is a separate repository (the local `backend/` folder, ignored by this one) deployed to Render. See its `README.md`.
+
+The UI runs in two modes, switched by one line at the top of `assets/js/api.js`:
+
+```js
+var API_BASE = '';                                   // offline: local simulation, empty states
+var API_BASE = 'https://orbisflow-api.onrender.com'; // live
+```
+
+Live, these talk to the API:
+
+| Where | What |
+|---|---|
+| `login`, `signup` (`assets/js/auth.js`) | Account creation, log-in, Google, email confirmation, "Forgot?", password reset. A referral link `/r/ORBIS-XXXXX` (rewritten in `vercel.json`) fills the sign-up code. |
+| Every app page (`api.js`, `app.js`) | Sends signed-out visitors to `/login?next=…`; loads the real balances into the account card and the name into the menu; Log out ends the session. |
+| Profile details | Saves name, phone, country and currency. |
+| Payment methods | Lists, adds (M-Pesa, bank, USDT) and removes methods. Cards are saved by paying with them. |
+| Refer & earn | The account's own referral link and QR. |
+| Deposit | M-Pesa sends an STK push and waits on the phone; cards go to Paystack and return to Cashier, which confirms the payment. |
+| Withdraw | Only to verified methods, with the $5 minimum and the $1 fee on top. |
+| Cashier | Real transaction history. |
+
+Pages whose data the backend does not serve yet (trades, reports, calendar, news, alerts, copy trading, AI, and others) show their empty states.
+
 ## Pages
 
 | File | What it is |

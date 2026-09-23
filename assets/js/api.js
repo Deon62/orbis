@@ -1,48 +1,131 @@
 /* ==========================================================================
    orbisflow, data layer
-   Every page that shows account data asks through here. Until an API base
-   is set, each request answers empty, so every page shows its empty state
-   rather than invented numbers. To connect the backend, set the base once:
+   Every page that shows account data asks through here.
 
-     <html data-api="https://api.orbisflow.com">       (per page), or
-     window.ORBIS_API_BASE = 'https://api.orbisflow.com' (before this file)
+   ┌──────────────────────────────────────────────────────────────────────┐
+   │ API_BASE: the address of the orbisflow API (the backend on Render). │
+   │ Empty = offline: pages show their empty states and the auth forms   │
+   │ and payments run their local simulation.                            │
+   └──────────────────────────────────────────────────────────────────────┘ */
+var API_BASE = '';
+/*
+   It can also be set per page with <html data-api="…">, or with
+   window.ORBIS_API_BASE before this file loads.
 
-   Endpoints the pages call, all GET, all JSON:
-     /me                       profile: { name, email, phone, country, currency }
-     /accounts                 [{ id, label, balance, currency }]
-     /trades/open              [{ id, sym, dir, stake, entry, now, ends, pl }]
-     /trades/closed            [{ id, sym, dir, stake, entry, exit, result, pl, when }]
-     /trades/stats             { byMarket: [[sym, pl]], byDuration: [[label, count, winPct]] }
-     /transactions             [{ when, type, method, ref, status, amount }]
-     /reports/profit           [{ date, trades, won, lost, turnover, pl }]
-     /confirmations            [{ id, sym, dir, stake, entry, exit, result, pl, when }]
-     /calendar?range=today     [{ time, ccy, flag, event, impact, forecast, previous, actual }]
-     /news                     [{ title, source, ago, sym, url }]
-     /alerts                   [{ sym, rule, status }]
-     /watchlists               [{ id, name, symbols: [] }]
-     /signals                  [{ sym, dir, conf, tf, stake, why }]
-     /patterns                 [{ sym, pattern, tf, bias, ago }]
-     /copy/providers           [{ id, name, initials, style, copiers, ret, win, dd, min }]
-     /referrals                [{ user, joined, status, volume, earned }]
-     /referrals/earnings       { paid, pending, weeks: [{ period, active, volume, amount, status }] }
-     /payment-methods          [{ kind, label, masked, status, isDefault }]
-     /sessions                 [{ device, place, lastSeen, current }]
-     /support/messages         [{ from: 'agent'|'me', text, at }]
-     /status                   { services: [{ k, days: [{ ago, sev, up }] }] }
+   Sessions: sign-in stores Supabase's access and refresh tokens here in
+   localStorage. Every request carries the access token; a 401 refreshes it
+   once and retries. App pages redirect to /login when there is no session.
+
+   Endpoints (the backend README has the full list):
+     /me /accounts /payment-methods /referrals /referrals/link /transactions
+     /payments/deposit/mpesa /payments/deposit/card /payments/withdraw /payments/{ref}
+     /rates
+   Not built on the backend yet (a 404 reads as "nothing yet", so these pages
+   show their empty states): /trades/* /reports/profit /confirmations /calendar
+   /news /alerts /watchlists /signals /patterns /copy/providers /sessions
+   /support/messages /status
    ========================================================================== */
 (function (global) {
   'use strict';
 
-  var BASE = (document.documentElement.getAttribute('data-api') || global.ORBIS_API_BASE || '').replace(/\/$/, '');
+  var BASE = (document.documentElement.getAttribute('data-api') || global.ORBIS_API_BASE || API_BASE || '').replace(/\/$/, '');
+  var SESSION_KEY = 'orbisflow-session';
 
-  function get(path) {
-    if (!BASE) return Promise.resolve(null);
-    return fetch(BASE + path, { credentials: 'include', headers: { Accept: 'application/json' } })
+  /* ---------------------------------------------------------- session --- */
+  function session() {
+    try { return JSON.parse(localStorage.getItem(SESSION_KEY)) || null; } catch (e) { return null; }
+  }
+  function setSession(s) {
+    try {
+      var prev = session() || {};
+      localStorage.setItem(SESSION_KEY, JSON.stringify({
+        access_token: s.access_token, refresh_token: s.refresh_token || prev.refresh_token,
+        expires_at: s.expires_at || null, profile: s.profile || prev.profile || null
+      }));
+    } catch (e) {}
+  }
+  function setProfile(p) {
+    var s = session();
+    if (!s) return;
+    s.profile = p;
+    try { localStorage.setItem(SESSION_KEY, JSON.stringify(s)); } catch (e) {}
+  }
+  function clearSession() { try { localStorage.removeItem(SESSION_KEY); } catch (e) {} }
+
+  function toLogin() {
+    var next = location.pathname + location.search;
+    location.replace('/login' + (next && next !== '/' ? '?next=' + encodeURIComponent(next) : ''));
+  }
+
+  /* ---------------------------------------------------------- requests --- */
+  function ApiError(message, status) {
+    var e = new Error(message);
+    e.status = status;
+    return e;
+  }
+
+  var refreshing = null;
+  function refresh() {
+    var s = session();
+    if (!s || !s.refresh_token) return Promise.reject(ApiError('Your session has ended. Log in again.', 401));
+    if (!refreshing) {
+      refreshing = fetch(BASE + '/auth/refresh', {
+        method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify({ refresh_token: s.refresh_token })
+      }).then(function (r) {
+        if (!r.ok) throw ApiError('Your session has ended. Log in again.', 401);
+        return r.json();
+      }).then(function (fresh) { setSession(fresh); return fresh; })
+        .finally(function () { refreshing = null; });
+    }
+    return refreshing;
+  }
+
+  function request(method, path, body, retried) {
+    if (!BASE) return Promise.reject(ApiError('Not connected', 0));
+    var s = session();
+    var headers = { Accept: 'application/json' };
+    if (body !== undefined) headers['Content-Type'] = 'application/json';
+    if (s && s.access_token) headers.Authorization = 'Bearer ' + s.access_token;
+
+    return fetch(BASE + path, { method: method, headers: headers, body: body !== undefined ? JSON.stringify(body) : undefined })
+      .catch(function () { throw ApiError('Could not reach orbisflow. Check your connection.', 0); })
       .then(function (r) {
-        if (!r.ok) throw new Error('HTTP ' + r.status);
-        return r.status === 204 ? null : r.json();
+        if (r.status === 401 && s && s.refresh_token && !retried && path.indexOf('/auth/') !== 0) {
+          return refresh().then(function () { return request(method, path, body, true); }, function (err) {
+            clearSession();
+            if (document.body.dataset.shell === 'app') toLogin();
+            throw err;
+          });
+        }
+        if (r.status === 204) return null;
+        return r.text().then(function (text) {
+          var data = null;
+          try { data = text ? JSON.parse(text) : null; } catch (e) {}
+          if (!r.ok) {
+            var msg = data && typeof data.detail === 'string' ? data.detail : 'Something went wrong. Try again.';
+            throw ApiError(msg, r.status);
+          }
+          return data;
+        });
       });
   }
+
+  /* offline, reads answer "nothing yet"; so does an endpoint the backend
+     does not have yet (404), so its page shows the empty state */
+  function get(path) {
+    if (!BASE) return Promise.resolve(null);
+    return request('GET', path).catch(function (e) {
+      if (e.status === 404) return null;
+      throw e;
+    });
+  }
+  function post(path, body) { return request('POST', path, body === undefined ? {} : body); }
+  function patch(path, body) { return request('PATCH', path, body); }
+  function del(path) { return request('DELETE', path); }
+
+  /* app pages need a signed-in user once the API is connected */
+  if (BASE && document.body && document.body.dataset.shell === 'app' && !session()) toLogin();
 
   function isEmpty(d) {
     if (d == null) return true;
@@ -103,7 +186,16 @@
 
   global.OrbisAPI = {
     connected: !!BASE,
+    base: BASE,
     get: get,
+    post: post,
+    patch: patch,
+    del: del,
+    session: session,
+    setSession: setSession,
+    setProfile: setProfile,
+    clearSession: clearSession,
+    signedIn: function () { return !!(session() && session().access_token); },
     load: load,
     isEmpty: isEmpty,
     empty: emptyHTML,

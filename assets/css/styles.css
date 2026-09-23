@@ -2290,3 +2290,46 @@ a.contact-way:hover{ border-color:var(--line-strong); }
 .sig-in{ animation:sigIn .35s ease both; }
 @keyframes sigIn{ from{ opacity:0; transform:translateY(6px); } to{ opacity:1; transform:none; } }
 @media(prefers-reduced-motion:reduce){ .sig-in{ animation:none; } }
+
+
+/* ============================================================ auth, live ==
+   messages from the API, a busy button, and the screens the forms turn into */
+.auth-msg{
+  display:flex; gap:9px; align-items:flex-start; margin:-6px 0 16px; padding:10px 12px;
+  font-size:13px; line-height:1.5; border-left:2px solid;
+}
+.auth-msg[hidden]{ display:none; }
+.auth-msg svg{ flex:none; margin-top:2px; }
+.auth-err{ color:var(--ink); background:color-mix(in srgb, var(--down) 8%, transparent); border-color:var(--down); }
+.auth-err svg{ color:var(--down); }
+.auth-ok{ color:var(--ink); background:color-mix(in srgb, var(--up) 9%, transparent); border-color:var(--up); }
+.auth-ok svg{ color:var(--up); }
+.input-err{ border-color:var(--down) !important; }
+.btn-spin{
+  width:14px; height:14px; border-radius:50%; flex:none;
+  border:2px solid currentColor; border-right-color:transparent; animation:vfspin .7s linear infinite;
+}
+.auth-wait{ display:flex; flex-direction:column; align-items:center; gap:18px; padding:30px 0; color:var(--ink-2); font-size:14px; }
+.auth-done{ text-align:center; }
+.auth-done-ic{
+  width:52px; height:52px; margin:4px auto 16px; border-radius:50%; display:grid; place-items:center;
+  background:var(--brand-tint); color:var(--brand-strong);
+}
+.auth-done h1{ margin-bottom:10px; }
+.auth-done p{ font-size:14px; line-height:1.6; color:var(--ink-2); margin-bottom:10px; }
+.auth-done .btn{ margin-top:12px; }
+
+
+/* ============================================================ live money ==
+   waiting on a phone, and methods that cannot be picked yet */
+.pay-wait{ padding-top:26px; }
+.pay-phone{
+  width:60px; height:60px; margin:0 auto 14px; border-radius:50%; display:grid; place-items:center;
+  background:var(--brand-tint); color:var(--brand-strong); animation:payPulse 1.6s ease-in-out infinite;
+}
+.pay-left{ margin-top:16px; font-size:22px; font-weight:600; color:var(--ink); }
+@keyframes payPulse{ 0%,100%{ box-shadow:0 0 0 0 color-mix(in srgb, var(--brand) 35%, transparent); } 50%{ box-shadow:0 0 0 12px transparent; } }
+@media(prefers-reduced-motion:reduce){ .pay-phone{ animation:none; } }
+.method:disabled{ opacity:.6; cursor:not-allowed; }
+.method:disabled:hover{ border-color:var(--line); }
+#mNums .method{ width:100%; }

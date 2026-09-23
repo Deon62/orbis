@@ -1,0 +1,4 @@
+# never upload the API with the UI (it deploys separately to Render)
+backend/
+scripts/
+README.md

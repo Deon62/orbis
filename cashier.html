@@ -37,7 +37,30 @@
 (function () {
   var A = OrbisAPI, M = A.money;
 
-  A.load({
+  /* back from Paystack: confirm the card payment before showing the list */
+  var params = new URLSearchParams(location.search);
+  var ref = params.get('deposit');
+  if (ref && A.connected) {
+    history.replaceState(null, '', location.pathname);
+    var tries = 0;
+    (function check() {
+      A.get('/payments/' + encodeURIComponent(ref)).then(function (t) {
+        if (t && t.state === 'completed') {
+          window.orbisToast('Card deposit of ' + M(t.netUsd) + ' received', 'check-circle-2');
+          if (window.orbisRefreshAccount) window.orbisRefreshAccount();
+          return list();
+        }
+        if (t && t.state === 'failed') {
+          window.orbisToast(t.failureReason || 'The card payment did not go through', 'triangle-alert');
+          return list();
+        }
+        if (++tries < 8) setTimeout(check, 2500);
+        else { window.orbisToast('Waiting for the card processor to confirm. Your balance updates when it does.', 'clock'); list(); }
+      }).catch(function () { list(); });
+    })();
+  }
+
+  function list() { A.load({
     el: '#txList', path: '/transactions',
     empty: { icon: 'receipt', title: 'No transactions yet',
       text: 'Deposits, withdrawals and trade settlements appear here, newest first.',
@@ -52,7 +75,8 @@
             '<td class="r mono ' + (pos ? 'up' : '') + '">' + (pos ? '+' : '') + M(t.amount) + '</td></tr>';
         }).join('') + '</tbody></table></div>';
     }
-  });
+  }); }
+  list();
 })();
 </script>
 </body>

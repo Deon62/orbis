@@ -36,19 +36,39 @@
 
   var ICON = { mpesa: 'smartphone', card: 'credit-card', bank: 'building-2', usdt: 'bitcoin' };
   var ADD = '<button class="btn btn-primary btn-sm" data-modal="add-payment"><i data-lucide="plus" class="i-sm"></i>Add a method</button>';
-  A.load({
-    el: '#pmList', path: '/payment-methods',
-    empty: { icon: 'wallet', title: 'No payment methods yet',
-      text: 'Add M-Pesa, a bank account or a USDT wallet in your own name. Withdrawals are only paid to verified methods.', action: ADD },
-    render: function (d) {
-      return d.map(function (m) {
-        return '<div class="row-line"><div style="display:flex;align-items:center;gap:12px">' +
-          '<span class="method-ic"><i data-lucide="' + (ICON[m.kind] || 'wallet') + '" class="i"></i></span>' +
-          '<div><b>' + m.label + '</b><span>' + m.masked + (m.isDefault ? ' · default' : '') + '</span></div></div>' +
-          (m.status === 'Verified' ? '<span class="tag tag-up">Verified</span>' : '<span class="tag tag-wait">' + m.status + '</span>') + '</div>';
-      }).join('') + '<div class="center-action">' + ADD + '</div>';
-    }
+  var NOTE = { pending: { mpesa: 'Verified by your first deposit from it', bank: 'Being verified', usdt: 'Being verified' } };
+
+  function load() {
+    A.load({
+      el: '#pmList', path: '/payment-methods',
+      empty: { icon: 'wallet', title: 'No payment methods yet',
+        text: 'Add M-Pesa, a bank account or a USDT wallet in your own name. Withdrawals are only paid to verified methods.', action: ADD },
+      render: function (d) {
+        return d.map(function (m) {
+          var ok = m.status === 'verified';
+          return '<div class="row-line"><div style="display:flex;align-items:center;gap:12px;min-width:0">' +
+            '<span class="method-ic"><i data-lucide="' + (ICON[m.kind] || 'wallet') + '" class="i"></i></span>' +
+            '<div style="min-width:0"><b>' + m.label + '</b><span>' + m.masked + (m.isDefault ? ' · default' : '') +
+              (!ok && NOTE.pending[m.kind] ? ' · ' + NOTE.pending[m.kind] : '') + '</span></div></div>' +
+            '<span style="display:flex;align-items:center;gap:6px;flex:none">' +
+              (ok ? '<span class="tag tag-up">Verified</span>' : '<span class="tag tag-wait">Pending</span>') +
+              '<button class="btn btn-quiet btn-sm" data-remove="' + m.id + '">Remove</button></span></div>';
+        }).join('') + '<div class="center-action">' + ADD + '</div>';
+      }
+    });
+  }
+
+  document.getElementById('pmList').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-remove]');
+    if (!b) return;
+    b.disabled = true;
+    A.del('/payment-methods/' + b.dataset.remove).then(function () {
+      window.orbisToast('Payment method removed', 'check');
+      load();
+    }).catch(function (err) { b.disabled = false; window.orbisToast(err.message, 'triangle-alert'); });
   });
+  document.addEventListener('orbis:methods', load);
+  load();
 })();
 </script>
 </body>

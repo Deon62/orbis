@@ -33,7 +33,15 @@
      The fallback is indicative; /rates replaces it once the API is set. */
   var USD_KES = 129.5;
   if (global.OrbisAPI) {
-    global.OrbisAPI.get('/rates').then(function (r) { if (r && r.USD_KES) USD_KES = Number(r.USD_KES); })
+    global.OrbisAPI.get('/rates').then(function (r) {
+      if (!r) return;
+      /* the backend owns the rules; these only mirror them for display */
+      if (r.USD_KES) USD_KES = Number(r.USD_KES);
+      if (r.minDepositUsd) MIN_DEPOSIT = Number(r.minDepositUsd);
+      if (r.minWithdrawUsd) MIN_WITHDRAW = Number(r.minWithdrawUsd);
+      if (r.withdrawFeeUsd != null) WITHDRAW_FEE = Number(r.withdrawFeeUsd);
+      if (r.cardFeePct != null) CARD_FEE = Number(r.cardFeePct) / 100;
+    })
       .catch(function () {});
   }
   function kes(usd) { return 'KSh ' + Math.round(usd * USD_KES).toLocaleString('en-US'); }
@@ -44,6 +52,17 @@
     return a ? Number(String(a.amount).replace(/[^0-9.]/g, '')) || 0 : 0;
   }
   var REF_LINK = 'https://orbisflow.com/r/ORBIS-4K92';
+
+  /* with the API connected, deposits, withdrawals, methods and the referral
+     link are real; offline, the flows below keep their local simulation */
+  var API = global.OrbisAPI;
+  function live() { return !!(API && API.connected && API.signedIn()); }
+  function refLink() {
+    var s = live() && API.session();
+    return (s && s.profile && s.profile.referralLink) || REF_LINK;
+  }
+  function esc(t) { return String(t == null ? '' : t).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function afterMoney() { if (global.orbisRefreshAccount) global.orbisRefreshAccount(); }
 
   /* ============================================================= shell == */
   var scrim, box;
@@ -104,7 +123,9 @@
   ];
 
   function depositStep1() {
-    var html = '<div class="modal-bd stack-sm">' + DEPOSIT_METHODS.map(function (m) {
+    /* bank transfers have no automatic crediting yet, so they are hidden when live */
+    var list = DEPOSIT_METHODS.filter(function (m) { return !(live() && m.k === 'bank'); });
+    var html = '<div class="modal-bd stack-sm">' + list.map(function (m) {
       return '<button class="method" data-pick="' + m.k + '">' +
         '<span class="method-ic">' + ic(SAVED[m.k].icon) + '</span>' +
         '<span style="flex:1"><b>' + m.name + '</b><span>' + m.note + '</span></span>' +
@@ -170,6 +191,8 @@
 
   function depositStep2(key) {
     if (key === 'usdt') return depositCrypto();
+    if (live() && key === 'mpesa') return liveMpesaDeposit();
+    if (live() && key === 'card') return liveCardDeposit();
 
     var s = SAVED[key];
     var card = key === 'card';
@@ -279,6 +302,7 @@
   ];
 
   function withdrawStep1() {
+    if (live()) return liveWithdrawPick();
     var html = '<div class="modal-bd stack-sm">' + WITHDRAW_METHODS.map(function (m) {
       return '<button class="method" data-pick="' + m.k + '">' +
         '<span class="method-ic">' + ic(SAVED[m.k].icon) + '</span>' +
@@ -292,8 +316,10 @@
     });
   }
 
-  function withdrawStep2(key) {
-    var s = SAVED[key];
+  function withdrawStep2(key, method) {
+    /* method: a saved method from the API; without one, the simulated flow */
+    var s = method ? { icon: SAVED[method.kind] ? SAVED[method.kind].icon : 'wallet', label: method.label, masked: method.masked }
+                   : SAVED[key];
     var mpesa = key === 'mpesa';
     var AVAILABLE = realBalance();
     /* the fee comes on top, so the most you can take out is the balance less the fee */
@@ -305,11 +331,12 @@
         '<div class="saved">' +
           '<span class="method-ic">' + ic(s.icon) + '</span>' +
           '<span class="saved-tx"><b>' + s.label + '</b><span id="mDest">' + s.masked + '</span></span>' +
-          '<button class="linkish" data-other>Use another</button>' +
+          (method ? '' : '<button class="linkish" data-other>Use another</button>') +
         '</div>' +
+        (method ? '' :
         '<div id="mOther" hidden style="margin-top:10px">' +
           '<input class="input" id="mOtherInput" placeholder="' + (mpesa ? '+254 7XX XXX XXX' : 'Account or wallet') + '">' +
-        '</div>' +
+        '</div>') +
 
         '<div class="field" style="margin:16px 0 10px">' +
           '<label class="label" for="mAmt">Amount to receive</label>' +
@@ -365,15 +392,34 @@
       root.querySelectorAll('[data-amt]').forEach(function (c) {
         c.addEventListener('click', function () { amt.value = c.dataset.amt; sync(); });
       });
-      root.querySelector('[data-other]').addEventListener('click', function () {
+      var other = root.querySelector('[data-other]');
+      if (other) other.addEventListener('click', function () {
         var o = root.querySelector('#mOther');
         o.hidden = !o.hidden;
         if (!o.hidden) root.querySelector('#mOtherInput').focus();
       });
       go.addEventListener('click', function () {
         var v = Number(amt.value) || 0;
-        close();
-        toast('Withdrawal of ' + (mpesa ? kes(v) : money(v)) + ' submitted for review', 'check-circle-2');
+        if (!method) {
+          close();
+          toast('Withdrawal of ' + (mpesa ? kes(v) : money(v)) + ' submitted for review', 'check-circle-2');
+          return;
+        }
+        go.disabled = true;
+        go.innerHTML = '<span class="btn-spin"></span>Requesting';
+        API.post('/payments/withdraw', { amount_usd: v, payment_method_id: method.id }).then(function (tx) {
+          afterMoney();
+          /* every withdrawal is paid by the team, so every one ends here */
+          resultScreen('Withdraw', true, 'Withdrawal requested',
+            (tx.localAmount ? 'KSh ' + Number(tx.localAmount).toLocaleString('en-US') : money(v)) + ' to ' +
+            esc(method.masked) + '. Our team pays it, usually the same day and always within a working day.',
+            [['Amount', money(tx.amountUsd)], ['Fee', money(tx.feeUsd)], ['Taken from your balance', money(tx.netUsd)],
+             ['Reference', tx.reference]]);
+        }).catch(function (err) {
+          go.disabled = false;
+          sync();
+          toast(err.message, 'triangle-alert');
+        });
       });
       sync();
     }, withdrawStep1);
@@ -395,20 +441,21 @@
   }
 
   function referModal() {
-    var share = shareLinks(REF_LINK).map(function (x) {
+    var link = refLink();
+    var share = shareLinks(link).map(function (x) {
       return '<a class="share-btn" href="' + x[2] + '" target="_blank" rel="noopener noreferrer" ' +
         'aria-label="Share on ' + x[1] + '">' +
         '<img class="brand-ic" src="https://cdn.simpleicons.org/' + x[0] + '/93928C" alt="" width="16" height="16">' +
         '</a>';
     }).join('') +
       '<a class="share-btn" href="mailto:?subject=' + encodeURIComponent('Trade with me on orbisflow') +
-        '&body=' + encodeURIComponent(SHARE_TEXT + ' ' + REF_LINK) + '" aria-label="Share by email">' +
+        '&body=' + encodeURIComponent(SHARE_TEXT + ' ' + link) + '" aria-label="Share by email">' +
         ic('mail', 'i-sm') + '</a>';
 
     var html =
       '<div class="modal-bd">' +
         '<div class="copybox">' +
-          '<input id="mRef" value="' + REF_LINK + '" readonly aria-label="Your referral link">' +
+          '<input id="mRef" value="' + link + '" readonly aria-label="Your referral link">' +
           '<button data-copy="#mRef" aria-label="Copy link">' + ic('copy', 'i-sm') + '</button>' +
         '</div>' +
         '<div class="share-row">' + share + '</div>' +
@@ -434,7 +481,7 @@
       if (cv && global.OrbisQR) {
         /* always dark-on-light: an inverted QR fails on most scanners, so this
            one keeps its own white field even in dark mode */
-        global.OrbisQR.render(cv, REF_LINK, { size: 160, dark: '#1C1C1C', light: '#FFFFFF' });
+        global.OrbisQR.render(cv, link, { size: 160, dark: '#1C1C1C', light: '#FFFFFF' });
       }
     });
   }
@@ -469,7 +516,7 @@
     { k: 'card',  name: 'Card',  note: 'Visa, Mastercard, Verve', icon: 'credit-card',
       hosted: true },
     { k: 'bank',  name: 'Bank account', note: 'Local transfer', icon: 'building-2',
-      field: 'Account number', placeholder: '0100 1234 5678' },
+      field: 'Account number', placeholder: '0100 1234 5678', bank: true },
     { k: 'usdt',  name: 'Crypto wallet', note: 'USDT on TRON (TRC-20)', icon: 'bitcoin',
       field: 'Wallet address', placeholder: 'T…' }
   ];
@@ -500,7 +547,11 @@
           ? '<p class="hint" style="margin:0">A card is saved by paying with it. Paystack ' +
               'takes the details on its own secure page and hands back a token, so the ' +
               'number never reaches orbisflow.</p>'
-          : '<div class="field">' +
+          : (m.bank ? '<div class="field">' +
+              '<label class="label" for="mBank">Bank</label>' +
+              '<input class="input" id="mBank" placeholder="e.g. Equity Bank">' +
+            '</div>' : '') +
+            '<div class="field">' +
               '<label class="label" for="mField">' + m.field + '</label>' +
               '<input class="input" id="mField" placeholder="' + m.placeholder + '">' +
             '</div>' +
@@ -512,13 +563,32 @@
       '</div>' +
       '<div class="modal-ft">' +
         '<button class="btn btn-primary btn-block btn-lg" id="mAdd">' +
-          (m.hosted ? 'Continue to Paystack' : 'Add method') + '</button>' +
+          (m.hosted ? (live() ? 'Make a card deposit' : 'Continue to Paystack') : 'Add method') + '</button>' +
       '</div>';
     open('Add a method', html, function (root) {
-      root.querySelector('#mAdd').addEventListener('click', function () {
-        close();
-        if (m.hosted) toast('Opening Paystack checkout', 'external-link');
-        else toast(m.name + ' added, pending verification', 'check-circle-2');
+      var add = root.querySelector('#mAdd');
+      add.addEventListener('click', function () {
+        if (!live()) {
+          close();
+          if (m.hosted) toast('Opening Paystack checkout', 'external-link');
+          else toast(m.name + ' added, pending verification', 'check-circle-2');
+          return;
+        }
+        /* a card is saved by paying with it, so adding one is a card deposit */
+        if (m.hosted) return liveCardDeposit();
+        var value = root.querySelector('#mField').value.trim();
+        var body = { kind: m.k, name: root.querySelector('#mName').value.trim() || null };
+        if (m.k === 'mpesa') body.phone = value;
+        if (m.k === 'bank') { body.account_number = value; body.bank_name = root.querySelector('#mBank').value.trim(); }
+        if (m.k === 'usdt') body.address = value;
+        add.disabled = true;
+        API.post('/payment-methods', body).then(function (pm) {
+          close();
+          document.dispatchEvent(new CustomEvent('orbis:methods', { detail: pm }));
+          toast(pm.status === 'verified' ? pm.label + ' added' :
+                m.k === 'mpesa' ? 'M-Pesa added. Your first deposit from it verifies it.'
+                                : pm.label + ' added. We verify it within a working day.', 'check-circle-2');
+        }).catch(function (err) { add.disabled = false; toast(err.message, 'triangle-alert'); });
       });
     }, addPaymentStep1);
   }
@@ -1074,6 +1144,243 @@
     else if (kind === 'copy') copyModal(t.dataset.provider);
     else if (kind === 'enrol') enrolInfo(t.dataset.course);
   });
+
+
+  /* ================================================== live money flows == */
+  /* a finished payment, good or bad, on one screen */
+  function resultScreen(title, ok, head, text, rows, again) {
+    var html =
+      '<div class="modal-bd center">' +
+        '<div class="result ' + (ok ? 'result-won' : 'result-lost') + '">' + ic(ok ? 'check' : 'x', 'i-lg') + '</div>' +
+        '<h3 style="margin-top:14px">' + head + '</h3>' +
+        '<p class="hint" style="max-width:34ch;margin:8px auto 0">' + text + '</p>' +
+        (rows && rows.length ? '<div style="text-align:left;margin-top:16px">' + rows.map(function (r) {
+          return '<div class="kv"><span>' + r[0] + '</span><b class="mono">' + esc(r[1]) + '</b></div>';
+        }).join('') + '</div>' : '') +
+      '</div>' +
+      '<div class="modal-ft">' +
+        (again ? '<button class="btn btn-ghost btn-block" data-again style="margin-bottom:8px">Try again</button>' : '') +
+        '<button class="btn btn-primary btn-block" data-done>Done</button>' +
+      '</div>';
+    open(title, html, function (root) {
+      root.querySelector('[data-done]').addEventListener('click', close);
+      var a = root.querySelector('[data-again]');
+      if (a) a.addEventListener('click', again);
+    });
+  }
+
+  function amountField(value, min) {
+    return '<div class="field" style="margin:0 0 10px">' +
+        '<label class="label" for="mAmt">Amount</label>' +
+        '<div class="input-wrap"><span class="input-prefix">$</span>' +
+          '<input class="input" id="mAmt" type="number" value="' + value + '" min="' + min + '" step="any" inputmode="decimal"></div>' +
+        '<p class="hint" id="mMin" style="margin-top:6px">Minimum ' + money(min) + '</p>' +
+        '<div class="stake-row">' + [5, 20, 100, 250].map(function (v) {
+          return '<button class="chip" data-amt="' + v + '">' + v + '</button>';
+        }).join('') + '</div>' +
+      '</div>';
+  }
+
+  /* ---------------------------------------------------------- M-Pesa in -- */
+  function liveMpesaDeposit(pre) {
+    pre = pre || {};
+    API.get('/payment-methods').catch(function () { return []; }).then(function (methods) {
+      var saved = (methods || []).filter(function (m) { return m.kind === 'mpesa'; });
+      var prof = (API.session() || {}).profile || {};
+      var chosen = pre.methodId || (saved[0] && saved[0].id) || '';
+
+      var html =
+        '<div class="modal-bd">' +
+          amountField(pre.amount || 20, MIN_DEPOSIT) +
+          '<p class="label" style="margin:14px 0 8px">Send the prompt to</p>' +
+          '<div class="stack-sm" id="mNums">' +
+            saved.map(function (m) {
+              return '<button class="method' + (m.id === chosen ? ' active' : '') + '" data-num="' + m.id + '">' +
+                '<span class="method-ic">' + ic('smartphone', 'i-sm') + '</span>' +
+                '<span style="flex:1;text-align:left"><b>' + esc(m.masked) + '</b><span>' +
+                  (m.status === 'verified' ? 'Verified' : 'Verified by this deposit') + '</span></span>' +
+                '<i class="pick-dot"></i></button>';
+            }).join('') +
+            '<button class="method' + (chosen ? '' : ' active') + '" data-num="">' +
+              '<span class="method-ic">' + ic('plus', 'i-sm') + '</span>' +
+              '<span style="flex:1;text-align:left"><b>' + (saved.length ? 'Another number' : 'Your M-Pesa number') + '</b>' +
+              '<span>Safaricom, in your own name</span></span><i class="pick-dot"></i></button>' +
+          '</div>' +
+          '<input class="input" id="mPhone" type="tel" inputmode="tel" placeholder="0712 345 678" style="margin-top:8px" value="' +
+            esc(pre.phone || prof.phone || '') + '"' + (chosen ? ' hidden' : '') + '>' +
+          '<div class="kv" style="margin-top:14px"><span>You pay by M-Pesa</span><b class="mono" id="mKes"></b></div>' +
+          '<div class="kv"><span>Credited</span><b class="mono" id="mNet"></b></div>' +
+          '<p class="hint" style="margin-top:8px">At KSh ' + USD_KES.toFixed(2) + ' to $1.</p>' +
+        '</div>' +
+        '<div class="modal-ft"><button class="btn btn-primary btn-block btn-lg" id="mGo"></button>' +
+          '<p class="hint center" style="margin-top:10px">A prompt appears on the phone. Enter your M-Pesa PIN to approve it.</p></div>';
+
+      open('Deposit with M-Pesa', html, function (root) {
+        var amt = root.querySelector('#mAmt'), go = root.querySelector('#mGo'), phone = root.querySelector('#mPhone');
+        function sync() {
+          var v = Number(amt.value) || 0, low = v < MIN_DEPOSIT;
+          root.querySelector('#mKes').textContent = kes(v);
+          root.querySelector('#mNet').textContent = money(v);
+          root.querySelector('#mMin').classList.toggle('hint-err', low && amt.value !== '');
+          root.querySelectorAll('[data-amt]').forEach(function (c) { c.classList.toggle('active', Number(c.dataset.amt) === v); });
+          go.disabled = low;
+          go.textContent = low ? 'Minimum deposit is ' + money(MIN_DEPOSIT) : 'Send prompt · ' + kes(v);
+        }
+        amt.addEventListener('input', sync);
+        root.querySelectorAll('[data-amt]').forEach(function (c) {
+          c.addEventListener('click', function () { amt.value = c.dataset.amt; sync(); });
+        });
+        root.querySelectorAll('[data-num]').forEach(function (b) {
+          b.addEventListener('click', function () {
+            chosen = b.dataset.num;
+            phone.hidden = !!chosen;
+            if (!chosen) phone.focus();
+          });
+        });
+        go.addEventListener('click', function () {
+          var v = Number(amt.value) || 0;
+          var body = { amount_usd: v };
+          if (chosen) body.payment_method_id = chosen; else body.phone = phone.value.trim();
+          go.disabled = true;
+          go.innerHTML = '<span class="btn-spin"></span>Sending the prompt';
+          API.post('/payments/deposit/mpesa', body).then(function (tx) {
+            waitForMpesa(tx, { amount: v, methodId: chosen, phone: phone.value.trim() });
+          }).catch(function (err) { sync(); toast(err.message, 'triangle-alert'); });
+        });
+        sync();
+      }, depositStep1);
+    });
+  }
+
+  /* the prompt is on the phone: wait for M-Pesa to say yes or no. Closing
+     the modal only hides the waiting screen; the check carries on and ends
+     in a toast instead */
+  function waitForMpesa(tx, pre) {
+    var left = 120, tries = 0;
+    var html =
+      '<div class="modal-bd center pay-wait">' +
+        '<span class="pay-phone">' + ic('smartphone', 'i-lg') + '</span>' +
+        '<h3>Check your phone</h3>' +
+        '<p class="hint" style="max-width:32ch;margin:8px auto 0">Enter your M-Pesa PIN to approve <b>KSh ' +
+          Number(tx.localAmount).toLocaleString('en-US') + '</b> to orbisflow. Sent to ' + esc(tx.destination) + '.</p>' +
+        '<p class="pay-left mono" id="mLeft">2:00</p>' +
+      '</div>' +
+      '<div class="modal-ft"><button class="btn btn-ghost btn-block" data-close>Close, and keep waiting in the background</button></div>';
+    open('Deposit with M-Pesa', html);
+    var box = document.querySelector('.pay-wait');
+    function shown() { return document.body.contains(box) && box.offsetParent !== null; }
+
+    var timer = setInterval(function () {
+      left--;
+      if (!shown()) return clearInterval(timer);
+      var el = document.getElementById('mLeft');
+      if (el) el.textContent = Math.floor(Math.max(0, left) / 60) + ':' + ('0' + Math.max(0, left) % 60).slice(-2);
+      if (left <= 0) {
+        clearInterval(timer);
+        resultScreen('Deposit with M-Pesa', false, 'Still waiting on M-Pesa',
+          'If you approved it, your balance updates as soon as M-Pesa confirms. If not, send the prompt again.', [],
+          function () { clearInterval(poll); liveMpesaDeposit(pre); });
+      }
+    }, 1000);
+
+    var poll = setInterval(function () {
+      if (++tries > 60) return clearInterval(poll);        /* four minutes, then leave it to the callback */
+      API.get('/payments/' + tx.reference).then(function (t) {
+        if (!t || (t.state !== 'completed' && t.state !== 'failed')) return;
+        clearInterval(poll); clearInterval(timer);
+        var ok = t.state === 'completed';
+        if (ok) { afterMoney(); if (global.orbisBeep) global.orbisBeep('win'); }
+        if (!shown() && !document.querySelector('.modal-scrim:not([hidden]) .result')) {
+          toast(ok ? 'Deposit of ' + money(t.netUsd) + ' received' : 'M-Pesa deposit was not completed',
+                ok ? 'check-circle-2' : 'triangle-alert');
+          return;
+        }
+        if (ok) {
+          resultScreen('Deposit with M-Pesa', true, money(t.netUsd) + ' received',
+            'Your real account is ready to trade.',
+            [['Paid', 'KSh ' + Number(t.localAmount).toLocaleString('en-US')], ['Credited', money(t.netUsd)],
+             ['New balance', money(t.balance)], ['Reference', t.reference]]);
+        } else {
+          resultScreen('Deposit with M-Pesa', false, 'Payment not completed',
+            esc(t.failureReason || 'The prompt was cancelled or timed out.'), [], function () { liveMpesaDeposit(pre); });
+        }
+      }).catch(function () {});
+    }, 4000);
+  }
+
+  /* ------------------------------------------------------------ card in -- */
+  function liveCardDeposit() {
+    var html =
+      '<div class="modal-bd">' +
+        amountField(20, MIN_DEPOSIT) +
+        '<div class="kv"><span>Processor fee · ' + (CARD_FEE * 100).toFixed(1) + '%</span><b class="mono" id="mFee"></b></div>' +
+        '<div class="kv"><span>Credited</span><b class="mono" id="mNet"></b></div>' +
+      '</div>' +
+      '<div class="modal-ft"><button class="btn btn-primary btn-block btn-lg" id="mGo"></button>' +
+        '<p class="hint center" style="margin-top:10px">Paystack takes the card details on its own secure page. ' +
+        'They never reach orbisflow, and the card is saved for next time.</p></div>';
+    open('Deposit by card', html, function (root) {
+      var amt = root.querySelector('#mAmt'), go = root.querySelector('#mGo');
+      function sync() {
+        var v = Number(amt.value) || 0, low = v < MIN_DEPOSIT;
+        root.querySelector('#mFee').textContent = money(v * CARD_FEE);
+        root.querySelector('#mNet').textContent = money(Math.max(0, v - v * CARD_FEE));
+        root.querySelector('#mMin').classList.toggle('hint-err', low && amt.value !== '');
+        root.querySelectorAll('[data-amt]').forEach(function (c) { c.classList.toggle('active', Number(c.dataset.amt) === v); });
+        go.disabled = low;
+        go.textContent = low ? 'Minimum deposit is ' + money(MIN_DEPOSIT) : 'Continue to Paystack · ' + money(v);
+      }
+      amt.addEventListener('input', sync);
+      root.querySelectorAll('[data-amt]').forEach(function (c) {
+        c.addEventListener('click', function () { amt.value = c.dataset.amt; sync(); });
+      });
+      go.addEventListener('click', function () {
+        go.disabled = true;
+        go.innerHTML = '<span class="btn-spin"></span>Opening checkout';
+        API.post('/payments/deposit/card', { amount_usd: Number(amt.value) }).then(function (r) {
+          close();
+          if (global.orbisVeil) global.orbisVeil('Opening Paystack checkout');
+          location.href = r.authorization_url;
+        }).catch(function (err) { sync(); toast(err.message, 'triangle-alert'); });
+      });
+      sync();
+    }, depositStep1);
+  }
+
+  /* ---------------------------------------------------------- money out -- */
+  function liveWithdrawPick() {
+    open('Withdraw', '<div class="modal-bd">' + (API.loading ? API.loading(3) : '') + '</div>');
+    API.get('/payment-methods').then(function (methods) {
+      var list = (methods || []).filter(function (m) { return m.kind !== 'card'; });
+      if (!list.length) {
+        open('Withdraw',
+          '<div class="modal-bd">' + API.empty({ icon: 'wallet', title: 'Add where to send it',
+            text: 'Withdrawals go to an M-Pesa number, bank account or USDT wallet in your own name.' }) + '</div>' +
+          '<div class="modal-ft"><button class="btn btn-primary btn-block" id="mAddM">Add a payment method</button></div>',
+          function (root) { root.querySelector('#mAddM').addEventListener('click', addPaymentStep1); });
+        return;
+      }
+      var html = '<div class="modal-bd stack-sm">' + list.map(function (m) {
+        var ok = m.status === 'verified';
+        return '<button class="method"' + (ok ? '' : ' disabled') + ' data-pick="' + m.id + '">' +
+          '<span class="method-ic">' + ic(SAVED[m.kind] ? SAVED[m.kind].icon : 'wallet') + '</span>' +
+          '<span style="flex:1;text-align:left"><b>' + esc(m.label) + '</b><span>' + esc(m.masked) + ' · ' +
+            (ok ? 'Usually paid the same day'
+                : (m.kind === 'mpesa' ? 'Deposit from it once to verify' : 'Being verified')) + '</span></span>' +
+          (ok ? ic('chevron-right', 'i-sm') : '<span class="tag tag-wait">Pending</span>') + '</button>';
+      }).join('') + '</div>' +
+      '<div class="modal-ft"><button class="linkish" id="mAddM">Add another method</button></div>';
+      open('Withdraw', html, function (root) {
+        root.querySelectorAll('[data-pick]').forEach(function (b) {
+          b.addEventListener('click', function () {
+            var m = list.filter(function (x) { return x.id === b.dataset.pick; })[0];
+            withdrawStep2(m.kind, m);
+          });
+        });
+        root.querySelector('#mAddM').addEventListener('click', addPaymentStep1);
+      });
+    }).catch(function (err) { close(); toast(err.message, 'triangle-alert'); });
+  }
 
   global.orbisModal = { open: open, close: close, autoResult: autoResultModal, deposit: depositStep1,
                       withdraw: withdrawStep1, refer: referModal, account: accountModal,

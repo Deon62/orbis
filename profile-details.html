@@ -22,7 +22,7 @@
 <main class="wrap page-body">
   <div class="stack" style="max-width:720px">
     <div class="card card-flat card-pad" style="padding-inline:0">
-      <form data-mock-submit="Saved">
+      <form data-mock-submit="Saved" id="profileForm">
         <div class="field">
           <label class="label" for="atn">Trader name</label>
           <input class="input" id="atn" placeholder="Your full name" autocomplete="name">
@@ -84,6 +84,34 @@
       t.querySelector('.ctry-name').textContent = me.country.name;
     }
   }).catch(function () {});
+
+  /* saving goes to the API once it is connected; the email is the sign-in
+     address, so it is shown but not edited here */
+  if (!A.connected) return;
+  var form = document.getElementById('profileForm');
+  var email = document.getElementById('aem');
+  form.removeAttribute('data-mock-submit');
+  email.readOnly = true;
+  email.title = 'Your sign-in email';
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var btn = form.querySelector('[type=submit]');
+    var t = document.querySelector('.ctry-trigger');
+    var body = {
+      name: document.getElementById('atn').value.trim() || null,
+      phone: document.getElementById('aph').value.trim(),
+      currency: document.getElementById('acur').value
+    };
+    if (t.dataset.code) { body.country_code = t.dataset.code; body.country_name = t.querySelector('.ctry-name').textContent; }
+    btn.disabled = true;
+    A.patch('/me', body).then(function (p) {
+      A.setProfile(p);
+      if (window.orbisRefreshAccount) window.orbisRefreshAccount();
+      window.orbisToast('Profile saved', 'check-circle-2');
+    }).catch(function (err) {
+      window.orbisToast(err.message, 'triangle-alert');
+    }).then(function () { btn.disabled = false; });
+  });
 })();
 </script>
 </body>

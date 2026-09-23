@@ -1,0 +1,10 @@
+# the Python API lives in its own repository and is deployed to Render,
+# so it is never committed or shipped with the UI
+backend/
+
+# local tooling
+.env
+.env.*
+node_modules/
+.DS_Store
+Thumbs.db
