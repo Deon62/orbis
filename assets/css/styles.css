@@ -2333,3 +2333,13 @@ a.contact-way:hover{ border-color:var(--line-strong); }
 .method:disabled{ opacity:.6; cursor:not-allowed; }
 .method:disabled:hover{ border-color:var(--line); }
 #mNums .method{ width:100%; }
+
+
+/* USDT: the exact amount is the thing to get right, so it is the biggest thing on the screen */
+.usdt-exact{ display:flex; align-items:baseline; gap:8px; padding:12px 14px; border:1px solid var(--line); background:var(--panel-2); }
+.usdt-exact b{ font-size:26px; font-weight:600; letter-spacing:-.02em; }
+.usdt-exact span{ font-size:13px; color:var(--ink-3); }
+.usdt-exact button{ margin-left:auto; display:inline-flex; align-items:center; gap:6px; font-size:12.5px; font-weight:600; color:var(--ink); }
+.usdt-wait{ display:flex; gap:10px; align-items:flex-start; margin-top:14px; font-size:12.5px; line-height:1.5; color:var(--ink-2); }
+.usdt-wait .btn-spin{ margin-top:3px; color:var(--brand-strong); }
+.usdt-wait b{ display:block; margin-top:2px; color:var(--ink); }

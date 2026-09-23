@@ -143,6 +143,7 @@
   /* USDT is a deposit address, not a form: we show where to send and watch
      for it. Cards never touch this site, Paystack takes them on its own page. */
   function depositCrypto() {
+    if (live()) return liveUsdtDeposit();
     var html =
       '<div class="modal-bd">' +
         '<div class="saved">' +
@@ -1362,6 +1363,100 @@
       });
       sync();
     }, depositStep1);
+  }
+
+
+  /* ------------------------------------------------------------- USDT in -- */
+  /* Everyone sends to one address, so each deposit asks for its own exact
+     amount (the cents are the fingerprint), and the backend credits it when
+     a confirmed transfer of exactly that much arrives. */
+  function liveUsdtDeposit() {
+    var html =
+      '<div class="modal-bd">' +
+        amountField(50, MIN_DEPOSIT) +
+        '<p class="hint" style="margin-top:4px">You get an exact amount to send, to the cent. ' +
+          'Sending exactly that is how your deposit is recognised and credited automatically.</p>' +
+      '</div>' +
+      '<div class="modal-ft"><button class="btn btn-primary btn-block btn-lg" id="mGo"></button></div>';
+    open('Deposit USDT', html, function (root) {
+      var amt = root.querySelector('#mAmt'), go = root.querySelector('#mGo');
+      function sync() {
+        var v = Number(amt.value) || 0, low = v < MIN_DEPOSIT;
+        root.querySelector('#mMin').classList.toggle('hint-err', low && amt.value !== '');
+        root.querySelectorAll('[data-amt]').forEach(function (c) { c.classList.toggle('active', Number(c.dataset.amt) === v); });
+        go.disabled = low;
+        go.textContent = low ? 'Minimum deposit is ' + money(MIN_DEPOSIT) : 'Get the amount to send';
+      }
+      amt.addEventListener('input', sync);
+      root.querySelectorAll('[data-amt]').forEach(function (c) {
+        c.addEventListener('click', function () { amt.value = c.dataset.amt; sync(); });
+      });
+      go.addEventListener('click', function () {
+        go.disabled = true;
+        go.innerHTML = '<span class="btn-spin"></span>Preparing';
+        API.post('/payments/deposit/usdt', { amount_usd: Number(amt.value) })
+          .then(usdtSendScreen)
+          .catch(function (err) { sync(); toast(err.message, 'triangle-alert'); });
+      });
+      sync();
+    }, depositStep1);
+  }
+
+  function usdtSendScreen(req) {
+    var html =
+      '<div class="modal-bd">' +
+        '<p class="hint" style="margin:0 0 6px">Send exactly</p>' +
+        '<div class="usdt-exact">' +
+          '<b class="mono" id="uAmt">' + esc(req.amountUsdt) + '</b><span>USDT</span>' +
+          '<button data-copy="#uAmt" aria-label="Copy amount">' + ic('copy', 'i-sm') + 'Copy</button>' +
+        '</div>' +
+        '<p class="hint" style="margin:14px 0 6px">To this address, on TRON (TRC-20)</p>' +
+        '<div class="addr"><code id="mAddr">' + esc(req.address) + '</code>' +
+          '<button data-copy="#mAddr">' + ic('copy', 'i-sm') + 'Copy address</button></div>' +
+        '<div class="qr-wrap"><canvas id="mQr" aria-label="QR code of the USDT deposit address" role="img"></canvas></div>' +
+        '<div class="note-warn">' + ic('triangle-alert', 'i-sm') +
+          '<span>Send the exact amount, cents included, on TRC-20 only. A different amount cannot be matched ' +
+          'automatically, and another network or coin cannot be recovered.</span></div>' +
+        '<div class="usdt-wait" id="uWait"><span class="btn-spin"></span>' +
+          '<span>Waiting for your transfer. It is credited about a minute after it confirms. ' +
+          '<b class="mono" id="uLeft"></b></span></div>' +
+      '</div>' +
+      '<div class="modal-ft"><button class="btn btn-ghost btn-block" data-close>Close, and credit it when it arrives</button></div>';
+
+    open('Deposit USDT', html, function (root) {
+      var cv = root.querySelector('#mQr');
+      if (cv && global.OrbisQR) {
+        var small = Math.min(innerHeight, innerWidth) < 820;
+        global.OrbisQR.render(cv, req.address, { size: small ? 118 : 140, dark: '#1C1C1C', light: '#FFFFFF' });
+      }
+    });
+
+    var box = document.getElementById('uWait');
+    function shown() { return box && document.body.contains(box) && box.offsetParent !== null; }
+    var ends = new Date(req.expiresAt).getTime();
+    var clock = setInterval(function () {
+      if (!shown()) return clearInterval(clock);
+      var left = Math.max(0, Math.round((ends - Date.now()) / 1000));
+      var el = document.getElementById('uLeft');
+      if (el) el.textContent = Math.floor(left / 60) + ':' + ('0' + left % 60).slice(-2) + ' left';
+    }, 1000);
+    var poll = setInterval(function () {
+      if (!shown()) return clearInterval(poll);
+      API.get('/payments/' + req.reference).then(function (t) {
+        if (!t || (t.state !== 'completed' && t.state !== 'failed')) return;
+        clearInterval(poll); clearInterval(clock);
+        if (t.state === 'completed') {
+          afterMoney();
+          if (global.orbisBeep) global.orbisBeep('win');
+          resultScreen('Deposit USDT', true, money(t.netUsd) + ' received', 'Your real account is ready to trade.',
+            [['Received', t.localAmount.toFixed(2) + ' USDT'], ['Credited', money(t.netUsd)],
+             ['New balance', money(t.balance)], ['Reference', t.reference]]);
+        } else {
+          resultScreen('Deposit USDT', false, 'Request closed', esc(t.failureReason || 'No matching transfer arrived.') +
+            ' If you did send it, contact support with the transaction hash.', [], liveUsdtDeposit);
+        }
+      }).catch(function () {});
+    }, 15000);
   }
 
   /* ---------------------------------------------------------- money out -- */
