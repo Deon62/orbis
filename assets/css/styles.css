@@ -1053,13 +1053,18 @@ body.app-shell.no-tabbar{ padding-bottom:0; }
 
 /* live chat */
 .chat{ border:1px solid var(--line); background:var(--panel); display:flex; flex-direction:column; max-width:640px; }
-.chat-hd{ display:flex; align-items:center; gap:11px; padding:13px 16px; border-bottom:1px solid var(--line); }
-.chat-log{ padding:16px; display:flex; flex-direction:column; gap:10px; }
-.bubble{ max-width:78%; padding:10px 13px; font-size:14px; }
+.chat-log{ padding:20px 16px; display:flex; flex-direction:column; gap:8px; }
+/* the conversation is the page, so the bubbles stay quiet: two tints of the
+   panel, told apart by side and a faint green on the reader's own */
+.bubble{ max-width:78%; padding:9px 13px; font-size:14px; line-height:1.5; border-radius:12px; }
 .bubble p{ margin:0; }
-.bubble time{ display:block; font-size:10.5px; margin-top:5px; opacity:.6; }
-.bubble-in{ align-self:flex-start; background:var(--panel-2); color:var(--ink); }
-.bubble-out{ align-self:flex-end; background:var(--ink); color:var(--bg); }
+.bubble time{ display:block; font-size:10.5px; margin-top:3px; color:var(--ink-3); }
+.bubble-in{ align-self:flex-start; background:var(--panel-2); color:var(--ink); border-bottom-left-radius:4px; }
+.bubble-out{
+  align-self:flex-end; color:var(--ink); border-bottom-right-radius:4px;
+  background:color-mix(in srgb, var(--brand) 12%, var(--panel));
+}
+.bubble-out time{ text-align:right; }
 .composer{ display:flex; gap:8px; padding:12px 16px; border-top:1px solid var(--line); }
 .composer .input{ flex:1; }
 
@@ -1347,6 +1352,22 @@ main{ animation:pageIn .18s ease both; }
 
 /* the plain top of a content page */
 .page-hero{ padding:44px 0 8px; }
+/* the academy opens on a wash of colour rather than a flat panel: soft blobs
+   of the brand green with a teal and a warm amber, blurred into each other */
+.academy-hero{
+  position:relative; overflow:hidden; isolation:isolate;
+  background:
+    radial-gradient(60% 70% at 12% 20%, color-mix(in srgb, var(--brand) 38%, transparent), transparent 70%),
+    radial-gradient(50% 60% at 88% 18%, rgba(34,184,207,.30), transparent 70%),
+    radial-gradient(55% 65% at 70% 95%, rgba(255,176,59,.26), transparent 70%),
+    radial-gradient(45% 55% at 30% 100%, rgba(124,92,255,.18), transparent 70%),
+    var(--bg);
+}
+.academy-hero::after{
+  content:""; position:absolute; inset:0; z-index:-1; pointer-events:none;
+  background:radial-gradient(40% 50% at 50% 45%, color-mix(in srgb, var(--bg) 55%, transparent), transparent 75%);
+}
+.academy-hero .wrap{ position:relative; }
 .page-hero h1{ font-size:clamp(28px,4vw,42px); }
 .page-hero .sec-lead{ margin-top:12px; }
 @media(min-width:900px){ .page-hero{ padding:64px 0 8px; } }
@@ -1424,7 +1445,6 @@ main{ animation:pageIn .18s ease both; }
 }
 .agent-sm{ width:38px; height:38px; }
 .agent-sm .agent-dot{ width:9px; height:9px; right:0; bottom:0; }
-.chat-hd{ justify-content:flex-start; }
 
 
 /* the chart tools were too small to aim at */
