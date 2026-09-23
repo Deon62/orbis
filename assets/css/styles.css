@@ -2343,3 +2343,8 @@ a.contact-way:hover{ border-color:var(--line-strong); }
 .usdt-wait{ display:flex; gap:10px; align-items:flex-start; margin-top:14px; font-size:12.5px; line-height:1.5; color:var(--ink-2); }
 .usdt-wait .btn-spin{ margin-top:3px; color:var(--brand-strong); }
 .usdt-wait b{ display:block; margin-top:2px; color:var(--ink); }
+
+
+/* the one-time code box: large, spaced digits */
+.otp-input{ font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:24px; letter-spacing:.5em; text-align:center; height:54px; }
+.auth-sub{ margin:-12px 0 18px; font-size:13.5px; line-height:1.55; color:var(--ink-2); }

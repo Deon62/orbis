@@ -409,7 +409,14 @@
         }
         go.disabled = true;
         go.innerHTML = '<span class="btn-spin"></span>Requesting';
-        API.post('/payments/withdraw', { amount_usd: v, payment_method_id: method.id }).then(function (tx) {
+        requestWithdrawal(v, null);
+      });
+      /* with withdrawal confirmation on, the first request sends a code and
+         answers 428; the code box then sends the same request with it */
+      function requestWithdrawal(v, code) {
+        var body = { amount_usd: v, payment_method_id: method.id };
+        if (code) body.otp_code = code;
+        return API.post('/payments/withdraw', body).then(function (tx) {
           afterMoney();
           /* every withdrawal is paid by the team, so every one ends here */
           resultScreen('Withdraw', true, 'Withdrawal requested',
@@ -418,11 +425,32 @@
             [['Amount', money(tx.amountUsd)], ['Fee', money(tx.feeUsd)], ['Taken from your balance', money(tx.netUsd)],
              ['Reference', tx.reference]]);
         }).catch(function (err) {
+          if (err.status === 428 && err.otp === 'withdrawal') return withdrawalCode(v, err.message);
+          if (code) throw err;
           go.disabled = false;
           sync();
           toast(err.message, 'triangle-alert');
         });
-      });
+      }
+      function withdrawalCode(v, message) {
+        open('Confirm withdrawal',
+          '<div class="modal-bd">' +
+            '<p class="hint" style="margin-top:0">' + esc(message) + '</p>' +
+            '<input class="input otp-input" id="wCode" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="••••••">' +
+          '</div>' +
+          '<div class="modal-ft"><button class="btn btn-dark btn-block btn-lg" id="wGo">Confirm withdrawal</button></div>',
+          function (r2) {
+            var input = r2.querySelector('#wCode'), wgo = r2.querySelector('#wGo');
+            input.focus();
+            input.addEventListener('input', function () { input.value = input.value.replace(/\D/g, '').slice(0, 6); });
+            wgo.addEventListener('click', function () {
+              wgo.disabled = true;
+              requestWithdrawal(v, input.value).catch(function (err) {
+                wgo.disabled = false; input.value = ''; input.focus(); toast(err.message, 'triangle-alert');
+              });
+            });
+          });
+      }
       sync();
     }, withdrawStep1);
   }

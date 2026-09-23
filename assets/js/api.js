@@ -104,7 +104,15 @@ var API_BASE = 'https://backend-xv27.onrender.com';
           try { data = text ? JSON.parse(text) : null; } catch (e) {}
           if (!r.ok) {
             var msg = data && typeof data.detail === 'string' ? data.detail : 'Something went wrong. Try again.';
-            throw ApiError(msg, r.status);
+            var err = ApiError(msg, r.status);
+            /* 428: a one-time code is owed. For signing in, that is the login
+               page's job; anything else (a withdrawal) is the caller's. */
+            err.otp = r.headers.get('X-Orbis-Otp');
+            if (r.status === 428 && err.otp === 'login' && document.body.dataset.page !== 'login') {
+              var next = location.pathname + location.search;
+              location.replace('/login?otp=1&next=' + encodeURIComponent(next));
+            }
+            throw err;
           }
           return data;
         });
@@ -122,6 +130,7 @@ var API_BASE = 'https://backend-xv27.onrender.com';
   }
   function post(path, body) { return request('POST', path, body === undefined ? {} : body); }
   function patch(path, body) { return request('PATCH', path, body); }
+  function put(path, body) { return request('PUT', path, body); }
   function del(path) { return request('DELETE', path); }
 
   /* app pages need a signed-in user once the API is connected */
@@ -190,6 +199,7 @@ var API_BASE = 'https://backend-xv27.onrender.com';
     get: get,
     post: post,
     patch: patch,
+    put: put,
     del: del,
     session: session,
     setSession: setSession,

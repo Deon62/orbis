@@ -93,12 +93,15 @@
       if (p) A.setProfile(p);
       return claimRef();
     }).then(function () { location.replace(next()); }, function (e) {
+      if (e.status === 428) return codeScreen({}, true);
       A.clearSession();
       location.replace('/login?error=' + encodeURIComponent(e.message));
     });
     return;
   }
   if (params.get('error')) say(params.get('error'), 'err');
+
+  if (params.get('otp') && A.signedIn()) return codeScreen({}, true);
 
   /* already signed in: straight through */
   if (A.signedIn()) { location.replace(next()); return; }
@@ -129,7 +132,13 @@
 
     busy(submit, true, 'Signing you in');
     A.post('/auth/login', { email: email, password: password })
-      .then(signedIn)
+      .then(function (res) {
+        if (res && res.otp_required) {
+          A.setSession(res);
+          return codeScreen(res.otp || {}, false);
+        }
+        return signedIn(res);
+      })
       .catch(function (err) { busy(submit, false); say(err.message, 'err'); });
   });
 
@@ -173,6 +182,52 @@
   }
 
   /* ------------------------------------------------------------ screens */
+  /* The code that finishes a two-factor sign-in. `sent` says where the login
+     already sent one; `sendNow` asks for one (arriving from Google, or sent
+     back here by a page). */
+  function codeScreen(sent, sendNow) {
+    card.innerHTML =
+      '<h1>Enter your code</h1>' +
+      '<p class="auth-sub" id="otpWhere">We sent a 6-digit code' + (sent.to ? ' to <b>' + esc(sent.to) + '</b>' : '') +
+        '. It expires in 10 minutes.</p>' +
+      '<form id="otpForm">' +
+        '<div class="field"><label class="label" for="otpCode">Code</label>' +
+          '<input class="input otp-input" id="otpCode" inputmode="numeric" autocomplete="one-time-code" ' +
+            'maxlength="6" placeholder="••••••" required></div>' +
+        '<button class="btn btn-primary btn-block btn-lg" type="submit">Verify and continue</button>' +
+      '</form>' +
+      '<p class="auth-foot"><button class="linkish" id="otpAgain" type="button">Send a new code</button> · ' +
+        '<button class="linkish" id="otpOut" type="button">Use another account</button></p>';
+    if (sent.error) say(sent.error, 'err');
+    var f = card.querySelector('#otpForm'), btn = f.querySelector('[type=submit]'), input = f.querySelector('#otpCode');
+    input.focus();
+    input.addEventListener('input', function () {
+      input.value = input.value.replace(/\D/g, '').slice(0, 6);
+      if (input.value.length === 6) f.requestSubmit ? f.requestSubmit() : btn.click();
+    });
+    f.addEventListener('submit', function (e) {
+      e.preventDefault();
+      quiet();
+      busy(btn, true, 'Checking');
+      A.post('/auth/2fa/verify', { code: input.value }).then(function () {
+        return A.get('/me').then(function (p) { if (p) A.setProfile(p); }).catch(function () {});
+      }).then(claimRef).then(function () { location.replace(next()); })
+        .catch(function (err) { busy(btn, false); input.value = ''; input.focus(); say(err.message, 'err'); });
+    });
+    function again() {
+      return A.post('/auth/2fa/send').then(function (r) {
+        card.querySelector('#otpWhere').innerHTML = 'We sent a 6-digit code to <b>' + esc(r.to) +
+          '</b>. It expires in 10 minutes.';
+        say('A new code is on its way.', 'ok');
+      }).catch(function (err) { say(err.message, 'err'); });
+    }
+    card.querySelector('#otpAgain').addEventListener('click', again);
+    card.querySelector('#otpOut').addEventListener('click', function () {
+      A.post('/auth/logout').catch(function () {}).then(function () { A.clearSession(); location.replace('/login'); });
+    });
+    if (sendNow) again();
+  }
+
   function checkEmail(email) {
     card.innerHTML =
       '<div class="auth-done">' +

@@ -445,6 +445,50 @@
       .then(function () { btn.disabled = false; });
   });
 
+  /* the ticket starts from the saved preferences: default stake and duration,
+     and an extra confirmation before each trade if that is switched on */
+  var prefs = {};
+  if (window.OrbisAPI && OrbisAPI.connected && OrbisAPI.signedIn()) {
+    OrbisAPI.get('/preferences').then(function (p) {
+      if (!p) return;
+      prefs = p;
+      if (!params.get('stake')) {
+        $('#stake').value = p.defaultStake;
+        document.querySelectorAll('[data-stake]').forEach(function (c) {
+          c.classList.toggle('active', Number(c.dataset.stake) === p.defaultStake);
+        });
+      }
+      if (!params.get('tf')) {
+        document.querySelectorAll('.tf button').forEach(function (b) {
+          if (b.textContent.trim() === p.defaultDuration) {
+            document.querySelectorAll('.tf button').forEach(function (x) { x.classList.remove('active'); });
+            b.classList.add('active');
+          }
+        });
+      }
+      calc();
+    }).catch(function () {});
+  }
+
+  function confirmFirst(dir, stake, go) {
+    if (!prefs.confirmTrades) return go();
+    window.orbisModal.open('Place this trade?',
+      '<div class="modal-bd">' +
+        '<div class="kv"><span>Market</span><b>' + current.sym + '</b></div>' +
+        '<div class="kv"><span>Direction</span><b>' + dir + '</b></div>' +
+        '<div class="kv"><span>Stake</span><b class="mono">' + OrbisData.money(stake) + '</b></div>' +
+        '<div class="kv"><span>Pays if right</span><b class="mono">' +
+          OrbisData.money(stake + stake * current.payout / 100) + '</b></div>' +
+      '</div>' +
+      '<div class="modal-ft" style="display:grid;grid-template-columns:1fr 1fr;gap:8px">' +
+        '<button class="btn btn-ghost" data-close>Cancel</button>' +
+        '<button class="btn btn-primary" id="cfGo">Place trade</button>' +
+      '</div>',
+      function (root) {
+        root.querySelector('#cfGo').addEventListener('click', function () { window.orbisModal.close(); go(); });
+      });
+  }
+
   var placing = false;
   document.querySelectorAll('[data-dir]').forEach(function (b) {
     b.addEventListener('click', function () {
@@ -456,6 +500,11 @@
       if (placing) return;
       var stake = Number($('#stake').value) || 0;
       if (shortBy(stake) || blocked()) { calc(); window.orbisToast(shortMsg(), 'wallet'); return; }
+      confirmFirst(b.dataset.dir, stake, function () { place(b, stake); });
+    });
+  });
+
+  function place(b, stake) {
 
       var c = { sym: current.sym, dir: b.dataset.dir, stake: stake, payout: current.payout,
                 duration: duration(), seconds: 6, entry: $('#price').textContent };
@@ -470,8 +519,7 @@
         document.querySelectorAll('[data-dir]').forEach(function (x) { x.disabled = false; });
         calc();
       }).then(function () { placing = false; });
-    });
-  });
+  }
 
   /* ------------------------------------------- signal handed over by /ai -- */
   (function applySignal() {
