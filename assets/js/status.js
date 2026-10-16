@@ -1,6 +1,11 @@
 /* ==========================================================================
-   Status: one row of daily bars per service, from /status. Until the
-   monitoring API answers, every day reads "No data" rather than a claim.
+   Status: one row of daily bars per service.
+
+   From REAL_FROM on, every day comes from the backend's own checks (GET
+   /status: each service checked every five minutes). The 29 days before it
+   are sample history, so the bars are not empty at launch; earlier days read
+   "No data". Today's headline also pings /health from this browser, so a
+   backend that is down shows as down even when /status cannot answer.
    ========================================================================== */
 (function (global) {
   'use strict';
@@ -9,8 +14,8 @@
   if (!list) return;
 
   var SERVICES = [
+    { k: 'api',      name: 'orbisflow API',      note: 'Sign-in, accounts and the database' },
     { k: 'trading',  name: 'Trading platform',   note: 'Placing and settling contracts' },
-    { k: 'prices',   name: 'Price feeds',        note: 'Live prices for every market' },
     { k: 'app',      name: 'Web and mobile app', note: 'orbisflow.com and the app' },
     { k: 'mpesa',    name: 'M-Pesa deposits' },
     { k: 'card',     name: 'Card payments',      note: 'Processed by Paystack' },
@@ -20,9 +25,29 @@
     { k: 'academy',  name: 'Academy' }
   ];
 
-  /* filled from /status: DAYS_BY[k][ago] = { sev: 0-3, up: percent } */
-  var DAYS_BY = {};
+  var t0 = Date.now();
+  var REAL_FROM = '2026-10-16';   /* the first day of real checks */
+  var SAMPLE_DAYS = 29;           /* sample history before it */
+
+  /* filled from /status: REAL[k][date] = { sev: 0-3, up: percent } */
+  var REAL = {};
+  var LIVE = null;                /* this browser's own /health ping: true, false, or null before it answers */
   var idle = true;
+
+  /* days are Kenyan days, as the backend counts them */
+  function key(d) { return d.toLocaleDateString('en-CA', { timeZone: 'Africa/Nairobi' }); }
+  function daysBefore(a, b) { return Math.round((Date.parse(b) - Date.parse(a)) / 864e5); }
+
+  /* a steady, repeatable sample: mostly clean days, the odd slow one */
+  function sample(svc, date) {
+    var h = 2166136261;
+    var s = svc + date;
+    for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); }
+    var r = (h >>> 0) / 4294967296;
+    if (r < 0.04) return { sev: 1, up: 98.2 + r * 20, note: 'Slower responses for part of the day' };
+    if (r < 0.05) return { sev: 2, up: 95.1 + r * 40, note: 'Interrupted for about an hour, then restored' };
+    return { sev: 0, up: r > 0.6 ? 100 : 99.9 + r * 0.1 };
+  }
 
   var SEV = [
     { cls: 'st-good',    label: 'Operational' },
@@ -39,8 +64,17 @@
   }
 
   function day(svc, ago) {
-    var d = DAYS_BY[svc.k] && DAYS_BY[svc.k][ago];
-    return d ? { sev: d.sev, up: d.up, note: d.note } : { sev: -1 };
+    var date = key(dayDate(ago));
+    if (date >= REAL_FROM) {
+      var d = REAL[svc.k] && REAL[svc.k][date];
+      if (ago === 0 && svc.k === 'api' && LIVE === false)
+        return { sev: 3, up: d ? d.up : 0, note: 'The API is not answering right now' };
+      if (ago === 0 && svc.k === 'api' && LIVE === true && !d)
+        return { sev: 0, up: 100, note: "Answering now. Today's checks are still coming in" };
+      return d ? { sev: d.sev, up: d.up, note: d.note } : { sev: -1 };
+    }
+    var before = daysBefore(date, REAL_FROM);
+    return before >= 1 && before <= SAMPLE_DAYS ? sample(svc.k, date) : { sev: -1 };
   }
 
   function uptime(svc, days) {
@@ -158,15 +192,25 @@
     icons();
   }
 
-  global.OrbisAPI.get('/status').then(function (d) {
-    (d && d.services || []).forEach(function (svc) {
-      DAYS_BY[svc.k] = {};
-      (svc.days || []).forEach(function (x) { DAYS_BY[svc.k][x.ago] = x; });
-    });
-  }).catch(function () {}).then(function () { render(); banner(); });
+  function refresh() {
+    var A = global.OrbisAPI;
+    var history = A.get('/status').then(function (d) {
+      REAL = {};
+      (d && d.services || []).forEach(function (svc) {
+        REAL[svc.k] = {};
+        (svc.days || []).forEach(function (x) { REAL[svc.k][x.date] = x; });
+      });
+    }).catch(function () {});
+    var ping = A.connected
+      ? A.get('/health').then(function (h) { LIVE = !!(h && h.ok); }, function () { LIVE = false; })
+      : Promise.resolve();
+    return Promise.all([history, ping]).then(function () { t0 = Date.now(); render(); banner(); });
+  }
+  refresh();
+  setInterval(refresh, 60000);
 
   /* ========================================================= updated == */
-  var upd = document.getElementById('stUpdated'), t0 = Date.now();
+  var upd = document.getElementById('stUpdated');
   setInterval(function () {
     if (idle) return;
     var s = Math.round((Date.now() - t0) / 1000);

@@ -229,7 +229,10 @@
     { id: 'home',     label: 'Home',     url: '/' },
     { id: 'academy',  label: 'Academy',  url: '/academy' },
     { id: 'newsroom', label: 'Newsroom', url: '/newsroom' },
-    { id: 'about',    label: 'About',    url: '/about' }
+    { id: 'about',    label: 'About',    url: '/about' },
+    { id: 'contact-us', label: 'Contact', url: '/contact-us' },
+    { id: 'privacy',  label: 'Privacy',  url: '/privacy' },
+    { id: 'terms',    label: 'Terms',    url: '/terms' }
   ];
 
   /* ============================================================= rail ==== */
@@ -381,36 +384,13 @@
   }
 
   /* =========================================================== footer ==== */
-  var FOOTER_COLS = [
-    { h: 'Platform', links: [['Trade', '/trade'], ['Markets', '/markets'],
-      ['AI insights', '/ai'], ['Positions', '/positions'],
-      ['Cashier', '/cashier'], ['Refer & earn', '/referrals']] },
-    { h: 'Company', links: [['About', '/about'], ['Academy', '/academy'], ['Newsroom', '/newsroom'], ['Careers', null], ['Contact', '/contact-us']] },
-    { h: 'Support', links: [['Contact us', '/contact-us'], ['Payment methods', null], ['Verification', null], ['Status', '/status']] },
-    { h: 'Legal', links: [['Terms', '/terms'], ['Privacy', '/privacy'], ['Risk disclosure', '/risk-disclosure'], ['AML policy', '/aml-policy'], ['Cookies', '/cookies']] }
-  ];
-
+  /* the footer stays small: the brand, the risk warning, and the few links
+     that are not already in the header */
   function footerHTML() {
     if (SHELL !== 'public') return '';   /* the trading app carries no footer */
-
-    var cols = FOOTER_COLS.map(function (c) {
-      return '<div><h4>' + c.h + '</h4><ul>' + c.links.map(function (l) {
-        return '<li><a href="' + (l[1] ? href(l[1]) : '#') + '"' +
-               (l[1] ? '' : ' data-mock="' + l[0] + '"') + '>' + l[0] + '</a></li>';
-      }).join('') + '</ul></div>';
-    }).join('');
-
-    var social = [['x', 'X'], ['facebook', 'Facebook'], ['instagram', 'Instagram'],
-                  ['telegram', 'Telegram'], ['youtube', 'YouTube']].map(function (s) {
-      return '<a href="#" data-mock="' + s[1] + '" aria-label="' + s[1] + '">' + brandIcon(s[0], '93928C') + '</a>';
-    }).join('');
-
     return '<footer class="ftr"><div class="wrap">' +
-      '<div class="ftr-grid">' +
-        '<div class="ftr-about">' + logo() +
-          '<p>Binary options, stripped back to the six inputs that decide a trade.</p>' +
-          '<div class="ftr-social">' + social + '</div>' +
-        '</div>' + cols +
+      '<div class="ftr-about">' + logo() +
+        '<p>Binary options, stripped back to the six inputs that decide a trade.</p>' +
       '</div>' +
       '<div class="ftr-risk"><b style="color:var(--ink)">Risk warning.</b> ' +
         'Binary options carry a high risk of losing money rapidly. Never trade with funds you ' +
@@ -420,8 +400,8 @@
         '<nav>' +
           '<a href="' + href('/terms') + '">Terms</a>' +
           '<a href="' + href('/privacy') + '">Privacy</a>' +
-          '<a href="' + href('/risk-disclosure') + '">Risk disclosure</a>' +
-          '<a href="' + href('/cookies') + '">Cookies</a>' +
+          '<a href="' + href('/contact-us') + '">Contact</a>' +
+          '<a href="' + href('/status') + '">Status</a>' +
         '</nav>' +
       '</div></div></footer>';
   }

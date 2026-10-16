@@ -622,8 +622,6 @@ table.tbl tbody tr:hover{ background:var(--panel-2); }
 
 /* ============================================================ footer === */
 .ftr{ background:var(--panel); border-top:1px solid var(--line); color:var(--ink-2); padding:44px 0 0; }
-.ftr-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:28px 20px; }
-@media(min-width:760px){ .ftr-grid{ grid-template-columns:1.6fr repeat(4,1fr); gap:34px; } }
 .ftr h4{ color:var(--ink); font-size:11px; letter-spacing:.11em; text-transform:uppercase; margin-bottom:12px; }
 .ftr li{ margin-bottom:8px; }
 .ftr a{ font-size:13.5px; color:var(--ink-2); }
@@ -1284,11 +1282,21 @@ main{ animation:pageIn .18s ease both; }
 /* ==========================================================================
    Landing page
    ========================================================================== */
-@media(min-width:900px){
-  body[data-shell="public"] .hdr-in{ position:relative; }
-  body[data-shell="public"] .hdr-nav{ position:absolute; left:50%; transform:translateX(-50%); margin:0; }
-  /* the nav is out of flow now, so the actions need pushing to the edge */
+/* seven links need room: below 1100px the public header keeps the menu
+   button; up to 1240px the links sit after the logo, tighter; wider, centred */
+@media(min-width:900px) and (max-width:1099px){
+  body[data-shell="public"] .hdr-nav{ display:none; }
+  body[data-shell="public"] .hdr .hide-desk{ display:inline-flex !important; }
+}
+@media(min-width:1100px){
+  body[data-shell="public"] .hdr-nav{ gap:18px; margin-left:28px; }
+  body[data-shell="public"] .hdr-nav a{ font-size:13.5px; }
   body[data-shell="public"] .hdr-right{ margin-left:auto; }
+}
+@media(min-width:1240px){
+  body[data-shell="public"] .hdr-in{ position:relative; }
+  body[data-shell="public"] .hdr-nav{ position:absolute; left:50%; transform:translateX(-50%); margin:0; gap:24px; }
+  body[data-shell="public"] .hdr-nav a{ font-size:14px; }
 }
 @media(max-width:899px){ .hide-mobile{ display:none !important; } }
 

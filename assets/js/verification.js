@@ -305,7 +305,7 @@
           '<h4 class="fa-q">Before we assess your answers</h4>' +
           '<label class="check" style="margin-top:6px"><input type="checkbox" data-ack>' +
             '<span>I understand that every binary contract can lose its whole stake, and that nothing on ' +
-            'orbisflow is investment advice. See the <a href="/risk-disclosure" target="_blank" rel="noopener">Risk disclosure</a>.</span></label>' +
+            'orbisflow is investment advice. See the <a href="/terms" target="_blank" rel="noopener">Terms</a>.</span></label>' +
           '<label class="check" style="margin-top:12px"><input type="checkbox" data-true>' +
             '<span>The answers I have given are true and complete.</span></label>' +
         '</div>' +

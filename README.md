@@ -72,7 +72,7 @@ Pages whose data the backend does not serve yet (trades, reports, calendar, news
 | `copy-trading`, `economic-calendar`, `market-news`, `price-alerts`, `watchlists` | Trading tools. |
 | `profit-table`, `trade-confirmations` | Reports. |
 | `help-centre`, `live-chat`, `contact` | Support. |
-| `terms`, `privacy`, `risk-disclosure` | Legal. |
+| `terms`, `privacy` | Legal. |
 
 Every link in the drawer now leads to a real page — nothing in it falls back to a
 "not wired up" toast. Group order: **Money → Account → Trading tools → Reports →
