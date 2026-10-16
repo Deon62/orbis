@@ -1052,8 +1052,15 @@ body.app-shell.no-tabbar{ padding-bottom:0; }
 .read-val{ font-size:14px; font-weight:600; white-space:nowrap; }
 
 /* live chat */
-.chat{ border:1px solid var(--line); background:var(--panel); display:flex; flex-direction:column; max-width:640px; }
-.chat-log{ padding:20px 16px; display:flex; flex-direction:column; gap:8px; }
+.chat{ display:flex; flex-direction:column; max-width:640px; margin-inline:auto; }
+/* room at the foot so the last bubble clears the floating composer */
+.chat-log{ padding:20px 0 calc(96px + env(safe-area-inset-bottom)); display:flex; flex-direction:column; gap:8px; }
+.bubble p{ white-space:pre-wrap; }
+.typing{ display:flex; gap:4px; padding:13px 14px; }
+.typing i{ width:6px; height:6px; border-radius:50%; background:var(--ink-3); animation:typing 1s infinite ease-in-out; }
+.typing i:nth-child(2){ animation-delay:.15s; }
+.typing i:nth-child(3){ animation-delay:.3s; }
+@keyframes typing{ 0%,60%,100%{ opacity:.3; transform:none; } 30%{ opacity:1; transform:translateY(-3px); } }
 /* the conversation is the page, so the bubbles stay quiet: two tints of the
    panel, told apart by side and a faint green on the reader's own */
 .bubble{ max-width:78%; padding:9px 13px; font-size:14px; line-height:1.5; border-radius:12px; }
@@ -1065,8 +1072,18 @@ body.app-shell.no-tabbar{ padding-bottom:0; }
   background:color-mix(in srgb, var(--brand) 12%, var(--panel));
 }
 .bubble-out time{ text-align:right; }
-.composer{ display:flex; gap:8px; padding:12px 16px; border-top:1px solid var(--line); }
-.composer .input{ flex:1; }
+/* the composer floats over the page, a rounded pill pinned to the bottom */
+.composer{
+  position:fixed; z-index:60; left:50%; transform:translateX(-50%);
+  bottom:calc(16px + env(safe-area-inset-bottom)); width:min(640px, calc(100% - 32px));
+  display:flex; gap:8px; padding:6px; border-radius:999px;
+  background:var(--panel); border:1px solid var(--line); box-shadow:0 8px 28px rgba(0,0,0,.12);
+}
+.composer .input{ flex:1; border:0; background:transparent; border-radius:999px; padding-inline:16px; box-shadow:none; }
+.composer .input:focus{ outline:none; box-shadow:none; }
+.composer .btn{ flex:none; width:44px; height:44px; padding:0; border-radius:50%; justify-content:center; }
+.composer .btn:disabled{ opacity:.55; }
+@media(min-width:900px){ body.app-shell .composer{ left:calc(50% + var(--rail-w) / 2); width:min(640px, calc(100% - var(--rail-w) - 40px)); } }
 
 /* legal prose */
 .prose{ max-width:68ch; }
@@ -1349,6 +1366,34 @@ main{ animation:pageIn .18s ease both; }
 @media(prefers-reduced-motion:reduce){ .rotator{ transition:none; } }
 
 .drawer-cta{ display:grid; gap:8px; padding:14px 16px; border-bottom:1px solid var(--line); }
+
+/* the signed-out phone menu: a full-screen dark sheet, the same in both themes */
+.drawer-full{
+  width:100%; border-right:0; background:var(--black); color:var(--on-black);
+  --ink:var(--on-black); --ink-2:var(--on-black-2); --line:var(--black-line);
+}
+.drawer-full .drawer-hd{ padding:18px 14px 18px 24px; }
+.drawer-full .icon-btn{ color:var(--on-black); }
+.drawer-full .icon-btn:hover{ background:var(--black-3); }
+.drawer-big{ display:flex; flex-direction:column; padding:28px 24px 0; }
+.drawer-big a{
+  padding:20px 0; border-bottom:1px solid var(--black-line);
+  font-size:30px; font-weight:400; letter-spacing:-.02em; line-height:1.15; color:var(--on-black-2);
+  transition:color .15s ease;
+}
+.drawer-big a:hover, .drawer-big a.active{ color:var(--on-black); }
+.drawer-end{
+  margin-top:auto; display:flex; flex-direction:column; align-items:center; gap:22px;
+  padding:40px 24px calc(32px + env(safe-area-inset-bottom));
+}
+.drawer-pill{
+  display:flex; align-items:center; justify-content:center; width:100%; height:56px;
+  border-radius:999px; background:var(--on-black); color:var(--black);
+  font-size:12.5px; font-weight:600; letter-spacing:.16em; text-transform:uppercase;
+}
+.drawer-pill:hover{ background:#fff; }
+.drawer-link{ font-size:11.5px; font-weight:600; letter-spacing:.2em; text-transform:uppercase; color:var(--on-black); }
+.drawer-link:hover{ color:var(--brand); }
 
 /* the plain top of a content page */
 .page-hero{ padding:44px 0 8px; }

@@ -26,7 +26,7 @@
   <div class="chat">
     <div class="chat-log" id="chatLog"></div>
     <form class="composer" id="chatForm">
-      <input class="input" placeholder="Write a message" aria-label="Message">
+      <input class="input" placeholder="Write a message" aria-label="Message" autocomplete="off" maxlength="2000">
       <button class="btn btn-primary" type="submit" aria-label="Send"><i data-lucide="send" class="i-sm"></i></button>
     </form>
   </div>
@@ -42,7 +42,7 @@
 
 <script>
 (function () {
-  var A = OrbisAPI, M = A.money;
+  var A = OrbisAPI;
 
   var log = document.getElementById('chatLog');
   var form = document.getElementById('chatForm');
@@ -52,27 +52,43 @@
   function bubble(m) {
     return '<div class="bubble ' + (m.from === 'me' ? 'bubble-out' : 'bubble-in') + '"><p>' + esc(m.text) + '</p><time>' + time(m.at) + '</time></div>';
   }
-  var greeted = false;
+  /* the assistant answers through the API (POST /support/chat); the page
+     keeps the conversation and sends the recent turns with each message */
+  var history = [];
+  var sendBtn = form.querySelector('button');
+  function down() { window.scrollTo(0, document.body.scrollHeight); }
+  function say(m) { log.insertAdjacentHTML('beforeend', bubble(m)); down(); }
 
-  A.load({
-    el: log, path: '/support/messages',
-    empty: { icon: 'message-square', title: 'How can we help?',
-      text: 'Write your question below and a member of the team will reply here. We are online 24/7.' },
-    render: function (d) { greeted = true; return d.map(bubble).join(''); }
-  });
+  say({ from: 'them', text: 'Hi, I am Orbi, the orbisflow assistant. Ask me about deposits, withdrawals, ' +
+    'verification or how trading works.' });
 
   form.addEventListener('submit', function (e) {
     e.preventDefault();
     var text = input.value.trim();
-    if (!text) return;
-    if (log.querySelector('.es')) log.innerHTML = '';
-    log.insertAdjacentHTML('beforeend', bubble({ from: 'me', text: text }));
-    if (!greeted) {
-      greeted = true;
-      log.insertAdjacentHTML('beforeend', '<p class="chat-note">Sent. The next available agent will reply here.</p>');
-    }
+    if (!text || sendBtn.disabled) return;
+    say({ from: 'me', text: text });
+    history.push({ role: 'user', content: text });
     input.value = '';
-    log.scrollTop = log.scrollHeight;
+
+    if (!A.connected) {
+      say({ from: 'them', text: 'Chat is offline right now. Email support@orbisflow.com and the team will reply.' });
+      return;
+    }
+    sendBtn.disabled = true;
+    log.insertAdjacentHTML('beforeend', '<div class="bubble bubble-in typing" aria-label="Typing"><i></i><i></i><i></i></div>');
+    down();
+    A.post('/support/chat', { messages: history.slice(-12) }).then(function (r) {
+      history.push({ role: 'assistant', content: r.reply });
+      return r.reply;
+    }, function (err) {
+      history.pop();
+      return (err && err.message) || 'Something went wrong. Try again in a moment.';
+    }).then(function (reply) {
+      var t = log.querySelector('.typing'); if (t) t.remove();
+      say({ from: 'them', text: reply });
+      sendBtn.disabled = false;
+      input.focus();
+    });
   });
 })();
 </script>

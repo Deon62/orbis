@@ -232,15 +232,6 @@
     { id: 'about',    label: 'About',    url: '/about' }
   ];
 
-  var PUBLIC_DRAWER = [
-    { h: 'Platform', items: [
-      ['Home',     'home',           '/',         'home'],
-      ['Academy',  'graduation-cap', '/academy',  'academy'],
-      ['Newsroom', 'newspaper',      '/newsroom', 'newsroom'],
-      ['About',    'building-2',     '/about',    'about']
-    ]}
-  ];
-
   /* ============================================================= rail ==== */
   function railHTML() {
     var items = NAV.map(function (n) {
@@ -302,32 +293,24 @@
       '</aside>';
   }
 
+  /* before signing in, the phone menu is a full-screen dark sheet: large
+     links between hairlines, and the account buttons at the foot */
   function publicDrawerHTML() {
-    var groups = PUBLIC_DRAWER.map(function (g) {
-      return '<div class="drawer-grp"><h4>' + g.h + '</h4>' + g.items.map(function (it) {
-        var on = ACTIVE === it[3];
-        return '<a href="' + it[2] + '"' + (on ? ' class="active" aria-current="page"' : '') + '>' +
-               ic(it[1]) + it[0] + '</a>';
-      }).join('') + '</div>';
+    var links = PUBLIC_NAV.map(function (n) {
+      var on = ACTIVE === n.id;
+      return '<a href="' + href(n.url) + '"' + (on ? ' class="active" aria-current="page"' : '') + '>' + n.label + '</a>';
     }).join('');
 
-    return '<div class="scrim" data-drawer-close hidden></div>' +
-      '<aside class="drawer" id="drawer" aria-label="Menu" aria-hidden="true">' +
+    return '<aside class="drawer drawer-full" id="drawer" aria-label="Menu" aria-hidden="true">' +
         '<div class="drawer-hd">' + logo() +
-          '<button class="icon-btn" data-drawer-close aria-label="Close menu">' + ic('x') + '</button>' +
+          '<button class="icon-btn" data-drawer-close aria-label="Close menu">' + ic('x', 'i-lg') + '</button>' +
         '</div>' +
-        '<div class="drawer-cta">' +
-          '<a class="btn btn-primary btn-block" href="/signup">Create free account</a>' +
-          '<a class="btn btn-ghost btn-block" href="/login">Log in</a>' +
-        '</div>' +
-        '<div class="drawer-scroll">' + groups + '</div>' +
-        '<div class="drawer-foot">' +
-          '<button class="drawer-act" data-theme-toggle>' +
-            '<span data-theme-icon>' + ic(currentTheme() === 'dark' ? 'sun' : 'moon') + '</span>' +
-            '<span>Dark mode</span>' +
-            '<span class="switch' + (currentTheme() === 'dark' ? ' on' : '') +
-              '" data-theme-switch role="switch" aria-checked="' + (currentTheme() === 'dark') + '"></span>' +
-          '</button>' +
+        '<nav class="drawer-big">' + links + '</nav>' +
+        '<div class="drawer-end">' +
+          (signedIn()
+            ? '<a class="drawer-pill" href="' + href('/trade') + '">Open trading</a>'
+            : '<a class="drawer-pill" href="' + href('/signup') + '">Create free account</a>' +
+              '<a class="drawer-link" href="' + href('/login') + '">Log in</a>') +
         '</div>' +
       '</aside>';
   }
