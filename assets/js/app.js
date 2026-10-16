@@ -706,5 +706,23 @@
   });
 
   window.orbisVeil = veil;
+
+  /* An action waiting on the server: the button that started it goes
+     inactive and the loader takes the screen, with what is happening
+     written under it. Returns done(), which puts both back. A navigation
+     that ends the wait simply leaves the loader up until the page goes. */
+  window.orbisBusy = function (btn, label) {
+    if (btn) { btn.disabled = true; btn.setAttribute('aria-busy', 'true'); }
+    var prev = document.documentElement.style.overflow;
+    var v = veil(label || 'Working');
+    var closed = false;
+    return function done() {
+      if (closed) return;
+      closed = true;
+      if (v.parentNode) v.remove();
+      document.documentElement.style.overflow = prev;
+      if (btn) { btn.disabled = false; btn.removeAttribute('aria-busy'); }
+    };
+  };
   window.orbisIcons = drawIcons;
 })();

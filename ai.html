@@ -138,9 +138,7 @@
 
   function scan() {
     if (btn.disabled) return;
-    btn.disabled = true;
-    btnTx.textContent = 'Scanning';
-    var svg = btn.querySelector('svg'); if (svg) svg.classList.add('spin');
+    var done = window.orbisBusy ? window.orbisBusy(btn, 'Scanning the markets') : function () {};
     grid.classList.add('scanning');
     pats.closest('.card').classList.add('scanning');
     if (!last) { grid.innerHTML = A.loading(3); pats.innerHTML = A.loading(4); }
@@ -153,9 +151,8 @@
     }).catch(function () {
       window.orbisToast('The scan did not finish. Try again.', 'triangle-alert');
     }).then(function () {
-      btn.disabled = false;
+      done();
       btnTx.textContent = last ? 'Rescan' : 'Scan';
-      var svg = btn.querySelector('svg'); if (svg) svg.classList.remove('spin');
       grid.classList.remove('scanning');
       pats.closest('.card').classList.remove('scanning');
       drawSignals(); drawPatterns(); paintAt();

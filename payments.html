@@ -61,11 +61,12 @@
   document.getElementById('pmList').addEventListener('click', function (e) {
     var b = e.target.closest('[data-remove]');
     if (!b) return;
-    b.disabled = true;
+    var done = window.orbisBusy ? window.orbisBusy(b, 'Removing it') : function () {};
     A.del('/payment-methods/' + b.dataset.remove).then(function () {
+      done();
       window.orbisToast('Payment method removed', 'check');
       load();
-    }).catch(function (err) { b.disabled = false; window.orbisToast(err.message, 'triangle-alert'); });
+    }).catch(function (err) { done(); window.orbisToast(err.message, 'triangle-alert'); });
   });
   document.addEventListener('orbis:methods', load);
   load();

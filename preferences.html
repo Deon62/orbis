@@ -76,6 +76,7 @@
 
   function money(n) { return '$' + Number(n).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 }); }
   function day(iso) { return new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }); }
+  function busy(btn, label) { return window.orbisBusy ? window.orbisBusy(btn, label) : function () {}; }
   function cache(p) { try { localStorage.setItem('orbisflow-prefs', JSON.stringify(p)); } catch (e) {} }
 
   function paint(p) {
@@ -134,9 +135,10 @@
       function (root) {
         root.querySelector('#lSave').addEventListener('click', function () {
           var d = Number(root.querySelector('#lDep').value) || null, l = Number(root.querySelector('#lLoss').value) || null;
+          var done = busy(this, 'Saving your limits');
           A.put('/preferences/limits', { deposit_daily: d, loss_daily: l }).then(function (p) {
-            paint(p); M.close(); toast('Limits saved', 'check-circle-2');
-          }).catch(function (err) { toast(err.message, 'triangle-alert'); });
+            done(); paint(p); M.close(); toast('Limits saved', 'check-circle-2');
+          }).catch(function (err) { done(); toast(err.message, 'triangle-alert'); });
         });
       });
   });
@@ -169,10 +171,10 @@
         });
         sure.addEventListener('change', sync);
         go.addEventListener('click', function () {
-          go.disabled = true;
+          var done = busy(go, 'Starting your break');
           A.post('/preferences/pause', { kind: pick[0], days: pick[1] }).then(function (p) {
-            paint(p); M.close(); toast('Your break has started', 'check-circle-2');
-          }).catch(function (err) { toast(err.message, 'triangle-alert'); sync(); });
+            done(); paint(p); M.close(); toast('Your break has started', 'check-circle-2');
+          }).catch(function (err) { done(); toast(err.message, 'triangle-alert'); sync(); });
         });
       });
   });

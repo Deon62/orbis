@@ -60,10 +60,12 @@
   }
   function quiet() { var b = card.querySelector('.auth-msg'); if (b) b.hidden = true; }
 
+  /* while the server works the button goes inactive and the loader takes
+     the screen; on success the page moves on with the loader still up */
   function busy(btn, on, label) {
     if (!btn) return;
-    if (on) { btn.dataset.label = btn.innerHTML; btn.disabled = true; btn.innerHTML = '<span class="btn-spin"></span>' + label; }
-    else { btn.disabled = false; if (btn.dataset.label) btn.innerHTML = btn.dataset.label; }
+    if (on) { btn._done = window.orbisBusy ? window.orbisBusy(btn, label) : null; }
+    else if (btn._done) { btn._done(); btn._done = null; }
   }
 
   function claimRef() {

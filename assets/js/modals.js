@@ -64,6 +64,8 @@
   }
   function esc(t) { return String(t == null ? '' : t).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
   function afterMoney() { if (global.orbisRefreshAccount) global.orbisRefreshAccount(); }
+  /* the button goes inactive and the loader shows while the server works */
+  function busy(btn, label) { return global.orbisBusy ? global.orbisBusy(btn, label) : function () {}; }
 
   /* ============================================================= shell == */
   var scrim, box;
@@ -407,16 +409,16 @@
           toast('Withdrawal of ' + (mpesa ? kes(v) : money(v)) + ' submitted for review', 'check-circle-2');
           return;
         }
-        go.disabled = true;
-        go.innerHTML = '<span class="btn-spin"></span>Requesting';
-        requestWithdrawal(v, null);
+        requestWithdrawal(v, null, go);
       });
       /* with withdrawal confirmation on, the first request sends a code and
          answers 428; the code box then sends the same request with it */
-      function requestWithdrawal(v, code) {
+      function requestWithdrawal(v, code, btn) {
         var body = { amount_usd: v, payment_method_id: method.id };
         if (code) body.otp_code = code;
+        var done = busy(btn, 'Requesting your withdrawal');
         return API.post('/payments/withdraw', body).then(function (tx) {
+          done();
           afterMoney();
           /* every withdrawal is paid by the team, so every one ends here */
           resultScreen('Withdraw', true, 'Withdrawal requested',
@@ -425,9 +427,9 @@
             [['Amount', money(tx.amountUsd)], ['Fee', money(tx.feeUsd)], ['Taken from your balance', money(tx.netUsd)],
              ['Reference', tx.reference]]);
         }).catch(function (err) {
+          done();
           if (err.status === 428 && err.otp === 'withdrawal') return withdrawalCode(v, err.message);
           if (code) throw err;
-          go.disabled = false;
           sync();
           toast(err.message, 'triangle-alert');
         });
@@ -444,9 +446,8 @@
             input.focus();
             input.addEventListener('input', function () { input.value = input.value.replace(/\D/g, '').slice(0, 6); });
             wgo.addEventListener('click', function () {
-              wgo.disabled = true;
-              requestWithdrawal(v, input.value).catch(function (err) {
-                wgo.disabled = false; input.value = ''; input.focus(); toast(err.message, 'triangle-alert');
+              requestWithdrawal(v, input.value, wgo).catch(function (err) {
+                input.value = ''; input.focus(); toast(err.message, 'triangle-alert');
               });
             });
           });
@@ -611,14 +612,15 @@
         if (m.k === 'mpesa') body.phone = value;
         if (m.k === 'bank') { body.account_number = value; body.bank_name = root.querySelector('#mBank').value.trim(); }
         if (m.k === 'usdt') body.address = value;
-        add.disabled = true;
+        var done = busy(add, 'Adding ' + m.name.toLowerCase());
         API.post('/payment-methods', body).then(function (pm) {
+          done();
           close();
           document.dispatchEvent(new CustomEvent('orbis:methods', { detail: pm }));
           toast(pm.status === 'verified' ? pm.label + ' added' :
                 m.k === 'mpesa' ? 'M-Pesa added. Your first deposit from it verifies it.'
                                 : pm.label + ' added. We verify it within a working day.', 'check-circle-2');
-        }).catch(function (err) { add.disabled = false; toast(err.message, 'triangle-alert'); });
+        }).catch(function (err) { done(); toast(err.message, 'triangle-alert'); });
       });
     }, addPaymentStep1);
   }
@@ -1287,11 +1289,11 @@
           var v = Number(amt.value) || 0;
           var body = { amount_usd: v };
           if (chosen) body.payment_method_id = chosen; else body.phone = phone.value.trim();
-          go.disabled = true;
-          go.innerHTML = '<span class="btn-spin"></span>Sending the prompt';
+          var done = busy(go, 'Sending the prompt to your phone');
           API.post('/payments/deposit/mpesa', body).then(function (tx) {
+            done();
             waitForMpesa(tx, { amount: v, methodId: chosen, phone: phone.value.trim() });
-          }).catch(function (err) { sync(); toast(err.message, 'triangle-alert'); });
+          }).catch(function (err) { done(); sync(); toast(err.message, 'triangle-alert'); });
         });
         sync();
       }, depositStep1);
@@ -1381,13 +1383,11 @@
         c.addEventListener('click', function () { amt.value = c.dataset.amt; sync(); });
       });
       go.addEventListener('click', function () {
-        go.disabled = true;
-        go.innerHTML = '<span class="btn-spin"></span>Opening checkout';
+        /* the loader stays up through the redirect to Paystack */
+        var done = busy(go, 'Opening Paystack checkout');
         API.post('/payments/deposit/card', { amount_usd: Number(amt.value) }).then(function (r) {
-          close();
-          if (global.orbisVeil) global.orbisVeil('Opening Paystack checkout');
           location.href = r.authorization_url;
-        }).catch(function (err) { sync(); toast(err.message, 'triangle-alert'); });
+        }).catch(function (err) { done(); sync(); toast(err.message, 'triangle-alert'); });
       });
       sync();
     }, depositStep1);
@@ -1420,11 +1420,10 @@
         c.addEventListener('click', function () { amt.value = c.dataset.amt; sync(); });
       });
       go.addEventListener('click', function () {
-        go.disabled = true;
-        go.innerHTML = '<span class="btn-spin"></span>Preparing';
+        var done = busy(go, 'Preparing your deposit');
         API.post('/payments/deposit/usdt', { amount_usd: Number(amt.value) })
-          .then(usdtSendScreen)
-          .catch(function (err) { sync(); toast(err.message, 'triangle-alert'); });
+          .then(function (req) { done(); usdtSendScreen(req); })
+          .catch(function (err) { done(); sync(); toast(err.message, 'triangle-alert'); });
       });
       sync();
     }, depositStep1);
@@ -1445,7 +1444,7 @@
         '<div class="note-warn">' + ic('triangle-alert', 'i-sm') +
           '<span>Send the exact amount, cents included, on TRC-20 only. A different amount cannot be matched ' +
           'automatically, and another network or coin cannot be recovered.</span></div>' +
-        '<div class="usdt-wait" id="uWait"><span class="btn-spin"></span>' +
+        '<div class="usdt-wait" id="uWait"><span class="loader loader-sm"></span>' +
           '<span>Waiting for your transfer. It is credited about a minute after it confirms. ' +
           '<b class="mono" id="uLeft"></b></span></div>' +
       '</div>' +

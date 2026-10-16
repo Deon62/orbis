@@ -214,9 +214,9 @@
 
     function submit() {
       var btn = panel.querySelector('[data-vf-submit]');
-      btn.disabled = true;
-      btn.innerHTML = '<span class="vf-spin"></span>Submitting';
+      var done = window.orbisBusy ? window.orbisBusy(btn, 'Submitting your documents') : function () {};
       setTimeout(function () {
+        done();
         var d = new Date();
         state[k] = {
           status: 'review', doc: doc.k, docName: doc.name,

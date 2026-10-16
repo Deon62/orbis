@@ -436,13 +436,12 @@
   document.addEventListener('orbis:trade-end', function (e) { closed(e.detail.contract.stake); });
 
   $('#fundReset').addEventListener('click', function () {
-    var btn = this;
-    btn.disabled = true;
+    var done = window.orbisBusy ? window.orbisBusy(this, 'Resetting your demo balance') : function () {};
     T.resetDemo().then(function (r) {
+      done();
       window.orbisToast('Demo balance reset to ' + OrbisData.money(r.balance), 'check-circle-2');
       calc();
-    }).catch(function (err) { window.orbisToast(err.message, 'triangle-alert'); })
-      .then(function () { btn.disabled = false; });
+    }).catch(function (err) { done(); window.orbisToast(err.message, 'triangle-alert'); });
   });
 
   /* the ticket starts from the saved preferences: default stake and duration,
@@ -510,11 +509,14 @@
                 duration: duration(), seconds: 6, entry: $('#price').textContent };
       placing = true;
       document.querySelectorAll('[data-dir]').forEach(function (x) { x.disabled = true; });
+      var done = window.orbisBusy ? window.orbisBusy(b, 'Placing your trade') : function () {};
       T.place(c).then(function (t) {
+        done();
         c.trade = t;
         opened(stake);
         window.orbisModal.trade(c);
       }).catch(function (err) {
+        done();
         window.orbisToast(err.message, 'triangle-alert');
         document.querySelectorAll('[data-dir]').forEach(function (x) { x.disabled = false; });
         calc();

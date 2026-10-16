@@ -2073,10 +2073,6 @@ a.contact-way:hover{ border-color:var(--line-strong); }
 .vf-done .vf-meta{ margin-top:6px; }
 
 .vf-ft{ display:flex; justify-content:flex-end; gap:8px; margin-top:14px; }
-.vf-spin{
-  width:13px; height:13px; border:2px solid rgba(255,255,255,.4); border-top-color:#fff;
-  border-radius:50%; animation:vfspin .7s linear infinite;
-}
 @keyframes vfspin{ to{ transform:rotate(360deg); } }
 
 
@@ -2305,10 +2301,6 @@ a.contact-way:hover{ border-color:var(--line-strong); }
 .auth-ok{ color:var(--ink); background:color-mix(in srgb, var(--up) 9%, transparent); border-color:var(--up); }
 .auth-ok svg{ color:var(--up); }
 .input-err{ border-color:var(--down) !important; }
-.btn-spin{
-  width:14px; height:14px; border-radius:50%; flex:none;
-  border:2px solid currentColor; border-right-color:transparent; animation:vfspin .7s linear infinite;
-}
 .auth-wait{ display:flex; flex-direction:column; align-items:center; gap:18px; padding:30px 0; color:var(--ink-2); font-size:14px; }
 .auth-done{ text-align:center; }
 .auth-done-ic{
@@ -2341,10 +2333,15 @@ a.contact-way:hover{ border-color:var(--line-strong); }
 .usdt-exact span{ font-size:13px; color:var(--ink-3); }
 .usdt-exact button{ margin-left:auto; display:inline-flex; align-items:center; gap:6px; font-size:12.5px; font-weight:600; color:var(--ink); }
 .usdt-wait{ display:flex; gap:10px; align-items:flex-start; margin-top:14px; font-size:12.5px; line-height:1.5; color:var(--ink-2); }
-.usdt-wait .btn-spin{ margin-top:3px; color:var(--brand-strong); }
 .usdt-wait b{ display:block; margin-top:2px; color:var(--ink); }
 
 
 /* the one-time code box: large, spaced digits */
 .otp-input{ font-family:'IBM Plex Mono',ui-monospace,monospace; font-size:24px; letter-spacing:.5em; text-align:center; height:54px; }
 .auth-sub{ margin:-12px 0 18px; font-size:13.5px; line-height:1.55; color:var(--ink-2); }
+
+
+/* the loader at the size of a line of text, for a wait that runs while you
+   carry on (a USDT transfer on its way) rather than one that holds the screen */
+.loader-sm{ --size:.3px; flex:none; margin-top:4px; }
+.modal .loader-sm{ --color-2: var(--panel); }
