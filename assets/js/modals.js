@@ -1291,6 +1291,9 @@
           if (chosen) body.payment_method_id = chosen; else body.phone = phone.value.trim();
           var done = busy(go, 'Sending the prompt to your phone');
           API.post('/payments/deposit/mpesa', body).then(function (tx) {
+            /* the push was refused, so the API opened Kora's checkout instead:
+               pay there, and the cashier confirms on the way back */
+            if (tx.checkoutUrl) { location.href = tx.checkoutUrl; return; }
             done();
             waitForMpesa(tx, { amount: v, methodId: chosen, phone: phone.value.trim() });
           }).catch(function (err) { done(); sync(); toast(err.message, 'triangle-alert'); });
