@@ -1,7 +1,7 @@
 # the Python API lives in its own repository and is deployed to Render,
 # so it is never committed or shipped with the UI
 backend/
-# the admin site is its own repository too (github.com/orbis4flow/admin), deployed to Vercel
+# the admin site is its own repository too (github.com/Deon62/adminobis), deployed to Vercel
 admin/
 
 # local tooling
