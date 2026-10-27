@@ -60,7 +60,7 @@
       </div>
 
       <div class="chart-foot">
-        <span><i class="dotlive"></i>Live</span>
+        <span title="obisflow generates these prices itself; they are not quotes from the real market"><i class="dotlive"></i>obisflow prices</span>
         <span>Spread <b class="mono" style="color:var(--ink)">0.8</b></span>
         <span>Payout <b class="mono brandtxt" id="footPayout">88%</b></span>
         <span style="margin-left:auto" id="clock" class="mono"></span>
@@ -355,11 +355,11 @@
   }
 
   /* ------------------------------------------------------- live prices -- */
-  /* The chart draws the server's prices, the same ones contracts settle on:
-     ten minutes of history, then the latest price every second. A market
-     the server has no live price for keeps the practice chart, and is
-     demo-only. */
-  var feed = { sym: null, base: 0, fresh: false };
+  /* The chart draws obisflow's generated prices, the same ones contracts
+     settle on: fifteen minutes of history, then every tick (two a second)
+     over a live stream. If the stream cannot be kept open, it asks for the
+     latest price every second instead. Offline, the practice chart runs. */
+  var feed = { sym: null, base: 0, fresh: false, on: false, last: 0, es: null };
   var API = window.OrbisAPI && OrbisAPI.connected ? OrbisAPI : null;
   window.orbisLiveMarket = function () { return feed.fresh; };
 
@@ -369,29 +369,50 @@
     calc();
   }
 
+  function tick(sym, t, p) {
+    if (feed.sym !== sym || !feed.on || t <= feed.last) return;
+    feed.last = t;
+    chart.push(t, p);
+    setFresh(true);
+  }
+
+  function openStream(sym) {
+    if (feed.es) { feed.es.close(); feed.es = null; }
+    if (!window.EventSource) return;
+    var es = new EventSource(API.base + '/prices/stream?symbol=' + encodeURIComponent(sym));
+    es.onmessage = function (e) {
+      try { var q = JSON.parse(e.data); tick(sym, q.t, Number(q.p)); } catch (x) {}
+    };
+    feed.es = es;
+  }
+
   function loadFeed(sym) {
-    feed.sym = sym; feed.base = 0; feed.on = false;
+    feed.sym = sym; feed.base = 0; feed.on = false; feed.last = 0;
     setFresh(false);
     if (!API) return;
-    API.get('/prices/history?symbol=' + encodeURIComponent(sym) + '&seconds=600').then(function (pts) {
+    API.get('/prices/history?symbol=' + encodeURIComponent(sym) + '&seconds=900').then(function (pts) {
       if (feed.sym !== sym || !pts || pts.length < 2) return;
       feed.base = Number(pts[0][1]);
       feed.on = true;
+      feed.last = pts[pts.length - 1][0];
       chart.live(pts.map(function (x) { return [x[0], Number(x[1])]; }), 5);
+      setFresh(true);
+      openStream(sym);
     }).catch(function () {});
   }
 
   if (API) {
+    /* the stream is the fast path; this keeps the chart moving if it drops,
+       and says the market is paused when no price has come for a while */
     setInterval(function () {
       if (document.hidden || !feed.sym) return;
       var sym = feed.sym;
+      if (!feed.on) return loadFeed(sym);
+      if (feed.es && feed.es.readyState === 1 && Date.now() / 1000 - feed.last < 3) return;
       API.get('/prices').then(function (all) {
-        if (feed.sym !== sym) return;
         var q = all && all[sym];
-        if (!q) return setFresh(false);
-        if (!feed.on) return loadFeed(sym);      /* the feed came up after the page did */
-        chart.push(q.t, Number(q.p));
-        setFresh(!!q.live);
+        if (!q || !q.live) return setFresh(false);
+        tick(sym, q.t, Number(q.p));
       }).catch(function () { setFresh(false); });
     }, 1000);
   }
