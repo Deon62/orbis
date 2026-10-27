@@ -335,7 +335,8 @@
     $('#price').textContent = p.toLocaleString('en-US', {
       minimumFractionDigits: current.dp, maximumFractionDigits: current.dp
     });
-    var pct = ((p - current.base) / current.base) * 100;
+    var base = (feed && feed.base) || current.base;
+    var pct = ((p - base) / base) * 100;
     var el = $('#chg');
     el.textContent = (pct >= 0 ? '+' : '') + pct.toFixed(2) + '%';
     el.className = pct >= 0 ? 'up' : 'down';
@@ -348,9 +349,53 @@
     $('#pickCat').textContent = OrbisData.cats[current.cat] + ' · ' + current.name;
     $('#footPayout').textContent = current.payout + '%';
     chart.reseed({ start: current.base, vol: current.vol });
+    loadFeed(current.sym);
     calc();
     window.orbisIcons();
   }
+
+  /* ------------------------------------------------------- live prices -- */
+  /* The chart draws the server's prices, the same ones contracts settle on:
+     ten minutes of history, then the latest price every second. A market
+     the server has no live price for keeps the practice chart, and is
+     demo-only. */
+  var feed = { sym: null, base: 0, fresh: false };
+  var API = window.OrbisAPI && OrbisAPI.connected ? OrbisAPI : null;
+  window.orbisLiveMarket = function () { return feed.fresh; };
+
+  function setFresh(on) {
+    if (feed.fresh === on) return;
+    feed.fresh = on;
+    calc();
+  }
+
+  function loadFeed(sym) {
+    feed.sym = sym; feed.base = 0; feed.on = false;
+    setFresh(false);
+    if (!API) return;
+    API.get('/prices/history?symbol=' + encodeURIComponent(sym) + '&seconds=600').then(function (pts) {
+      if (feed.sym !== sym || !pts || pts.length < 2) return;
+      feed.base = Number(pts[0][1]);
+      feed.on = true;
+      chart.live(pts.map(function (x) { return [x[0], Number(x[1])]; }), 5);
+    }).catch(function () {});
+  }
+
+  if (API) {
+    setInterval(function () {
+      if (document.hidden || !feed.sym) return;
+      var sym = feed.sym;
+      API.get('/prices').then(function (all) {
+        if (feed.sym !== sym) return;
+        var q = all && all[sym];
+        if (!q) return setFresh(false);
+        if (!feed.on) return loadFeed(sym);      /* the feed came up after the page did */
+        chart.push(q.t, Number(q.p));
+        setFresh(!!q.live);
+      }).catch(function () { setFresh(false); });
+    }, 1000);
+  }
+
   applyMarket(idx);
 
   /* ----------------------------------------------------------- ticket -- */
@@ -364,10 +409,10 @@
   function funds() { return window.orbisBalance ? window.orbisBalance() : Infinity; }
   function shortBy(stake) { return stake > funds(); }
   var T = window.OrbisTrading;
-  /* real money waits for server-side prices; practice runs on Demo */
+  /* real money needs a live server price for the market on screen */
   function blocked() { return !!(T && !T.canTrade()); }
   function shortMsg() {
-    if (blocked()) return 'Real-money trading is not open yet. Switch to Demo to practise.';
+    if (blocked()) return current.sym + ' is closed for real money right now. Pick another market, or switch to Demo.';
     var bal = funds();
     if (acct() === 'demo') {
       return bal <= 0 ? 'Your demo balance is ' + OrbisData.money(0) + '. Reset it to keep practising.'
@@ -398,7 +443,7 @@
       if (running) return;
       b.disabled = short;
     });
-    var why = blocked() ? 'Demo only for now' : 'Not enough balance';
+    var why = blocked() ? 'Market closed' : 'Not enough balance';
     $('#upSub').textContent = short ? why : sub;
     $('#downSub').textContent = short ? why : sub;
     if (window.orbisAutoFunds) window.orbisAutoFunds();
@@ -516,6 +561,9 @@
       T.place(c).then(function (t) {
         done();
         c.trade = t;
+        /* the server's entry price and payout are the ones that count */
+        if (t.entry) c.entry = t.entry;
+        if (t.payout) c.payout = t.payout;
         opened(stake);
         window.orbisModal.trade(c);
       }).catch(function (err) {
@@ -609,7 +657,7 @@
       var short = !guest && (shortBy(Number(stake.value) || 0) || blocked());
       run.disabled = short;
       run.innerHTML = short
-        ? '<i data-lucide="wallet" class="i-sm"></i>' + (blocked() ? 'Demo only for now'
+        ? '<i data-lucide="wallet" class="i-sm"></i>' + (blocked() ? 'Market closed for real money'
             : funds() <= 0 ? (acct() === 'demo' ? 'Reset demo to auto trade' : 'Deposit to auto trade')
             : 'Stake is more than your balance')
         : '<i data-lucide="play" class="i-sm"></i>Start auto trading';

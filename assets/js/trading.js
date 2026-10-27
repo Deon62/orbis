@@ -65,7 +65,7 @@
       return API.post('/trades/' + encodeURIComponent(t.id) + '/settle', { exit_price: String(exit) })
         .then(function (r) {
           setBalance(t.account, r.balance);
-          return { won: r.status === 'won', returned: r.returned, profit: r.profit,
+          return { won: r.status === 'won', void: r.status === 'void', returned: r.returned, profit: r.profit,
                    entry: r.entry, exit: r.exit, balance: r.balance };
         });
     }
@@ -100,9 +100,11 @@
     return Promise.resolve({ kind: 'demo', balance: 10000 });
   }
 
-  /* real money waits for server-side prices; the backend refuses it too */
+  /* real money is only staked at a price the server's feed holds right now;
+     the Trade page says whether the market on screen has one */
   function canTrade(kind) {
-    return !(live() && (kind || account()) === 'real');
+    if ((kind || account()) !== 'real' || !live()) return true;
+    return !!(global.orbisLiveMarket && global.orbisLiveMarket());
   }
 
   global.OrbisTrading = { place: place, settle: settle, sell: sell, resetDemo: resetDemo,

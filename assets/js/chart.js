@@ -1,7 +1,8 @@
 /* ==========================================================================
    obisflow, canvas candlestick chart
    Colours are read from the active theme, so light/dark just works.
-   Replace generate()/tick() with a real price feed when the backend exists.
+   With the API connected, live() loads the server's price history and push()
+   adds each new price; without it the chart runs its own random walk.
    ========================================================================== */
 (function (global) {
   'use strict';
@@ -73,7 +74,8 @@
     this._ro = new ResizeObserver(function () { self.resize(); self.draw(); });
     this._ro.observe(canvas.parentElement || canvas);
     this.draw();
-    this.start(opts.interval || 1100);
+    this._ms = opts.interval || 1100;
+    this.start(this._ms);
     instances.push(this);
   }
 
@@ -253,9 +255,43 @@
   Chart.prototype.stop = function () { clearInterval(this._t); };
 
   Chart.prototype.reseed = function (o) {
+    this.liveMode = false;
     this.vol = o.vol || this.vol;
     this.data = generate(this.count, o.start, this.vol, o.seed || Math.random() * 999);
+    this.start(this._ms);
     this.draw();
+  };
+
+  /* ------------------------------------------------------- live prices -- */
+  /* points: [[epoch seconds, price], ...] from the server, oldest first.
+     Each candle covers barSec seconds of them. */
+  Chart.prototype.live = function (points, barSec) {
+    this.stop();
+    this.liveMode = true;
+    this.barSec = barSec || 5;
+    this.data = [];
+    for (var i = 0; i < points.length; i++) this._add(points[i][0], points[i][1]);
+    this.draw();
+    var last = this.data[this.data.length - 1];
+    if (last) this.onPrice(last.c, last.c >= last.o);
+  };
+
+  Chart.prototype._add = function (t, p) {
+    var b = Math.floor(t / this.barSec), last = this.data[this.data.length - 1];
+    if (last && last.b === b) {
+      last.c = p; last.h = Math.max(last.h, p); last.l = Math.min(last.l, p);
+    } else if (!last || b > last.b) {
+      this.data.push({ b: b, o: last ? last.c : p, c: p, h: Math.max(p, last ? last.c : p), l: Math.min(p, last ? last.c : p) });
+      if (this.data.length > this.count) this.data.shift();
+    }
+  };
+
+  Chart.prototype.push = function (t, p) {
+    if (!this.liveMode) return;
+    this._add(t, p);
+    this.draw();
+    var last = this.data[this.data.length - 1];
+    this.onPrice(last.c, last.c >= last.o);
   };
 
   /* --------------------------------------------------------- sparkline -- */

@@ -781,6 +781,11 @@
   function settleModal(c, res) {
     /* res is the settled trade from the ledger; without one, the old coin flip */
     var won = res ? res.won : Math.random() < 0.5;
+    if (res && res.void) {
+      return resultScreen('Contract refunded', true, 'Contract refunded',
+        'The price feed dropped while this contract was open, so it could not be settled fairly. Your stake is back in your balance.',
+        [['Stake returned', money(res.returned)]]);
+    }
     var profit = c.stake * (c.payout / 100);
     var delta = res ? res.profit : (won ? profit : -c.stake);
     var back = res ? res.returned : (won ? c.stake + profit : 0);

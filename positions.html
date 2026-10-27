@@ -82,10 +82,11 @@
       return '<div class="tbl-scroll"><table class="tbl"><thead><tr><th>Contract</th><th>Market</th><th>Direction</th>' +
         '<th class="r">Stake</th><th class="r">Entry</th><th class="r">Exit</th><th>Result</th><th class="r">P/L</th><th class="r">Settled</th></tr></thead><tbody>' +
         d.map(function (t) {
-          var won = t.result === 'won';
+          var won = t.result === 'won', refunded = t.result === 'void';
           return '<tr><td class="mono dim">' + t.id + '</td><td><b>' + t.sym + '</b></td><td>' + t.dir + '</td>' +
-            '<td class="r mono">' + M(t.stake) + '</td><td class="r mono">' + t.entry + '</td><td class="r mono">' + t.exit + '</td>' +
-            '<td><span class="tag ' + (won ? 'tag-up' : 'tag-down') + '">' + (won ? 'Won' : 'Lost') + '</span></td>' +
+            '<td class="r mono">' + M(t.stake) + '</td><td class="r mono">' + t.entry + '</td><td class="r mono">' + (t.exit || '-') + '</td>' +
+            '<td><span class="tag ' + (refunded ? '' : won ? 'tag-up' : 'tag-down') + '">' +
+              (refunded ? 'Refunded' : won ? 'Won' : 'Lost') + '</span></td>' +
             '<td class="r">' + pl(t.pl) + '</td><td class="r dim">' + t.when + '</td></tr>';
         }).join('') + '</tbody></table></div>';
     },
