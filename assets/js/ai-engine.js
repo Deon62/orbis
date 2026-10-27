@@ -1,5 +1,5 @@
 /* ==========================================================================
-   orbisflow, AI scan stand-in
+   obisflow, AI scan stand-in
    Not a model. It plays the part of the scanning service: each scan picks
    markets from the live list, draws a direction, a confidence and a reason
    at random, and answers after a network-like pause, in exactly the shape

@@ -1,5 +1,5 @@
 /* ==========================================================================
-   orbisflow, modals
+   obisflow, modals
    Short flows (deposit, withdraw, refer) happen in place instead of on a page.
    Triggered by data-modal="deposit|withdraw|refer" anywhere in the markup.
    ========================================================================== */
@@ -27,7 +27,7 @@
   };
 
   var WITHDRAW_FEE = 1;          /* flat platform fee, charged on top of the amount */
-  var MIN_DEPOSIT = 2;
+  var MIN_DEPOSIT = 5;
   var MIN_WITHDRAW = 5;          /* what arrives, before the fee is added */
 
   /* M-Pesa moves shillings, so every M-Pesa amount is shown in KSh too.
@@ -52,7 +52,7 @@
     var a = (global.orbisAccounts || []).filter(function (x) { return x.id === 'real'; })[0];
     return a ? Number(String(a.amount).replace(/[^0-9.]/g, '')) || 0 : 0;
   }
-  var REF_LINK = 'https://orbisflow.com/r/ORBIS-4K92';
+  var REF_LINK = 'https://obisflow.com/r/ORBIS-4K92';
 
   /* with the API connected, deposits, withdrawals, methods and the referral
      link are real; offline, the flows below keep their local simulation */
@@ -246,7 +246,7 @@
         (mpesa ? '<p class="hint center" style="margin-top:10px">Approve the prompt on your phone.</p>' : '') +
         (card ? '<p class="hint center" style="margin-top:10px">' +
                   'Paystack takes the card details on its own secure page. ' +
-                  'They never reach orbisflow.</p>' : '') +
+                  'They never reach obisflow.</p>' : '') +
       '</div>';
 
     open('Deposit', html, function (root) {
@@ -458,7 +458,7 @@
 
   /* ============================================================= refer == */
   /* share targets, ready to work the moment the domain is live */
-  var SHARE_TEXT = 'I trade on orbisflow. Use my link and we both get a bonus:';
+  var SHARE_TEXT = 'I trade on obisflow. Use my link and we both get a bonus:';
 
   function shareLinks(url) {
     var t = encodeURIComponent(SHARE_TEXT);
@@ -479,7 +479,7 @@
         '<img class="brand-ic" src="https://cdn.simpleicons.org/' + x[0] + '/93928C" alt="" width="16" height="16">' +
         '</a>';
     }).join('') +
-      '<a class="share-btn" href="mailto:?subject=' + encodeURIComponent('Trade with me on orbisflow') +
+      '<a class="share-btn" href="mailto:?subject=' + encodeURIComponent('Trade with me on obisflow') +
         '&body=' + encodeURIComponent(SHARE_TEXT + ' ' + link) + '" aria-label="Share by email">' +
         ic('mail', 'i-sm') + '</a>';
 
@@ -577,7 +577,7 @@
         (m.hosted
           ? '<p class="hint" style="margin:0">A card is saved by paying with it. Paystack ' +
               'takes the details on its own secure page and hands back a token, so the ' +
-              'number never reaches orbisflow.</p>'
+              'number never reaches obisflow.</p>'
           : (m.bank ? '<div class="field">' +
               '<label class="label" for="mBank">Bank</label>' +
               '<input class="input" id="mBank" placeholder="e.g. Equity Bank">' +
@@ -934,7 +934,7 @@
 
   /* ==================================================== academy enrol == */
   /* The Academy is not the trading platform. Enrolling never touches an
-     orbisflow account: we take an email, take a payment, and send a login for
+     obisflow account: we take an email, take a payment, and send a login for
      the learning dashboard. Three steps, then a receipt. */
   var COURSES = {
     foundations:  { name: 'Foundations',  price: 19,  level: 'Beginner' },
@@ -961,7 +961,7 @@
     var c = courseOf(key);
     var rows = [
       ['graduation-cap', 'A separate learning dashboard',
-       'The Academy runs on its own site. You do not need an orbisflow trading account, and enrolling does not open one.'],
+       'The Academy runs on its own site. You do not need an obisflow trading account, and enrolling does not open one.'],
       ['mail', 'Your login arrives by email',
        'A username and password for the dashboard, sent to the address you give on the next step, within a minute of payment.'],
       ['infinity', 'Yours to keep',
@@ -1313,7 +1313,7 @@
         '<span class="pay-phone">' + ic('smartphone', 'i-lg') + '</span>' +
         '<h3>Check your phone</h3>' +
         '<p class="hint" style="max-width:32ch;margin:8px auto 0">Enter your M-Pesa PIN to approve <b>KSh ' +
-          Number(tx.localAmount).toLocaleString('en-US') + '</b> to orbisflow. Sent to ' + esc(tx.destination) + '.</p>' +
+          Number(tx.localAmount).toLocaleString('en-US') + '</b> to obisflow. Sent to ' + esc(tx.destination) + '.</p>' +
         '<p class="pay-left mono" id="mLeft">2:00</p>' +
       '</div>' +
       '<div class="modal-ft"><button class="btn btn-ghost btn-block" data-close>Close, and keep waiting in the background</button></div>';
@@ -1369,7 +1369,7 @@
       '</div>' +
       '<div class="modal-ft"><button class="btn btn-primary btn-block btn-lg" id="mGo"></button>' +
         '<p class="hint center" style="margin-top:10px">Paystack takes the card details on its own secure page. ' +
-        'They never reach orbisflow, and the card is saved for next time.</p></div>';
+        'They never reach obisflow, and the card is saved for next time.</p></div>';
     open('Deposit by card', html, function (root) {
       var amt = root.querySelector('#mAmt'), go = root.querySelector('#mGo');
       function sync() {

@@ -58,7 +58,7 @@ function collect(ICONS) {
   const out = {};
   for (const n of used) out[n] = ICONS[pascal(n)];
 
-  const body = `/* orbisflow, icon subset (${used.length} of ${Object.keys(ICONS).length} lucide icons).
+  const body = `/* obisflow, icon subset (${used.length} of ${Object.keys(ICONS).length} lucide icons).
    Regenerate with: node scripts/build-icons.js */
 (function (g) {
   var I = ${JSON.stringify(out)};

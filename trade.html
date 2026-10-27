@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Trade · orbisflow</title>
-<meta name="description" content="The orbisflow trade terminal.">
+<title>Trade · obisflow</title>
+<meta name="description" content="The obisflow trade terminal.">
 <meta name="theme-color" content="#1C1C1C">
 <link rel="icon" href="/assets/img/favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -16,7 +16,7 @@
 <link rel="stylesheet" href="/assets/css/styles.css">
 <script>(function(){try{var t=localStorage.getItem("orbisflow-theme")||(matchMedia("(prefers-color-scheme:dark)").matches?"dark":"light");document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>
 </head>
-<body data-page="trade" data-shell="app">
+<body data-page="trade" data-shell="app" data-guest>
 
 <div id="site-header"></div>
 
@@ -378,11 +378,14 @@
       : 'Stake is more than your balance of ' + OrbisData.money(bal) + '.';
   }
 
+  /* a visitor has no balance yet: the buttons stay live and lead to sign-up */
+  var guest = !!(window.orbisGuest && window.orbisGuest());
+
   function calc() {
     var stake = Number($('#stake').value) || 0;
     var payout = stake + stake * (current.payout / 100);
     var sub = current.payout + '% · ' + OrbisData.money(payout);
-    var short = shortBy(stake) || blocked();
+    var short = !guest && (shortBy(stake) || blocked());
     var note = $('#fundNote');
     note.hidden = !short;
     if (short) $('#fundTx').textContent = shortMsg();
@@ -603,7 +606,7 @@
 
     function autoFunds() {
       if (running) return;
-      var short = shortBy(Number(stake.value) || 0) || blocked();
+      var short = !guest && (shortBy(Number(stake.value) || 0) || blocked());
       run.disabled = short;
       run.innerHTML = short
         ? '<i data-lucide="wallet" class="i-sm"></i>' + (blocked() ? 'Demo only for now'

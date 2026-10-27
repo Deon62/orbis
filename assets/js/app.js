@@ -1,5 +1,5 @@
 /* ==========================================================================
-   orbisflow, shared shell
+   obisflow, shared shell
      shell="app"    → icon rail (desktop) + drawer & 6-tab bar (mobile),
                       edge-to-edge, no footer
      shell="public" → marketing header + footer
@@ -28,8 +28,8 @@
 
   /* the mark is a wordmark, so it is type, not an image */
   function logo(cls) {
-    return '<a class="logo ' + (cls || '') + '" href="' + href(SHELL === 'app' ? '/trade' : '/') +
-           '" aria-label="orbisflow"><span class="logo-word">orbis<span class="flow">flow</span></span></a>';
+    return '<a class="logo ' + (cls || '') + '" href="' + href('/trade') +
+           '" aria-label="obisflow"><span class="logo-word">obis<span class="flow">flow</span></span></a>';
   }
 
   /* ============================================================= sound === */
@@ -109,7 +109,10 @@
     { id: 'demo', label: 'Demo account', short: 'Demo', amount: '$10,000.00', icon: 'flask-conical' },
     { id: 'real', label: 'Real account', short: 'Real', amount: '$0.00',      icon: 'wallet' }
   ];
-  var activeAccount = 'demo';
+  /* Real is where everyone starts; switching to Demo is remembered */
+  var ACCOUNT_KEY = 'obisflow-account';
+  var activeAccount = 'real';
+  try { if (localStorage.getItem(ACCOUNT_KEY) === 'demo') activeAccount = 'demo'; } catch (e) {}
   /* the account card belongs where money is at stake */
   var ACCOUNT_PAGES = ['trade', 'markets', 'positions'];
 
@@ -123,6 +126,7 @@
 
   function setAccount(id) {
     activeAccount = id;
+    try { localStorage.setItem(ACCOUNT_KEY, id); } catch (e) {}
     var host = document.querySelector('.hdr-right');
     if (host) {
       var old = host.querySelector('.acct-card');
@@ -224,9 +228,10 @@
   ];
 
   /* Only pages that actually run the public shell belong here. Everything else
-     lives inside the trading app and would drop a visitor into it sideways. */
+     lives inside the trading app and would drop a visitor into it sideways.
+     Trade is the exception: the terminal is open to visitors. */
   var PUBLIC_NAV = [
-    { id: 'home',     label: 'Home',     url: '/' },
+    { id: 'trade',    label: 'Trade',    url: '/trade' },
     { id: 'academy',  label: 'Academy',  url: '/academy' },
     { id: 'newsroom', label: 'Newsroom', url: '/newsroom' },
     { id: 'about',    label: 'About',    url: '/about' },
@@ -243,7 +248,7 @@
     }).join('');
 
     return '<nav class="rail" aria-label="Sections">' +
-      '<a class="rail-logo" href="' + href('/trade') + '" aria-label="orbisflow">' +
+      '<a class="rail-logo" href="' + href('/trade') + '" aria-label="obisflow">' +
         '<span class="logo-word"><span class="flow">of</span></span></a>' +
       '<div class="rail-items">' + items + '</div>' +
       '<div class="rail-foot">' +
@@ -251,7 +256,9 @@
         '<button class="rail-item" data-theme-toggle title="Theme">' +
           '<span data-theme-icon>' + ic(currentTheme() === 'dark' ? 'sun' : 'moon', 'i-lg') + '</span>' +
           '<span>Theme</span></button>' +
-        '<a class="rail-item rail-item-danger" href="' + href('/') + '" title="Log out" data-logout>' + ic('log-out', 'i-lg') + '<span>Log out</span></a>' +
+        (GUEST
+          ? '<a class="rail-item" href="' + href('/login') + '" title="Log in">' + ic('log-in', 'i-lg') + '<span>Log in</span></a>'
+          : '<a class="rail-item rail-item-danger" href="' + href('/trade') + '" title="Log out" data-logout>' + ic('log-out', 'i-lg') + '<span>Log out</span></a>') +
       '</div></nav>';
   }
 
@@ -272,10 +279,14 @@
         '<div class="drawer-hd">' + logo() +
           '<button class="icon-btn" data-drawer-close aria-label="Close menu">' + ic('x') + '</button>' +
         '</div>' +
-        '<a class="drawer-acct" href="/profile-details">' +
-          '<span class="avatar" data-me-initials>' + ic('user-round', 'i-sm') + '</span>' +
-          '<div><b data-me-name>Your account</b><span data-me-email>Demo · $10,000.00</span></div>' +
-        '</a>' +
+        (GUEST
+          ? '<a class="drawer-acct" href="' + SIGNUP + '">' +
+              '<span class="avatar">' + ic('user-round-plus', 'i-sm') + '</span>' +
+              '<div><b>Create your account</b><span>Free, and ready to trade in a minute</span></div></a>'
+          : '<a class="drawer-acct" href="/profile-details">' +
+              '<span class="avatar" data-me-initials>' + ic('user-round', 'i-sm') + '</span>' +
+              '<div><b data-me-name>Your account</b><span data-me-email></span></div>' +
+            '</a>') +
         '<div class="drawer-scroll">' + groups + '</div>' +
         /* pinned, so log out and the theme switch never need scrolling to */
         '<div class="drawer-foot">' +
@@ -291,7 +302,9 @@
             '<span class="switch' + (currentTheme() === 'dark' ? ' on' : '') +
               '" data-theme-switch role="switch" aria-checked="' + (currentTheme() === 'dark') + '"></span>' +
           '</button>' +
-          '<a class="drawer-act drawer-act-danger" href="' + href('/') + '" data-logout>' + ic('log-out') + '<span>Log out</span></a>' +
+          (GUEST
+            ? '<a class="drawer-act" href="' + href('/login') + '">' + ic('log-in') + '<span>Log in</span></a>'
+            : '<a class="drawer-act drawer-act-danger" href="' + href('/trade') + '" data-logout>' + ic('log-out') + '<span>Log out</span></a>') +
         '</div>' +
       '</aside>';
   }
@@ -319,6 +332,14 @@
   }
 
   function signedIn() { return !!(window.OrbisAPI && OrbisAPI.connected && OrbisAPI.signedIn()); }
+
+  /* the trading terminal is open to visitors: they can watch the chart and
+     build a ticket, and trading, depositing or switching accounts asks them
+     to create one first */
+  var GUEST = SHELL === 'app' && BODY.hasAttribute('data-guest') &&
+              !!(window.OrbisAPI && OrbisAPI.connected) && !signedIn();
+  window.orbisGuest = function () { return GUEST; };
+  var SIGNUP = '/signup?next=' + encodeURIComponent(location.pathname + location.search);
 
   /* =========================================================== header ==== */
   function headerHTML() {
@@ -354,7 +375,10 @@
     return '<header class="hdr"><div class="hdr-in">' + lead +
       '<span class="hdr-page' + (full ? '' : ' hdr-page-always') + '">' + title + '</span>' +
       '<div class="hdr-right">' +
-        (full ? accountCardHTML() : '') +
+        (full && GUEST
+          ? '<a class="btn btn-quiet btn-sm hide-mobile" href="' + href('/login') + '">Log in</a>' +
+            '<a class="btn btn-primary btn-sm" href="' + SIGNUP + '">Create account</a>'
+          : full ? accountCardHTML() : '') +
         (BODY.dataset.hdrAction
           ? '<button class="icon-btn" data-modal="' + BODY.dataset.hdrAction + '" aria-label="' +
             (BODY.dataset.hdrLabel || 'Details') + '">' + ic(BODY.dataset.hdrIcon || 'info') + '</button>'
@@ -371,7 +395,7 @@
             '</span>'
           : '') +
         /* deposit only where money is actually at stake */
-        (full ? '<button class="hdr-deposit" data-modal="deposit" aria-label="Deposit">' +
+        (full && !GUEST ? '<button class="hdr-deposit" data-modal="deposit" aria-label="Deposit">' +
                   ic('arrow-down-to-line') + '</button>' : '') +
       '</div></div></header>';
   }
@@ -384,25 +408,35 @@
   }
 
   /* =========================================================== footer ==== */
-  /* the footer stays small: the brand, the risk warning, and the few links
-     that are not already in the header */
+  /* the footer stays small: the brand, a way into the terminal, the few
+     links that are not already in the header, and the risk warning. Most
+     visitors are on phones, so the links are thumb-sized tiles there and a
+     plain row on desktop. */
+  var FOOTER_LINKS = [
+    ['Terms',   'file-text',      '/terms'],
+    ['Privacy', 'shield',         '/privacy'],
+    ['Contact', 'mail',           '/contact-us'],
+    ['Status',  'activity',       '/status']
+  ];
   function footerHTML() {
     if (SHELL !== 'public') return '';   /* the trading app carries no footer */
     return '<footer class="ftr"><div class="wrap">' +
-      '<div class="ftr-about">' + logo() +
-        '<p>Binary options, stripped back to the six inputs that decide a trade.</p>' +
+      '<div class="ftr-top">' +
+        '<div class="ftr-about">' + logo() +
+          '<p>Binary options, stripped back to the six inputs that decide a trade.</p>' +
+        '</div>' +
+        '<a class="btn btn-primary ftr-cta" href="' + href(signedIn() ? '/trade' : '/signup') + '">' +
+          (signedIn() ? 'Open trading' : 'Create free account') + ic('arrow-right', 'i-sm') + '</a>' +
       '</div>' +
-      '<div class="ftr-risk"><b style="color:var(--ink)">Risk warning.</b> ' +
+      '<nav class="ftr-links" aria-label="Footer">' + FOOTER_LINKS.map(function (l) {
+        return '<a href="' + href(l[2]) + '">' + ic(l[1], 'i-sm') + '<span>' + l[0] + '</span></a>';
+      }).join('') + '</nav>' +
+      '<p class="ftr-risk">' + ic('triangle-alert', 'i-sm') + '<span><b>Risk warning.</b> ' +
         'Binary options carry a high risk of losing money rapidly. Never trade with funds you ' +
-        'cannot afford to lose.</div>' +
+        'cannot afford to lose.</span></p>' +
       '<div class="ftr-bottom">' +
-        '<span>&copy; ' + new Date().getFullYear() + ' orbisflow Markets Ltd.</span>' +
-        '<nav>' +
-          '<a href="' + href('/terms') + '">Terms</a>' +
-          '<a href="' + href('/privacy') + '">Privacy</a>' +
-          '<a href="' + href('/contact-us') + '">Contact</a>' +
-          '<a href="' + href('/status') + '">Status</a>' +
-        '</nav>' +
+        '<span>&copy; ' + new Date().getFullYear() + ' obisflow Markets Ltd. · Nairobi</span>' +
+        '<a href="mailto:support@obisflow.com">support@obisflow.com</a>' +
       '</div></div></footer>';
   }
 
@@ -453,6 +487,20 @@
   }
 
   /* ================================================== global handlers ==== */
+  /* a visitor who goes to trade, deposit or switch account signs up first;
+     capture, so this runs before the page's own handlers */
+  if (GUEST) {
+    document.addEventListener('click', function (e) {
+      var t = e.target.closest('[data-dir], #aRun, [data-modal="deposit"], [data-modal="withdraw"], ' +
+                               '[data-modal="account"], [data-modal="refer"]');
+      if (!t) return;
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      veil('Create your account to trade');
+      window.location.href = SIGNUP;
+    }, true);
+  }
+
   document.addEventListener('click', function (e) {
     if (e.target.closest('[data-theme-toggle]')) {
       setTheme(currentTheme() === 'dark' ? 'light' : 'dark');
@@ -474,7 +522,7 @@
       veil('Signing you out');
       OrbisAPI.post('/auth/logout').catch(function () {}).then(function () {
         OrbisAPI.clearSession();
-        window.location.href = '/';
+        window.location.href = '/trade';
       });
       return;
     }

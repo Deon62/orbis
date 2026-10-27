@@ -23,7 +23,7 @@ const OUT = path.resolve(__dirname, '../assets/pdf');
 
 const COURSES = [
   {
-    file: 'orbisflow-foundations-intro',
+    file: 'obisflow-foundations-intro',
     course: 'Foundations',
     title: 'Your first ten trades',
     lead: 'What a binary contract is, what decides the payout, and how to spend your first ten trades on demo without learning the wrong lesson.',
@@ -39,7 +39,7 @@ const COURSES = [
     ]
   },
   {
-    file: 'orbisflow-practitioner-intro',
+    file: 'obisflow-practitioner-intro',
     course: 'Practitioner',
     title: 'The risk sheet',
     lead: 'Position sizing is the only part of trading you fully control. This is the arithmetic that decides whether a run of losses is a bad week or the end of the account.',
@@ -55,7 +55,7 @@ const COURSES = [
     ]
   },
   {
-    file: 'orbisflow-professional-intro',
+    file: 'obisflow-professional-intro',
     course: 'Professional',
     title: 'Building a trading system',
     lead: 'A system is a set of rules you can test, follow and improve without renegotiating them mid-session. This is how one gets built, and how you know when it is finished.',
@@ -93,15 +93,15 @@ const page = c => `<!doctype html><html><head><meta charset="utf-8"><style>
   .end b{ display:block; margin-bottom:3px; font-size:10pt; }
   .end span{ font-size:9.5pt; color:#3D3C37; }
 </style></head><body>
-  <div class="brand"><span class="word">orbis<i>flow</i></span>
+  <div class="brand"><span class="word">obis<i>flow</i></span>
     <span class="kicker">${c.course} &middot; free introduction</span></div>
   <h1>${c.title}</h1>
   <p class="lead">${c.lead}</p>
   ${c.sections.map(s => `<h2>${s[0]}</h2><p>${s[1]}</p>`).join('')}
   <div class="end"><b>This is the introduction, not the course.</b>
     <span>The full ${c.course} course carries the lessons, the worked examples and the
-    templates referenced here. It is on the Academy page at orbisflow.com/academy.</span></div>
-  <div class="foot"><span>orbisflow Academy &middot; ${c.course}</span><span>orbisflow.com/academy</span></div>
+    templates referenced here. It is on the Academy page at obisflow.com/academy.</span></div>
+  <div class="foot"><span>obisflow Academy &middot; ${c.course}</span><span>obisflow.com/academy</span></div>
 </body></html>`;
 
 (async () => {

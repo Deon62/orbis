@@ -1,5 +1,5 @@
 /* ==========================================================================
-   orbisflow, minimal QR encoder (byte mode, error correction level M).
+   obisflow, minimal QR encoder (byte mode, error correction level M).
    Versions 1 to 6, which covers any referral URL we issue, and stops short of
    the version-information blocks that versions 7 and up require.
    Renders straight to a canvas: OrbisQR.render(canvas, text).

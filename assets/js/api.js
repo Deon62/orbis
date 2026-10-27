@@ -1,9 +1,9 @@
 /* ==========================================================================
-   orbisflow, data layer
+   obisflow, data layer
    Every page that shows account data asks through here.
 
    ┌──────────────────────────────────────────────────────────────────────┐
-   │ API_BASE: the address of the orbisflow API (the backend on Render). │
+   │ API_BASE: the address of the obisflow API (the backend on Render). │
    │ Empty = offline: pages show their empty states and the auth forms   │
    │ and payments run their local simulation.                            │
    └──────────────────────────────────────────────────────────────────────┘ */
@@ -89,12 +89,12 @@ var API_BASE = 'https://backend-xv27.onrender.com';
     if (s && s.access_token) headers.Authorization = 'Bearer ' + s.access_token;
 
     return fetch(BASE + path, { method: method, headers: headers, body: body !== undefined ? JSON.stringify(body) : undefined })
-      .catch(function () { throw ApiError('Could not reach orbisflow. Check your connection.', 0); })
+      .catch(function () { throw ApiError('Could not reach obisflow. Check your connection.', 0); })
       .then(function (r) {
         if (r.status === 401 && s && s.refresh_token && !retried && path.indexOf('/auth/') !== 0) {
           return refresh().then(function () { return request(method, path, body, true); }, function (err) {
             clearSession();
-            if (document.body.dataset.shell === 'app') toLogin();
+            if (document.body.dataset.shell === 'app' && !document.body.hasAttribute('data-guest')) toLogin();
             throw err;
           });
         }
@@ -133,8 +133,10 @@ var API_BASE = 'https://backend-xv27.onrender.com';
   function put(path, body) { return request('PUT', path, body); }
   function del(path) { return request('DELETE', path); }
 
-  /* app pages need a signed-in user once the API is connected */
-  if (BASE && document.body && document.body.dataset.shell === 'app' && !session()) toLogin();
+  /* app pages need a signed-in user once the API is connected; a page marked
+     data-guest (the trading terminal) is open to visitors as well */
+  if (BASE && document.body && document.body.dataset.shell === 'app' && !session() &&
+      !document.body.hasAttribute('data-guest')) toLogin();
 
   function isEmpty(d) {
     if (d == null) return true;

@@ -1,4 +1,4 @@
-# orbisflow — binary trading platform (design prototype)
+# obisflow — binary trading platform (design prototype)
 
 A deliberately simple Deriv alternative: pick a market, pick a direction, set stake and
 duration, done. Static HTML/CSS/JS — no build step, no dependencies to install.
@@ -34,7 +34,7 @@ The UI runs in two modes, switched by one line at the top of `assets/js/api.js`:
 
 ```js
 var API_BASE = '';                                   // offline: local simulation, empty states
-var API_BASE = 'https://orbisflow-api.onrender.com'; // live
+var API_BASE = 'https://obisflow-api.onrender.com'; // live
 ```
 
 Live, these talk to the API:
@@ -137,7 +137,7 @@ what enrolment actually gets you, the email the login is sent to (validated, the
 stays disabled until it parses), the payment method, then the receipt. Card goes to
 Paystack and USDT reuses the TRC-20 address with its QR. The page says the same thing
 above the cards, because someone who never opens the modal still needs to know that
-paying here does not open an orbisflow account.
+paying here does not open an obisflow account.
 
 On a phone each course card owns a screen (`min-height:calc(100svh - var(--nav-h))`,
 with `scroll-margin-top` for the sticky header) so the three are compared one at a
@@ -365,7 +365,7 @@ stay reachable while you scroll the ticket; the page reserves the space with
 ## Assets
 
 - The logo is a **wordmark**, so it is set in type (Poppins 700) rather than shipped as
-  an image: `orbis` + `flow` with a green underline, matching `logo.png`. The desktop
+  an image: `obis` + `flow` with a green underline, matching `logo.png`. The desktop
   rail uses an `of` monogram. `favicon.svg` is the same motif drawn as shapes.
 - `assets/img/skyline.svg` / `skyline-ink.svg` — the Manhattan silhouette behind the
   charts (Empire State, Chrysler, One WTC, with the low-rise gap between Midtown and

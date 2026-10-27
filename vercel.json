@@ -3,6 +3,16 @@
   "cleanUrls": true,
   "trailingSlash": false,
   "rewrites": [
-    { "source": "/r/:code", "destination": "/signup?ref=:code" }
+    {
+      "source": "/r/:code",
+      "destination": "/signup?ref=:code"
+    }
+  ],
+  "redirects": [
+    {
+      "source": "/",
+      "destination": "/trade",
+      "permanent": false
+    }
   ]
 }

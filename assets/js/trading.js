@@ -1,5 +1,5 @@
 /* ==========================================================================
-   orbisflow, placing and settling contracts
+   obisflow, placing and settling contracts
    One place the Trade page goes through for money. With the API connected
    the backend holds the balance: placing takes the stake, settling pays back
    what the contract returned, selling back pays 75% of the stake. Offline,

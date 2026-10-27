@@ -1,5 +1,5 @@
 /* ==========================================================================
-   orbisflow, sign-up and log-in against the API
+   obisflow, sign-up and log-in against the API
    Offline (no API_BASE), the forms keep their local simulation.
 
    Supabase sends people back to /login with the session in the URL
@@ -120,9 +120,11 @@
 
     if (page === 'signup') {
       if (password.length < 8) return say('Use at least 8 characters for your password.', 'err');
+      var phone = form.querySelector('#phone').value.trim();
+      if (phone.replace(/\D/g, '').length < 9) return say('Enter your mobile number, e.g. 0712 345 678.', 'err');
       busy(submit, true, 'Creating your account');
       A.post('/auth/signup', {
-        name: form.querySelector('#tn').value.trim(), email: email, password: password,
+        name: form.querySelector('#tn').value.trim(), email: email, password: password, phone: phone,
         referral_code: (refInput && refInput.value.trim()) || null
       }).then(function (res) {
         if (res && res.confirm_email) return checkEmail(res.email || email);

@@ -1,5 +1,5 @@
 /* ==========================================================================
-   orbisflow, design tokens
+   obisflow, design tokens
    Flat single-surface UI (no shouting cards), light + dark themes,
    square corners everywhere except avatars and asset badges.
    ========================================================================== */
@@ -621,18 +621,42 @@ table.tbl tbody tr:hover{ background:var(--panel-2); }
 .empty p{ font-size:13.5px; max-width:40ch; margin-inline:auto; }
 
 /* ============================================================ footer === */
-.ftr{ background:var(--panel); border-top:1px solid var(--line); color:var(--ink-2); padding:44px 0 0; }
-.ftr h4{ color:var(--ink); font-size:11px; letter-spacing:.11em; text-transform:uppercase; margin-bottom:12px; }
-.ftr li{ margin-bottom:8px; }
-.ftr a{ font-size:13.5px; color:var(--ink-2); }
+/* phones first: brand, a full-width call to action, the links as a 2x2 grid
+   of 48px tiles, then the warning and the small print, clear of the home bar */
+.ftr{ background:var(--panel); border-top:1px solid var(--line); color:var(--ink-2); padding:32px 0 0; }
+.ftr a{ color:var(--ink-2); }
 .ftr a:hover{ color:var(--ink); }
-.ftr-about p{ font-size:13.5px; margin:12px 0 16px; max-width:36ch; }
+.ftr-top{ display:flex; flex-direction:column; gap:18px; }
+.ftr-about p{ font-size:14px; line-height:1.55; margin:10px 0 0; max-width:36ch; }
+.ftr .ftr-cta{ color:#fff; width:100%; justify-content:center; gap:8px; min-height:48px; font-size:15px; }
+.ftr .ftr-cta:hover{ color:#fff; }
+.ftr-links{ display:grid; grid-template-columns:1fr 1fr; gap:1px; margin-top:24px;
+  background:var(--line); border:1px solid var(--line); }
+.ftr-links a{ display:flex; align-items:center; gap:10px; min-height:48px; padding:0 14px;
+  background:var(--panel); font-size:14px; font-weight:500; color:var(--ink); }
+.ftr-links a .i-sm{ color:var(--ink-3); }
+.ftr-links a:active{ background:var(--line); }
+.ftr-risk{ display:flex; gap:10px; align-items:flex-start; margin:20px 0 0; padding:14px;
+  background:var(--bg); border:1px solid var(--line); font-size:12.5px; line-height:1.6; color:var(--ink-3); }
+.ftr-risk .i-sm{ flex:none; margin-top:2px; color:var(--ink-2); }
+.ftr-risk b{ color:var(--ink); }
+.ftr-bottom{ display:flex; flex-direction:column; align-items:center; gap:6px; text-align:center;
+  padding:20px 0 calc(24px + env(safe-area-inset-bottom)); font-size:12.5px; color:var(--ink-3); }
+.ftr-bottom a{ font-size:12.5px; }
+@media(min-width:900px){
+  .ftr{ padding-top:44px; }
+  .ftr-top{ flex-direction:row; align-items:flex-end; justify-content:space-between; gap:24px; }
+  .ftr .ftr-cta{ width:auto; min-height:0; font-size:14px; }
+  .ftr-links{ display:flex; gap:24px; background:none; border:0; border-top:1px solid var(--line);
+    margin-top:32px; padding-top:16px; }
+  .ftr-links a{ min-height:0; padding:0; background:none; font-size:13.5px; color:var(--ink-2); }
+  .ftr-links a:hover{ color:var(--ink); }
+  .ftr-risk{ background:none; border:0; border-top:1px solid var(--line); padding:16px 0; margin-top:16px; font-size:12px; }
+  .ftr-bottom{ flex-direction:row; justify-content:space-between; border-top:1px solid var(--line); padding:14px 0 24px; }
+}
 .ftr-social{ display:flex; gap:8px; }
 .ftr-social a{ width:34px; height:34px; border:1px solid var(--line); display:grid; place-items:center; }
 .ftr-social a:hover{ border-color:var(--line-strong); }
-.ftr-risk{ margin-top:36px; padding:16px 0; border-top:1px solid var(--line); font-size:12px; line-height:1.7; color:var(--ink-3); }
-.ftr-bottom{ border-top:1px solid var(--line); padding:14px 0 24px; display:flex; flex-wrap:wrap; gap:8px 18px; align-items:center; font-size:12.5px; }
-.ftr-bottom nav{ display:flex; gap:16px; flex-wrap:wrap; margin-left:auto; }
 
 /* brand marks pulled from Simple Icons */
 .brand-ic{ width:16px; height:16px; flex:none; opacity:.85; }

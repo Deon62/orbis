@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Live chat · orbisflow</title>
+<title>Live chat · obisflow</title>
 <meta name="description" content="Talk to support.">
 <meta name="theme-color" content="#1C1C1C">
 <link rel="icon" href="/assets/img/favicon.svg">
@@ -59,7 +59,7 @@
   function down() { window.scrollTo(0, document.body.scrollHeight); }
   function say(m) { log.insertAdjacentHTML('beforeend', bubble(m)); down(); }
 
-  say({ from: 'them', text: 'Hi, I am Orbi, the orbisflow assistant. Ask me about deposits, withdrawals, ' +
+  say({ from: 'them', text: 'Hi, I am Orbi, the obisflow assistant. Ask me about deposits, withdrawals, ' +
     'verification or how trading works.' });
 
   form.addEventListener('submit', function (e) {
@@ -71,7 +71,7 @@
     input.value = '';
 
     if (!A.connected) {
-      say({ from: 'them', text: 'Chat is offline right now. Email support@orbisflow.com and the team will reply.' });
+      say({ from: 'them', text: 'Chat is offline right now. Email support@obisflow.com and the team will reply.' });
       return;
     }
     sendBtn.disabled = true;

@@ -76,8 +76,8 @@
     }
     function rule(y, w) { ops.push('0.85 G ' + (w || 0.6) + ' w 56 ' + y + ' m 539 ' + y + ' l S'); }
 
-    text(56, 780, 'orbisflow', 'F2', 20);
-    text(56, 762, 'orbisflow Markets Ltd - Nairobi, Kenya', 'F1', 9, 0.45);
+    text(56, 780, 'obisflow', 'F2', 20);
+    text(56, 762, 'obisflow Markets Ltd - Nairobi, Kenya', 'F1', 9, 0.45);
     text(360, 780, 'TRADE CONFIRMATION', 'F2', 11);
     text(360, 764, 'Contract ' + t.id, 'F1', 10, 0.35);
     rule(740, 1);
@@ -112,13 +112,13 @@
     var foot = [
       'This confirmation records a contract settled automatically at expiry against the published',
       'settlement price. Keep it for your records. If anything here looks wrong, contact',
-      'support@orbisflow.com within 30 days quoting the contract ID.',
+      'support@obisflow.com within 30 days quoting the contract ID.',
       '',
       'Binary options carry a high risk of losing money rapidly. Nothing here is investment advice.'
     ];
     y -= 26;
     foot.forEach(function (l) { if (l) text(56, y, l, 'F1', 8.5, 0.45); y -= 13; });
-    text(56, 48, 'orbisflow.com', 'F1', 8, 0.55);
+    text(56, 48, 'obisflow.com', 'F1', 8, 0.55);
     text(470, 48, 'Page 1 of 1', 'F1', 8, 0.55);
     return ops.join('\n');
   }
@@ -131,7 +131,7 @@
     objs[0] = '<< /Type /Catalog /Pages 2 0 R >>';
     objs[2] = '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>';
     objs[3] = '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>';
-    objs[4] = '<< /Producer (orbisflow) /Title (Trade confirmation) >>';
+    objs[4] = '<< /Producer (obisflow) /Title (Trade confirmation) >>';
     trades.forEach(function (t, i) {
       var pid = 6 + i * 2, cid = 7 + i * 2;
       var stream = pageStream(t).replace('Page 1 of 1', 'Page ' + (i + 1) + ' of ' + nPages);
@@ -207,7 +207,7 @@
     var b = e.target.closest('.conf-dl');
     if (!b) return;
     var t = TRADES[Number(b.dataset.i)];
-    run(b, [t], 'orbisflow-confirmation-' + t.id + '.pdf', {
+    run(b, [t], 'obisflow-confirmation-' + t.id + '.pdf', {
       finish: function () { toast(t.id + ' confirmation downloaded', 'file-check'); }
     });
   });

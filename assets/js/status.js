@@ -14,9 +14,9 @@
   if (!list) return;
 
   var SERVICES = [
-    { k: 'api',      name: 'orbisflow API',      note: 'Sign-in, accounts and the database' },
+    { k: 'api',      name: 'obisflow API',      note: 'Sign-in, accounts and the database' },
     { k: 'trading',  name: 'Trading platform',   note: 'Placing and settling contracts' },
-    { k: 'app',      name: 'Web and mobile app', note: 'orbisflow.com and the app' },
+    { k: 'app',      name: 'Web and mobile app', note: 'obisflow.com and the app' },
     { k: 'mpesa',    name: 'M-Pesa deposits' },
     { k: 'card',     name: 'Card payments',      note: 'Processed by Paystack' },
     { k: 'usdt',     name: 'USDT on TRON' },
