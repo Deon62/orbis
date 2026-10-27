@@ -2,3 +2,6 @@
 backend/
 scripts/
 README.md
+
+# the admin site deploys as its own Vercel project (Root Directory: admin)
+admin/
