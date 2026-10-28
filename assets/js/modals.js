@@ -58,6 +58,16 @@
      link are real; offline, the flows below keep their local simulation */
   var API = global.OrbisAPI;
   function live() { return !!(API && API.connected && API.signedIn()); }
+  /* a VIP account is a demonstration account: obisflow credits its balance,
+     and no money goes in or out of it */
+  function vip() {
+    var s = live() && API.session();
+    return !!(s && s.profile && s.profile.vip);
+  }
+  function vipNote(title, what) {
+    open(title, '<div class="modal-bd"><p class="hint center">This is a VIP account. Its balance is credited by obisflow ' +
+      'for demonstrations, so it cannot ' + what + '.</p></div>');
+  }
   function refLink() {
     var s = live() && API.session();
     return (s && s.profile && s.profile.referralLink) || REF_LINK;
@@ -126,6 +136,7 @@
   ];
 
   function depositStep1() {
+    if (vip()) return vipNote('Deposit', 'take deposits');
     /* bank transfers have no automatic crediting yet, so they are hidden when live */
     var list = DEPOSIT_METHODS.filter(function (m) { return !(live() && m.k === 'bank'); });
     var html = '<div class="modal-bd stack-sm">' + list.map(function (m) {
@@ -306,6 +317,7 @@
   ];
 
   function withdrawStep1() {
+    if (vip()) return vipNote('Withdraw', 'withdraw');
     if (live()) return liveWithdrawPick();
     var html = '<div class="modal-bd stack-sm">' + WITHDRAW_METHODS.map(function (m) {
       return '<button class="method" data-pick="' + m.k + '">' +
