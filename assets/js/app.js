@@ -158,12 +158,29 @@
     });
     setAccount(activeAccount);
   }
+  /* +254712345412 → +254 7** *** 412 */
+  function maskPhone(phone) {
+    var d = String(phone || '').replace(/\D/g, '');
+    if (d.length < 7) return '';
+    var cc = d.length > 10 ? d.slice(0, d.length - 9) : '';
+    var rest = d.slice(cc.length);
+    return (cc ? '+' + cc + ' ' : '') + rest.slice(0, rest.charAt(0) === '0' ? 2 : 1) + '** *** ' + rest.slice(-3);
+  }
+  /* orinadeon@gmail.com → or*******@gmail.com */
+  function maskEmail(email) {
+    var e = String(email || ''), at = e.indexOf('@');
+    if (at < 1) return '';
+    var user = e.slice(0, at);
+    return user.slice(0, Math.min(2, user.length - 1)) + new Array(Math.max(3, user.length - 1)).join('*') + e.slice(at);
+  }
   function applyProfile(p) {
     if (!p) return;
     var name = p.name || p.email || 'Your account';
     var initials = name.split(/[\s@.]+/).filter(Boolean).slice(0, 2).map(function (w) { return w[0].toUpperCase(); }).join('');
-    document.querySelectorAll('[data-me-name]').forEach(function (el) { el.textContent = name; });
-    document.querySelectorAll('[data-me-email]').forEach(function (el) { el.textContent = p.email || ''; });
+    /* the menu shows the phone and email part-hidden, so a screen share or a
+       glance over the shoulder gives neither away */
+    document.querySelectorAll('[data-me-name]').forEach(function (el) { el.textContent = maskPhone(p.phone) || 'Your account'; });
+    document.querySelectorAll('[data-me-email]').forEach(function (el) { el.textContent = maskEmail(p.email); });
     document.querySelectorAll('[data-me-initials]').forEach(function (el) { el.textContent = initials || '?'; });
   }
   function refreshAccount() {
