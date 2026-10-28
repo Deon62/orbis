@@ -51,7 +51,11 @@
           if (window.orbisRefreshAccount) window.orbisRefreshAccount();
           return list();
         }
-        if (t && t.state === 'failed') {
+        if (!t) {                     /* unfinished after 2 minutes, so the API removed it */
+          window.orbisToast('That deposit was not completed in time, so it was cancelled. Start a new one.', 'triangle-alert');
+          return list();
+        }
+        if (t.state === 'failed') {
           window.orbisToast(t.failureReason || 'The payment did not go through', 'triangle-alert');
           return list();
         }

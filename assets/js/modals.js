@@ -1345,8 +1345,9 @@
       if (el) el.textContent = Math.floor(Math.max(0, left) / 60) + ':' + ('0' + Math.max(0, left) % 60).slice(-2);
       if (left <= 0) {
         clearInterval(timer);
-        resultScreen('Deposit with M-Pesa', false, 'Still waiting on M-Pesa',
-          'If you approved it, your balance updates as soon as M-Pesa confirms. If not, send the prompt again.', [],
+        resultScreen('Deposit with M-Pesa', false, 'Prompt not approved in time',
+          'Deposits not completed within 2 minutes are cancelled. If you did approve it, your balance still updates ' +
+          'once M-Pesa confirms. Otherwise send a new prompt.', [],
           function () { clearInterval(poll); liveMpesaDeposit(pre); });
       }
     }, 1000);
@@ -1354,6 +1355,9 @@
     var poll = setInterval(function () {
       if (++tries > 60) return clearInterval(poll);        /* four minutes, then leave it to the callback */
       API.get('/payments/' + tx.reference).then(function (t) {
+        /* null: unfinished after 2 minutes, the API removed it */
+        return t || { state: 'failed', failureReason: 'The prompt was not approved within 2 minutes.' };
+      }).then(function (t) {
         if (!t || (t.state !== 'completed' && t.state !== 'failed')) return;
         clearInterval(poll); clearInterval(timer);
         var ok = t.state === 'completed';
