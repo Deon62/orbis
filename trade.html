@@ -621,7 +621,7 @@
     if (dir) {
       var btn = document.querySelector('[data-dir="' + dir + '"]');
       if (btn) btn.classList.add('suggested');
-      window.orbisToast('AI signal loaded · ' + (dir === 'Rise' ? 'Buy' : 'Sell') + ' ' + current.sym + (tf ? ' · ' + tf : ''), 'bot');
+      window.orbisToast('From the scan · ' + current.sym + ' has been moving ' + (dir === 'Rise' ? 'up' : 'down'), 'radar');
     }
   })();
 

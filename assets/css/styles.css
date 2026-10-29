@@ -839,6 +839,15 @@ body.app-shell .hdr-right{ margin-left:auto; }
   display:flex; gap:10px; padding:13px 15px; border:1px solid var(--line);
   background:var(--panel); font-size:12.5px; color:var(--ink-3);
 }
+/* the AI page: one centred scan, the results under it */
+.ai-scan{ display:flex; flex-direction:column; gap:20px; }
+.ai-hero{ display:flex; flex-direction:column; align-items:center; text-align:center; gap:10px; padding:28px 0 8px; }
+.ai-hero-ic{ display:grid; place-items:center; width:52px; height:52px; border:1px solid var(--line); background:var(--panel); color:var(--ink); }
+.ai-hero h1{ font-size:22px; font-weight:600; letter-spacing:-.01em; }
+.ai-hero p{ font-size:13.5px; color:var(--ink-3); max-width:340px; }
+.ai-hero .btn{ margin-top:6px; min-width:220px; }
+.ai-hero .scan-at{ font-size:12px; color:var(--ink-3); min-height:16px; }
+@media (max-width:640px){ .ai-hero .btn{ width:100%; } }
 
 
 /* ==========================================================================
