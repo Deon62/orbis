@@ -40,7 +40,7 @@
       var won = t.result === 'won';
       return '<div class="row-line conf-row">' +
         '<div><b>' + t.id + '</b>' +
-          '<span>' + t.sym + ' · ' + t.dir + ' · ' + money(t.stake) + ' · settled ' + settledAt(t).full + '</span></div>' +
+          '<span>' + t.sym + ' · ' + (t.dir === 'Rise' ? 'Buy' : 'Sell') + ' · ' + money(t.stake) + ' · settled ' + settledAt(t).full + '</span></div>' +
         '<span class="conf-pl mono ' + (won ? 'up' : 'down') + '">' + (won ? '+' : '') + money(t.pl) + '</span>' +
         '<button class="conf-dl" data-i="' + i + '" aria-label="Download confirmation ' + t.id + '">' +
           '<span class="conf-ic">' + ic('download', 'i-sm') + '</span>' +
@@ -90,7 +90,7 @@
     var rows = [
       ['Contract ID', t.id],
       ['Market', t.sym],
-      ['Contract type', 'Binary - ' + t.dir],
+      ['Contract type', 'Binary - ' + (t.dir === 'Rise' ? 'Buy' : 'Sell')],
       ['Stake', money(t.stake)],
       ['Entry price', t.entry],
       ['Exit price', t.exit],

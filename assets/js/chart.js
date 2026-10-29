@@ -70,6 +70,7 @@
     this.smas = [];                        /* moving-average overlays */
 
     this.resize();
+    this._gestures();
     var self = this;
     this._ro = new ResizeObserver(function () { self.resize(); self.draw(); });
     this._ro.observe(canvas.parentElement || canvas);
@@ -88,10 +89,50 @@
 
   /* dir > 0 zooms in (fewer, wider candles), dir < 0 zooms out */
   Chart.prototype.zoom = function (dir) {
-    var next = Math.round(dir > 0 ? this.view * 0.75 : this.view / 0.75);
-    this.view = Math.max(this.minView, Math.min(this.data.length, next));
+    this.setView(dir > 0 ? this.view * 0.75 : this.view / 0.75);
+  };
+
+  Chart.prototype.setView = function (n) {
+    var next = Math.max(this.minView, Math.min(this.data.length, Math.round(n)));
+    if (next === this.view) return;
+    this.view = next;
     this.draw();
     this.onZoom(this.view, this.view <= this.minView, this.view >= this.data.length);
+  };
+
+  /* Pinching or scrolling on the chart zooms the chart, not the page: the
+     browser's own zoom is stopped here and the gesture changes the number
+     of candles drawn instead. One finger still scrolls the page (touch-action
+     in styles.css lets panning through and keeps pinch for us). */
+  Chart.prototype._gestures = function () {
+    var self = this, cv = this.cv, wheel = 0, pinch = null;
+
+    /* a mouse wheel, or a trackpad pinch, which browsers send as ctrl + wheel */
+    cv.addEventListener('wheel', function (e) {
+      e.preventDefault();
+      wheel += e.deltaMode === 1 ? e.deltaY * 33 : e.deltaY;      /* lines to pixels */
+      var step = e.ctrlKey ? 12 : 60;                             /* pinches arrive in small steps */
+      if (Math.abs(wheel) < step) return;
+      self.setView(self.view * Math.pow(1.12, wheel / step));     /* down/apart zooms out, up/together in */
+      wheel = 0;
+    }, { passive: false });
+
+    function gap(ts) { return Math.hypot(ts[0].clientX - ts[1].clientX, ts[0].clientY - ts[1].clientY) || 1; }
+    cv.addEventListener('touchstart', function (e) {
+      if (e.touches.length === 2) pinch = { d: gap(e.touches), view: self.view };
+    }, { passive: true });
+    cv.addEventListener('touchmove', function (e) {
+      if (!pinch || e.touches.length !== 2) return;
+      e.preventDefault();
+      self.setView(pinch.view * pinch.d / gap(e.touches));       /* fingers apart: fewer, wider candles */
+    }, { passive: false });
+    cv.addEventListener('touchend', function (e) { if (e.touches.length < 2) pinch = null; });
+    cv.addEventListener('touchcancel', function () { pinch = null; });
+
+    /* Safari's own pinch events, which would otherwise zoom the page */
+    ['gesturestart', 'gesturechange', 'gestureend'].forEach(function (k) {
+      cv.addEventListener(k, function (e) { e.preventDefault(); }, { passive: false });
+    });
   };
 
   Chart.prototype.resize = function () {

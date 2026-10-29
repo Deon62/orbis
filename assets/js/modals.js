@@ -639,7 +639,7 @@
 
   /* ================================================= market read (AI) === */
   var MARKET_READ = [
-    ['Market sentiment', 'Risk-on', '62% of open contracts are Rise', 'gauge'],
+    ['Market sentiment', 'Risk-on', '62% of open contracts are Buy', 'gauge'],
     ['Volatility', 'Elevated', 'Above the 30-day average', 'activity'],
     ['Signal accuracy', '64%', 'Across the last 200 signals', 'target'],
     ['Next event', 'US CPI', 'In 3h 20m · high impact', 'calendar-days']
@@ -734,7 +734,7 @@
     pop.innerHTML =
       '<span class="run-dot ' + (up ? 'up' : 'down') + '">' +
         ic(up ? 'arrow-up' : 'arrow-down', 'i-sm') + '</span>' +
-      '<span class="run-tx"><b>' + c.dir + ' · ' + c.sym + '</b>' +
+      '<span class="run-tx"><b>' + (up ? 'Buy' : 'Sell') + ' · ' + c.sym + '</b>' +
         '<span>' + money(c.stake) + ' · ' + c.duration + '</span></span>' +
       '<b class="run-clock mono">' + left + 's</b>' +
       '<i class="run-line"></i>';
@@ -811,7 +811,7 @@
           (won ? '+' : '') + money(delta) + '</p>' +
         '<div style="text-align:left;margin-top:18px">' +
           '<div class="kv"><span>Market</span><b>' + c.sym + '</b></div>' +
-          '<div class="kv"><span>Direction</span><b>' + c.dir + '</b></div>' +
+          '<div class="kv"><span>Direction</span><b>' + (c.dir === 'Rise' ? 'Buy' : 'Sell') + '</b></div>' +
           '<div class="kv"><span>Stake</span><b class="mono">' + money(c.stake) + '</b></div>' +
           (res ? '<div class="kv"><span>Entry → exit</span><b class="mono">' + res.entry + ' → ' + res.exit + '</b></div>' : '') +
           '<div class="kv"><span>Returned</span><b class="mono">' + money(back) + '</b></div>' +

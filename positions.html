@@ -66,7 +66,7 @@
         '<th class="r">Stake</th><th class="r">Entry</th><th class="r">Current</th><th class="r">Ends in</th><th class="r">P/L</th><th></th></tr></thead><tbody>' +
         d.map(function (t) {
           return '<tr><td class="mono dim">' + t.id + '</td><td><b>' + t.sym + '</b></td>' +
-            '<td><span class="tag ' + (t.dir === 'Rise' ? 'tag-up' : 'tag-down') + '">' + t.dir + '</span></td>' +
+            '<td><span class="tag ' + (t.dir === 'Rise' ? 'tag-up' : 'tag-down') + '">' + (t.dir === 'Rise' ? 'Buy' : 'Sell') + '</span></td>' +
             '<td class="r mono">' + M(t.stake) + '</td><td class="r mono">' + t.entry + '</td><td class="r mono">' + t.now + '</td>' +
             '<td class="r mono">' + t.ends + '</td><td class="r">' + pl(t.pl) + '</td>' +
             '<td class="r"><button class="btn btn-ghost btn-sm" data-mock="Sell back contract">Sell back</button></td></tr>';
@@ -83,7 +83,7 @@
         '<th class="r">Stake</th><th class="r">Entry</th><th class="r">Exit</th><th>Result</th><th class="r">P/L</th><th class="r">Settled</th></tr></thead><tbody>' +
         d.map(function (t) {
           var won = t.result === 'won', refunded = t.result === 'void';
-          return '<tr><td class="mono dim">' + t.id + '</td><td><b>' + t.sym + '</b></td><td>' + t.dir + '</td>' +
+          return '<tr><td class="mono dim">' + t.id + '</td><td><b>' + t.sym + '</b></td><td>' + (t.dir === 'Rise' ? 'Buy' : 'Sell') + '</td>' +
             '<td class="r mono">' + M(t.stake) + '</td><td class="r mono">' + t.entry + '</td><td class="r mono">' + (t.exit || '-') + '</td>' +
             '<td><span class="tag ' + (refunded ? '' : won ? 'tag-up' : 'tag-down') + '">' +
               (refunded ? 'Refunded' : won ? 'Won' : 'Lost') + '</span></td>' +

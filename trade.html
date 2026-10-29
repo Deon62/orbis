@@ -107,11 +107,11 @@
           <!-- on phones this row is fixed just above the tab bar -->
           <div class="trade-btns">
             <button class="btn-up" data-dir="Rise">
-              <span class="tb-main"><i data-lucide="arrow-up" class="i-sm"></i>Rise</span>
+              <span class="tb-main"><i data-lucide="arrow-up" class="i-sm"></i>Buy</span>
               <span class="tb-sub" id="upSub">88% · $47.00</span>
             </button>
             <button class="btn-down" data-dir="Fall">
-              <span class="tb-main"><i data-lucide="arrow-down" class="i-sm"></i>Fall</span>
+              <span class="tb-main"><i data-lucide="arrow-down" class="i-sm"></i>Sell</span>
               <span class="tb-sub" id="downSub">88% · $47.00</span>
             </button>
           </div>
@@ -155,10 +155,10 @@
           </div>
 
           <p class="hint center" style="margin-bottom:12px">
-            Runs Rise/Fall on the selected market until a limit is hit.
+            Runs Buy/Sell on the selected market until a limit is hit.
           </p>
 
-          <!-- on phones this rides above the tab bar, like the Rise/Fall pair -->
+          <!-- on phones this rides above the tab bar, like the Buy/Sell pair -->
           <div class="auto-btns">
             <button class="btn btn-primary btn-block btn-lg" id="aRun">
               <i data-lucide="play" class="i-sm"></i>Start auto trading
@@ -543,7 +543,7 @@
     window.orbisModal.open('Place this trade?',
       '<div class="modal-bd">' +
         '<div class="kv"><span>Market</span><b>' + current.sym + '</b></div>' +
-        '<div class="kv"><span>Direction</span><b>' + dir + '</b></div>' +
+        '<div class="kv"><span>Direction</span><b>' + (dir === 'Rise' ? 'Buy' : 'Sell') + '</b></div>' +
         '<div class="kv"><span>Stake</span><b class="mono">' + OrbisData.money(stake) + '</b></div>' +
         '<div class="kv"><span>Pays if right</span><b class="mono">' +
           OrbisData.money(stake + stake * current.payout / 100) + '</b></div>' +
@@ -621,7 +621,7 @@
     if (dir) {
       var btn = document.querySelector('[data-dir="' + dir + '"]');
       if (btn) btn.classList.add('suggested');
-      window.orbisToast('AI signal loaded · ' + dir + ' ' + current.sym + (tf ? ' · ' + tf : ''), 'bot');
+      window.orbisToast('AI signal loaded · ' + (dir === 'Rise' ? 'Buy' : 'Sell') + ' ' + current.sym + (tf ? ' · ' + tf : ''), 'bot');
     }
   })();
 
@@ -650,7 +650,7 @@
       var isUp = busyBtn.dataset.dir === 'Rise';
       busyBtn.classList.remove('busy');
       busyBtn.querySelector('.tb-main').innerHTML =
-        '<i data-lucide="arrow-' + (isUp ? 'up' : 'down') + '" class="i-sm"></i>' + busyBtn.dataset.dir;
+        '<i data-lucide="arrow-' + (isUp ? 'up' : 'down') + '" class="i-sm"></i>' + (isUp ? 'Buy' : 'Sell');
       window.orbisIcons();
     }
     busyBtn = null;
