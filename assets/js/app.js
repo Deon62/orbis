@@ -116,11 +116,19 @@
   /* the account card belongs where money is at stake */
   var ACCOUNT_PAGES = ['trade', 'markets', 'positions'];
 
+  /* staged results on (set on the admin site for a VIP): the results are not
+     the real odds, so the account says DEMO wherever its balance shows */
+  function staged() {
+    var s = window.OrbisAPI && OrbisAPI.session && OrbisAPI.session();
+    return !!(s && s.profile && s.profile.staged);
+  }
   function accountCardHTML() {
     var a = ACCOUNTS.filter(function (x) { return x.id === activeAccount; })[0];
     return '<button class="acct-card" data-modal="account" aria-haspopup="dialog">' +
       '<img class="acct-flag" src="https://flagcdn.com/w40/us.png" alt="USD" title="US dollar">' +
-      '<span class="acct-card-tx"><small>' + a.short + '</small><b class="num">' + a.amount + '</b></span>' +
+      '<span class="acct-card-tx"><small>' + a.short +
+        (staged() ? ' <i class="tag-demo" title="Staged results: these outcomes are set for a demonstration">DEMO</i>' : '') +
+      '</small><b class="num">' + a.amount + '</b></span>' +
       ic('chevron-down', 'i-sm') + '</button>';
   }
 
@@ -182,6 +190,9 @@
     document.querySelectorAll('[data-me-name]').forEach(function (el) { el.textContent = maskPhone(p.phone) || 'Your account'; });
     document.querySelectorAll('[data-me-email]').forEach(function (el) { el.textContent = maskEmail(p.email); });
     document.querySelectorAll('[data-me-initials]').forEach(function (el) { el.textContent = initials || '?'; });
+    document.documentElement.classList.toggle('is-staged', !!p.staged);
+    var card = document.querySelector('.hdr-right .acct-card');      /* redraw the card only, no account change */
+    if (card && /tag-demo/.test(card.innerHTML) !== !!p.staged) { card.outerHTML = accountCardHTML(); drawIcons(); }
   }
   function refreshAccount() {
     if (!signedIn()) return Promise.resolve();

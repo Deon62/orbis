@@ -473,6 +473,11 @@ table.tbl tbody tr:hover{ background:var(--panel-2); }
 .tag-up{ color:var(--up); }
 .tag-down{ color:var(--down); }
 .tag-wait{ color:var(--warn); }
+/* staged results (a VIP demonstration): never mistaken for the real odds */
+.tag-demo{
+  display:inline-block; font-style:normal; font-size:9.5px; font-weight:700; letter-spacing:.08em;
+  padding:1px 5px; margin-left:4px; vertical-align:1px; color:#fff; background:var(--warn);
+}
 
 /* ============================================================= stats === */
 .stat{ background:transparent; border:0; padding:6px 0; }
