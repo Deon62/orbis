@@ -69,10 +69,10 @@
     el.hidden = false;
     el.className = 'vf-banner' + (state.verified ? ' vf-banner-ok' : '');
     el.innerHTML = state.verified
-      ? ic('badge-check', 'i-sm') + 'Your identity is verified. Withdrawals are open.'
+      ? ic('badge-check', 'i-sm') + 'Verified. Withdrawals are open.'
       : id.status === 'review'
-        ? ic('clock', 'i-sm') + 'Your ID is being reviewed, usually within a working day. Withdrawals open once it is approved.'
-        : ic('lock', 'i-sm') + 'Verify your identity to withdraw. Send a photo of your national ID, passport or driving licence below.';
+        ? ic('clock', 'i-sm') + 'Your ID is in review, usually under a day.'
+        : ic('lock', 'i-sm') + 'Verify your identity to withdraw.';
     icons();
   }
 
@@ -83,26 +83,26 @@
     if (k === 'tax') {
       html = s.status === 'done'
         ? '<span class="tag tag-up">' + ic('check', 'i-sm') + 'Submitted</span>' +
-          '<button class="btn btn-quiet btn-sm" data-vf-tax>Edit</button>'
-        : '<button class="btn btn-ghost btn-sm" data-vf-tax>Declare</button>';
+          '<button class="vf-act vf-act-quiet" data-vf-tax>Edit</button>'
+        : '<button class="vf-act" data-vf-tax>Declare' + ic('chevron-right', 'i-sm') + '</button>';
     } else if (k === 'assessment') {
       html = s.status === 'done'
         ? (s.result === 'ok'
-            ? '<span class="tag tag-up">' + ic('check', 'i-sm') + 'Complete</span>'
-            : '<span class="tag tag-wait">' + ic('triangle-alert', 'i-sm') + 'Complete, with a warning</span>') +
-          '<button class="btn btn-quiet btn-sm" data-vf-assess>Retake</button>'
-        : '<button class="btn btn-ghost btn-sm" data-vf-assess>Start</button>';
+            ? '<span class="tag tag-up">' + ic('check', 'i-sm') + 'Done</span>'
+            : '<span class="tag tag-wait">' + ic('triangle-alert', 'i-sm') + 'Done</span>') +
+          '<button class="vf-act vf-act-quiet" data-vf-assess>Retake</button>'
+        : '<button class="vf-act" data-vf-assess>Start' + ic('chevron-right', 'i-sm') + '</button>';
     } else if (s.status === 'approved') {
       html = '<span class="tag tag-up">' + ic('check', 'i-sm') + 'Verified</span>' +
-             (k === 'address' ? '<button class="btn btn-quiet btn-sm" data-vf-open>Replace</button>' : '');
+             (k === 'address' ? '<button class="vf-act vf-act-quiet" data-vf-open>Replace</button>' : '');
     } else if (s.status === 'rejected') {
       html = '<span class="tag tag-down">' + ic('triangle-alert', 'i-sm') + 'Not accepted</span>' +
-             '<button class="btn btn-primary btn-sm" data-vf-open>' + ic('upload', 'i-sm') + 'Send again</button>';
+             '<button class="vf-act" data-vf-open>' + ic('upload', 'i-sm') + 'Send again</button>';
     } else if (s.status === 'review') {
       html = '<span class="tag tag-wait">' + ic('clock', 'i-sm') + 'In review</span>' +
-             '<button class="btn btn-quiet btn-sm" data-vf-open>Replace</button>';
+             '<button class="vf-act vf-act-quiet" data-vf-open>Replace</button>';
     } else {
-      html = '<button class="btn btn-primary btn-sm" data-vf-open>' + ic('upload', 'i-sm') + 'Upload</button>';
+      html = '<button class="vf-act" data-vf-open>' + ic('upload', 'i-sm') + 'Upload</button>';
     }
     host.innerHTML = html;
 
@@ -112,7 +112,7 @@
       sub.textContent = s.country + ' · declared ' + s.date;
     } else if (k !== 'assessment' && k !== 'tax' && s.status === 'review') {
       sub.dataset.orig = sub.dataset.orig || sub.textContent;
-      sub.textContent = s.docName + ' · submitted ' + s.date + ' · usually reviewed within 24 hours';
+      sub.textContent = s.docName + ' · in review since ' + s.date;
     } else if (k !== 'assessment' && k !== 'tax' && s.status === 'approved') {
       sub.dataset.orig = sub.dataset.orig || sub.textContent;
       sub.textContent = s.docName + ' · approved';
@@ -121,8 +121,8 @@
       sub.textContent = s.docName + ' was not accepted: ' + (s.reason || 'send a clearer copy');
     } else if (k === 'assessment' && s.status === 'done') {
       sub.dataset.orig = sub.dataset.orig || sub.textContent;
-      sub.textContent = s.result === 'ok' ? 'Completed ' + s.date + ' · real-money trading is open'
-                                          : 'Completed ' + s.date + ' · you can trade, with a risk warning';
+      sub.textContent = s.result === 'ok' ? 'Done ' + s.date
+                                          : 'Done ' + s.date + ' · with a risk warning';
     } else if (sub.dataset.orig) {
       sub.textContent = sub.dataset.orig;
     }
@@ -178,14 +178,11 @@
            second the gallery or files; on a desktop both open the dialog */
         el.className = 'vf-slot vf-empty';
         el.innerHTML =
-          '<div class="vf-slot-hd"><b>' + s.side + '</b><span>' + doc.name + '</span></div>' +
-          '<div class="vf-picks">' +
-            '<label class="vf-pick">' + ic('camera') + '<span>Take a photo</span>' +
-              '<input type="file" accept="image/*" capture="environment" hidden></label>' +
-            '<label class="vf-pick">' + ic('image') + '<span>Choose from gallery</span>' +
-              '<input type="file" accept="image/*,application/pdf" hidden></label>' +
-          '</div>' +
-          '<p class="vf-drop">or drop a file here</p>' +
+          '<label class="vf-up">' +
+            '<span class="vf-up-ic">' + ic('upload') + '</span>' +
+            '<span class="vf-up-tx"><b>' + s.side + '</b><span>JPG, PNG or PDF</span></span>' +
+            '<input type="file" accept="image/jpeg,image/png,image/webp,application/pdf" hidden>' +
+          '</label>' +
           (err ? '<p class="vf-err">' + ic('triangle-alert', 'i-sm') + err + '</p>' : '');
         el.querySelectorAll('input[type=file]').forEach(function (inp) {
           inp.addEventListener('change', function () { if (inp.files[0]) pick(i, inp.files[0]); });

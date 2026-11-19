@@ -2103,18 +2103,31 @@ a.contact-way:hover{ border-color:var(--line-strong); }
 
 
 /* ======================================================= verification == */
+.pd-view{ border-top:1px solid var(--line-soft); }
+.pd-row{ display:flex; justify-content:space-between; align-items:baseline; gap:16px; padding:14px 2px; border-bottom:1px solid var(--line-soft); }
+.pd-row span{ font-size:13px; color:var(--ink-3); }
+.pd-row b{ font-size:14px; font-weight:500; text-align:right; min-width:0; overflow-wrap:anywhere; }
+.pd-acts{ display:flex; justify-content:flex-end; padding-top:16px; }
 .vf-lead{ font-size:13.5px; line-height:1.6; color:var(--ink-2); max-width:62ch; }
 .vf-banner{ display:flex; align-items:center; gap:8px; padding:11px 14px; font-size:13.5px; line-height:1.5;
   border:1px solid color-mix(in srgb, var(--warn) 45%, transparent); color:var(--ink); background:color-mix(in srgb, var(--warn) 8%, transparent); }
 .vf-banner .i-sm{ color:var(--warn); flex:none; }
 .vf-banner-ok{ border-color:color-mix(in srgb, var(--up) 45%, transparent); background:color-mix(in srgb, var(--up) 8%, transparent); }
 .vf-banner-ok .i-sm{ color:var(--up); }
+.vf{ border-top:1px solid var(--line-soft); border-bottom:1px solid var(--line-soft); }
 .vf-item{ border-bottom:1px solid var(--line-soft); }
+.vf-item .row-line{ padding-inline:2px; }
 .vf-item:last-child{ border-bottom:0; }
 .vf-item .row-line{ border-bottom:0; }
 .vf-state{ display:flex; align-items:center; gap:6px; flex:none; }
-.vf-open{ background:var(--panel); }
-.vf-panel{ padding:4px 16px 18px; }
+.vf-open{ background:transparent; }
+/* actions as quiet text, not boxed buttons */
+.vf-act{ display:inline-flex; align-items:center; gap:5px; height:30px; padding:0 2px; border:0; background:none;
+  font:inherit; font-size:13.5px; font-weight:600; color:var(--brand-strong); cursor:pointer; }
+.vf-act:hover{ text-decoration:underline; text-underline-offset:3px; }
+.vf-act-quiet{ font-weight:500; color:var(--ink-3); }
+:root[data-theme="dark"] .vf-act:not(.vf-act-quiet){ color:var(--brand); }
+.vf-panel{ padding:2px 2px 18px; }
 .vf-fine{ display:flex; align-items:center; gap:7px; font-size:12.5px; color:var(--ink-3); }
 .vf-fine a{ color:var(--ink-2); text-decoration:underline; text-underline-offset:2px; }
 
@@ -2132,8 +2145,15 @@ a.contact-way:hover{ border-color:var(--line-strong); }
 
 .vf-slots{ display:grid; gap:10px; grid-template-columns:1fr; }
 @media(min-width:600px){ .vf-slots:has(.vf-slot:nth-child(2)){ grid-template-columns:1fr 1fr; } }
-.vf-slot{ border:1px dashed var(--line-strong); padding:14px; min-width:0; transition:border-color .15s, background .15s; }
-.vf-over{ border-color:var(--brand); background:color-mix(in srgb, var(--brand) 6%, transparent); }
+.vf-slot{ min-width:0; padding:4px 0; transition:background .15s; }
+.vf-up{ display:flex; align-items:center; gap:12px; cursor:pointer; }
+.vf-up-ic{ width:42px; height:42px; flex:none; display:grid; place-items:center; border-radius:50%;
+  background:color-mix(in srgb, var(--brand) 12%, transparent); color:var(--brand-strong); transition:background .15s; }
+:root[data-theme="dark"] .vf-up-ic{ color:var(--brand); }
+.vf-up:hover .vf-up-ic, .vf-up:focus-within .vf-up-ic{ background:color-mix(in srgb, var(--brand) 22%, transparent); }
+.vf-up-tx b{ display:block; font-size:13.5px; }
+.vf-up-tx span{ font-size:12px; color:var(--ink-3); }
+.vf-over{ background:color-mix(in srgb, var(--brand) 6%, transparent); }
 .vf-slot-hd{ display:flex; align-items:baseline; justify-content:space-between; gap:8px; margin-bottom:12px; }
 .vf-slot-hd b{ font-size:13.5px; }
 .vf-slot-hd span{ font-size:12px; color:var(--ink-3); }
@@ -2151,10 +2171,10 @@ a.contact-way:hover{ border-color:var(--line-strong); }
 .vf-err{ display:flex; gap:6px; align-items:flex-start; margin-top:9px; font-size:12.5px; color:var(--down); }
 .vf-err svg{ flex:none; margin-top:1px; }
 
-.vf-full{ display:flex; gap:12px; align-items:center; border-style:solid; }
+.vf-full{ display:flex; gap:12px; align-items:center; }
 .vf-thumb{
-  width:64px; height:64px; flex:none; overflow:hidden; display:grid; place-items:center;
-  background:var(--panel-2); border:1px solid var(--line); color:var(--ink-3);
+  width:42px; height:42px; flex:none; overflow:hidden; display:grid; place-items:center; border-radius:6px;
+  background:var(--panel-2); color:var(--ink-3);
 }
 .vf-thumb img{ width:100%; height:100%; object-fit:cover; }
 .vf-file{ flex:1; min-width:0; }

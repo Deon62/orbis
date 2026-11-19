@@ -21,16 +21,28 @@
 
 <main class="wrap page-body">
   <div class="stack" style="max-width:720px">
-    <div class="card card-flat card-pad" style="padding-inline:0">
+    <!-- read-only first: email and phone are masked so a screenshot does not give them away -->
+    <section id="pdView" class="pd-view">
+      <div class="pd-row"><span>Name</span><b data-pd="name">-</b></div>
+      <div class="pd-row"><span>Email</span><b data-pd="email">-</b></div>
+      <div class="pd-row"><span>Phone</span><b data-pd="phone">-</b></div>
+      <div class="pd-row"><span>Country</span><b data-pd="country">-</b></div>
+      <div class="pd-row"><span>Currency</span><b data-pd="currency">-</b></div>
+      <div class="pd-acts">
+        <button type="button" class="btn btn-ghost btn-sm" id="pdEdit"><i data-lucide="sliders-horizontal" class="i-sm"></i>Edit details</button>
+      </div>
+    </section>
+
+    <div class="card card-flat card-pad" style="padding-inline:0" id="pdForm" hidden>
       <form data-mock-submit="Saved" id="profileForm">
         <div class="field">
-          <label class="label" for="atn">Trader name</label>
+          <label class="label" for="atn">Name</label>
           <input class="input" id="atn" placeholder="Your full name" autocomplete="name">
         </div>
 
         <div class="field">
           <label class="label" for="aem">Email</label>
-          <input class="input" id="aem" type="email" placeholder="you@example.com" autocomplete="email">
+          <input class="input" id="aem" type="text" placeholder="you@example.com" autocomplete="email">
         </div>
 
         <div class="field">
@@ -55,6 +67,7 @@
         </div>
 
         <div class="form-actions">
+          <button class="btn btn-quiet" type="button" id="pdCancel">Cancel</button>
           <button class="btn btn-primary" type="submit">Save changes</button>
         </div>
       </form>
@@ -71,10 +84,41 @@
 (function () {
   var A = OrbisAPI, M = A.money;
 
+  /* d•••n@gmail.com and +254 7•• ••• 278: enough to recognise, not enough to copy */
+  function maskEmail(e) {
+    var at = (e || '').indexOf('@');
+    if (at < 1) return e || '-';
+    var u = e.slice(0, at);
+    return (u.length <= 2 ? u[0] + '•' : u[0] + '•••' + u[u.length - 1]) + e.slice(at);
+  }
+  function maskPhone(p) {
+    var d = (p || '').replace(/\D/g, '');
+    if (d.length < 7) return p || '-';
+    var rest = d.indexOf('254') === 0 ? d.slice(3) : d[0] === '0' ? d.slice(1) : null;
+    if (rest) return '+254 ' + rest[0] + '•• ••• ' + rest.slice(-3);
+    return '+' + d.slice(0, 2) + ' ••• ••• ' + d.slice(-3);
+  }
+  function fill(me) {
+    var v = function (k, t) { document.querySelector('[data-pd="' + k + '"]').textContent = t || '-'; };
+    v('name', me.name);
+    v('email', maskEmail(me.email));
+    v('phone', me.phone ? maskPhone(me.phone) : '');
+    v('country', me.country && me.country.name);
+    v('currency', me.currency);
+  }
+  var view = document.getElementById('pdView'), formBox = document.getElementById('pdForm');
+  function editing(on) {
+    view.hidden = on; formBox.hidden = !on;
+    if (on) document.getElementById('atn').focus();
+  }
+  document.getElementById('pdEdit').addEventListener('click', function () { editing(true); });
+  document.getElementById('pdCancel').addEventListener('click', function () { editing(false); });
+
   A.get('/me').then(function (me) {
     if (!me) return;
+    fill(me);
     if (me.name) document.getElementById('atn').value = me.name;
-    if (me.email) document.getElementById('aem').value = me.email;
+    if (me.email) document.getElementById('aem').value = maskEmail(me.email);   /* the sign-in email, not edited here */
     if (me.phone) document.getElementById('aph').value = me.phone;
     if (me.currency) document.getElementById('acur').value = me.currency;
     if (me.country) {
@@ -106,6 +150,8 @@
     var done = window.orbisBusy ? window.orbisBusy(btn, 'Saving your profile') : function () {};
     A.patch('/me', body).then(function (p) {
       A.setProfile(p);
+      fill(p);
+      editing(false);
       if (window.orbisRefreshAccount) window.orbisRefreshAccount();
       window.orbisToast('Profile saved', 'check-circle-2');
     }).catch(function (err) {
