@@ -38,11 +38,6 @@
 
       <form data-mock-submit="Account created" data-loading="Creating your account" data-go="/trade">
         <div class="field">
-          <label class="label" for="tn">Trader name</label>
-          <input class="input" id="tn" type="text" placeholder="Amara Otieno" required>
-        </div>
-
-        <div class="field">
           <label class="label" for="email">Email</label>
           <input class="input" id="email" type="email" placeholder="you@example.com" required>
         </div>
@@ -63,9 +58,10 @@
           </div>
         </div>
 
-        <div class="field">
-          <label class="label" for="ref">Referral code <span class="dim" style="font-weight:400">- optional</span></label>
-          <input class="input" id="ref" type="text" placeholder="ORBIS-4K92">
+        <button type="button" class="ref-toggle" data-ref-toggle aria-expanded="false" aria-controls="refField">Have a referral code?</button>
+        <div class="field" id="refField" hidden>
+          <label class="label" for="ref">Referral code</label>
+          <input class="input" id="ref" type="text" placeholder="ORBIS-4K92" autocapitalize="characters">
         </div>
 
         <label class="check" style="margin:2px 0 18px">

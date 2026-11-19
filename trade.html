@@ -390,7 +390,7 @@
     feed.sym = sym; feed.base = 0; feed.on = false; feed.last = 0;
     setFresh(false);
     if (!API) return;
-    API.get('/prices/history?symbol=' + encodeURIComponent(sym) + '&seconds=900').then(function (pts) {
+    API.get('/prices/history?symbol=' + encodeURIComponent(sym) + '&seconds=' + Math.min(3600, Math.max(900, chart.fitView() * 5 + 60))).then(function (pts) {
       if (feed.sym !== sym || !pts || pts.length < 2) return;
       feed.base = Number(pts[0][1]);
       feed.on = true;

@@ -264,6 +264,9 @@ textarea.input{ height:auto; padding:11px 13px; resize:vertical; }
 .auth-card{ width:100%; max-width:400px; background:var(--panel); border:1px solid var(--line); padding:28px 24px; }
 @media(min-width:520px){ .auth-card{ padding:34px 32px; } }
 .auth-card h1{ font-size:24px; margin-bottom:22px; }
+.ref-toggle{ display:inline-block; margin:-4px 0 14px; padding:0; background:none; border:0; font:inherit; font-size:13px;
+  color:var(--brand-strong); text-decoration:underline; text-underline-offset:3px; cursor:pointer; }
+:root[data-theme="dark"] .ref-toggle{ color:var(--brand); }
 .auth-top{ width:100%; max-width:400px; display:flex; justify-content:center; margin-bottom:24px; }
 .auth-foot{ margin-top:20px; font-size:13.5px; color:var(--ink-2); text-align:center; }
 .auth-foot a{ color:var(--ink); font-weight:600; }
@@ -1676,38 +1679,46 @@ body:has(.chart-full) .tabbar{ display:none; }
 .btn-file:hover{ border-color:var(--line-strong); color:var(--ink); background:var(--panel-2); }
 
 /* ========================================================== the loader ==
-   cssloaders.github.io diamond, re-coloured onto our own tokens: the source
-   ships a pure lime (#20DE00) on near-black, which is neither our green nor
-   readable on a light panel. --color-2 is the well, so it has to match
-   whatever sits behind the loader or the middle stops reading as a hole. */
+   Two dots orbiting on tilted planes: one in ink, one in the brand green. */
 .loader{
-  --color-1: var(--line-strong);      /* the track */
-  --color-2: var(--bg);               /* the well, matched to the veil */
-  --color-3: var(--brand-strong);     /* the sweep */
+  --color-1: var(--ink);              /* one dot: white on dark, ink on light */
+  --color-2: var(--brand-strong);     /* the other: the brand green */
   --size: 1px;
 
   position:relative;
-  width:calc(64 * var(--size)); height:calc(64 * var(--size));
-  background-color:var(--color-1);
-  transform:rotate(45deg);
-  overflow:hidden;
+  display:inline-block;
+  flex:none;
+  transform:rotateZ(45deg);
+  perspective:calc(1000 * var(--size));
+  border-radius:50%;
+  width:calc(48 * var(--size)); height:calc(48 * var(--size));
+  font-size:calc(16 * var(--size));
+  color:var(--color-1);
+}
+.loader::before,
+.loader::after{
+  content:''; display:block; position:absolute; top:0; left:0;
+  width:inherit; height:inherit; border-radius:50%;
+  transform:rotateX(70deg);
+  animation:1s loaderSpin linear infinite;
 }
 .loader::after{
-  content:''; position:absolute; inset:calc(8 * var(--size));
-  margin:auto; background:var(--color-2);
+  color:var(--color-2);
+  transform:rotateY(70deg);
+  animation-delay:.4s;
 }
-.loader::before{
-  content:''; position:absolute; inset:calc(-15 * var(--size));
-  margin:auto; background:var(--color-3);
-  animation:diamondLoader 2s linear infinite;
+@keyframes loaderSpin{
+  0%, 100%{ box-shadow:.2em 0 0 0 currentcolor; }
+  12%{ box-shadow:.2em .2em 0 0 currentcolor; }
+  25%{ box-shadow:0 .2em 0 0 currentcolor; }
+  37%{ box-shadow:-.2em .2em 0 0 currentcolor; }
+  50%{ box-shadow:-.2em 0 0 0 currentcolor; }
+  62%{ box-shadow:-.2em -.2em 0 0 currentcolor; }
+  75%{ box-shadow:0 -.2em 0 0 currentcolor; }
+  87%{ box-shadow:.2em -.2em 0 0 currentcolor; }
 }
-@keyframes diamondLoader{
-  0%, 10%{ transform:translate(calc(-64 * var(--size)), calc(-64 * var(--size))) rotate(-45deg); }
-  90%, 100%{ transform:translate(0,0) rotate(-45deg); }
-}
-/* a moving block this large is exactly what reduced motion is asking about */
 @media(prefers-reduced-motion:reduce){
-  .loader::before{ animation:none; transform:translate(0,0) rotate(-45deg); }
+  .loader::before, .loader::after{ animation-duration:3s; }
 }
 
 /* the screen a pending action takes over */
@@ -1723,10 +1734,7 @@ body:has(.chart-full) .tabbar{ display:none; }
 
 /* the darker brand green holds up on paper; on a dark page the lighter one
    is the one that reads */
-:root[data-theme="dark"] .loader{ --color-3: var(--brand); }
-
-/* on a dark panel the well is the panel, not the page */
-.modal .loader{ --color-2: var(--panel); }
+:root[data-theme="dark"] .loader{ --color-2: var(--brand); }
 
 
 /* four feature tiles have to share one phone screen with a heading, so they
@@ -2096,6 +2104,11 @@ a.contact-way:hover{ border-color:var(--line-strong); }
 
 /* ======================================================= verification == */
 .vf-lead{ font-size:13.5px; line-height:1.6; color:var(--ink-2); max-width:62ch; }
+.vf-banner{ display:flex; align-items:center; gap:8px; padding:11px 14px; font-size:13.5px; line-height:1.5;
+  border:1px solid color-mix(in srgb, var(--warn) 45%, transparent); color:var(--ink); background:color-mix(in srgb, var(--warn) 8%, transparent); }
+.vf-banner .i-sm{ color:var(--warn); flex:none; }
+.vf-banner-ok{ border-color:color-mix(in srgb, var(--up) 45%, transparent); background:color-mix(in srgb, var(--up) 8%, transparent); }
+.vf-banner-ok .i-sm{ color:var(--up); }
 .vf-item{ border-bottom:1px solid var(--line-soft); }
 .vf-item:last-child{ border-bottom:0; }
 .vf-item .row-line{ border-bottom:0; }
@@ -2431,5 +2444,4 @@ a.contact-way:hover{ border-color:var(--line-strong); }
 
 /* the loader at the size of a line of text, for a wait that runs while you
    carry on (a USDT transfer on its way) rather than one that holds the screen */
-.loader-sm{ --size:.3px; flex:none; margin-top:4px; }
-.modal .loader-sm{ --color-2: var(--panel); }
+.loader-sm{ --size:.4px; flex:none; margin-top:2px; }

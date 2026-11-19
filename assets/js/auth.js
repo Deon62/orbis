@@ -26,6 +26,19 @@
   var refInput = document.getElementById('ref');
   if (page === 'signup' && refInput && !refInput.value) refInput.value = ref || storedRef();
 
+  /* the referral code hides behind a link; a code that came with the link
+     shows straight away so the user can see it was applied */
+  var refToggle = document.querySelector('[data-ref-toggle]');
+  var refField = document.getElementById('refField');
+  function showRef(focus) {
+    if (!refField) return;
+    refField.hidden = false;
+    if (refToggle) { refToggle.setAttribute('aria-expanded', 'true'); refToggle.hidden = true; }
+    if (focus && refInput) refInput.focus();
+  }
+  if (refToggle) refToggle.addEventListener('click', function () { showRef(true); });
+  if (refInput && refInput.value) showRef(false);
+
   if (!A || !A.connected) return;
 
   var card = document.querySelector('.auth-card');
@@ -124,7 +137,7 @@
       if (phone.replace(/\D/g, '').length < 9) return say('Enter your mobile number, e.g. 0712 345 678.', 'err');
       busy(submit, true, 'Creating your account');
       A.post('/auth/signup', {
-        name: form.querySelector('#tn').value.trim(), email: email, password: password, phone: phone,
+        email: email, password: password, phone: phone,
         referral_code: (refInput && refInput.value.trim()) || null
       }).then(function (res) {
         if (res && res.confirm_email) return checkEmail(res.email || email);

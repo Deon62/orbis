@@ -8,6 +8,7 @@
   'use strict';
 
   var instances = [];
+  var STEP_PX = 6;          /* width per candle on a wide chart, close to a phone's density */
 
   function themeColors(el) {
     var cs = getComputedStyle(el || document.documentElement);
@@ -53,8 +54,10 @@
     opts = opts || {};
     this.cv = canvas;
     this.ctx = canvas.getContext('2d');
-    this.count = opts.count || 140;        /* candles kept in memory */
-    this.view = opts.view || 72;           /* candles actually drawn */
+    this.count = opts.count || 720;        /* candles kept in memory: enough to fill a wide monitor */
+    this.defaultView = opts.view || 72;    /* candles drawn on a phone-sized chart */
+    this.view = this.defaultView;          /* candles actually drawn */
+    this.zoomK = 1;                        /* the user's zoom, relative to what fits the width */
     this.minView = 24;
     this.vol = opts.vol || 0.0018;
     this.data = generate(this.count, opts.start || 1.0842, this.vol, opts.seed || 7);
@@ -92,10 +95,18 @@
     this.setView(dir > 0 ? this.view * 0.75 : this.view / 0.75);
   };
 
+  /* How many candles fit the width at the density a phone shows: a wider
+     chart draws more candles instead of spreading the same 72 far apart. */
+  Chart.prototype.fitView = function () {
+    var plotW = (this.w || 0) - this.padR;
+    return Math.max(this.defaultView, Math.round(plotW / STEP_PX));
+  };
+
   Chart.prototype.setView = function (n) {
     var next = Math.max(this.minView, Math.min(this.data.length, Math.round(n)));
     if (next === this.view) return;
     this.view = next;
+    this.zoomK = next / this.fitView();
     this.draw();
     this.onZoom(this.view, this.view <= this.minView, this.view >= this.data.length);
   };
@@ -142,6 +153,8 @@
     this.cv.width = Math.round(r.width * dpr);
     this.cv.height = Math.round(r.height * dpr);
     this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    var fit = Math.round(this.fitView() * this.zoomK);
+    this.view = Math.max(this.minView, fit);
   };
 
   Chart.prototype.range = function () {

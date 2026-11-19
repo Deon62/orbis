@@ -441,6 +441,11 @@
         }).catch(function (err) {
           done();
           if (err.status === 428 && err.otp === 'withdrawal') return withdrawalCode(v, err.message);
+          if (err.status === 403 && /verify your identity/i.test(err.message || '')) {
+            return open('Verify your identity',
+              '<div class="modal-bd"><p class="hint" style="margin-top:0">' + esc(err.message) + '</p></div>' +
+              '<div class="modal-ft"><a class="btn btn-primary btn-block btn-lg" href="/verification">Go to Verification</a></div>');
+          }
           if (code) throw err;
           sync();
           toast(err.message, 'triangle-alert');

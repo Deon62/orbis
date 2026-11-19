@@ -1,9 +1,9 @@
 /* ==========================================================================
    Verification: document upload and the financial assessment.
-   The file pickers are real (camera and gallery on a phone, the file dialog
-   on a desktop) and the preview is the actual file; only the upload itself
-   and the review are simulated. Progress is kept in localStorage so a
-   reload does not lose it.
+   Proof of identity and proof of address go to the API (POST /verification)
+   and are reviewed on the admin site; withdrawals open once the identity is
+   approved. Photos are shrunk in the browser to about 1600 px first. The
+   assessment and tax declaration are kept in localStorage.
    ========================================================================== */
 (function (global) {
   'use strict';
@@ -36,6 +36,45 @@
     try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
   }
   var state = load();
+  var API = global.OrbisAPI;
+  var live = !!(API && API.connected && API.signedIn && API.signedIn());
+  var DOC_KEY = { 'National ID': 'id', 'Passport': 'passport', 'Driving licence': 'licence', 'Utility bill': 'utility', 'Bank statement': 'bank' };
+
+  /* the server's word on identity and address replaces anything kept locally */
+  function fromServer(v) {
+    ['identity', 'address'].forEach(function (k) {
+      var x = v[k];
+      if (!x) { delete state[k]; return; }
+      var d = new Date(x.createdAt);
+      state[k] = { status: x.status === 'pending' ? 'review' : x.status, docName: x.docName, reason: x.reason,
+                   date: d.getDate() + ' ' + d.toLocaleString('en-GB', { month: 'short' }) };
+    });
+    state.verified = !!v.verified;
+    state.required = v.required !== false;
+    save();
+  }
+
+  function banner() {
+    var host = document.querySelector('.vf');
+    if (!host) return;
+    var el = document.getElementById('vfBanner');
+    if (!el) {
+      el = document.createElement('p');
+      el.id = 'vfBanner';
+      el.className = 'vf-banner';
+      host.parentNode.insertBefore(el, host);
+    }
+    var id = state.identity || {};
+    if (!live || state.required === false) { el.hidden = true; return; }
+    el.hidden = false;
+    el.className = 'vf-banner' + (state.verified ? ' vf-banner-ok' : '');
+    el.innerHTML = state.verified
+      ? ic('badge-check', 'i-sm') + 'Your identity is verified. Withdrawals are open.'
+      : id.status === 'review'
+        ? ic('clock', 'i-sm') + 'Your ID is being reviewed, usually within a working day. Withdrawals open once it is approved.'
+        : ic('lock', 'i-sm') + 'Verify your identity to withdraw. Send a photo of your national ID, passport or driving licence below.';
+    icons();
+  }
 
   /* ======================================================= row states == */
   function renderState(item) {
@@ -53,6 +92,12 @@
             : '<span class="tag tag-wait">' + ic('triangle-alert', 'i-sm') + 'Complete, with a warning</span>') +
           '<button class="btn btn-quiet btn-sm" data-vf-assess>Retake</button>'
         : '<button class="btn btn-ghost btn-sm" data-vf-assess>Start</button>';
+    } else if (s.status === 'approved') {
+      html = '<span class="tag tag-up">' + ic('check', 'i-sm') + 'Verified</span>' +
+             (k === 'address' ? '<button class="btn btn-quiet btn-sm" data-vf-open>Replace</button>' : '');
+    } else if (s.status === 'rejected') {
+      html = '<span class="tag tag-down">' + ic('triangle-alert', 'i-sm') + 'Not accepted</span>' +
+             '<button class="btn btn-primary btn-sm" data-vf-open>' + ic('upload', 'i-sm') + 'Send again</button>';
     } else if (s.status === 'review') {
       html = '<span class="tag tag-wait">' + ic('clock', 'i-sm') + 'In review</span>' +
              '<button class="btn btn-quiet btn-sm" data-vf-open>Replace</button>';
@@ -68,6 +113,12 @@
     } else if (k !== 'assessment' && k !== 'tax' && s.status === 'review') {
       sub.dataset.orig = sub.dataset.orig || sub.textContent;
       sub.textContent = s.docName + ' · submitted ' + s.date + ' · usually reviewed within 24 hours';
+    } else if (k !== 'assessment' && k !== 'tax' && s.status === 'approved') {
+      sub.dataset.orig = sub.dataset.orig || sub.textContent;
+      sub.textContent = s.docName + ' · approved';
+    } else if (k !== 'assessment' && k !== 'tax' && s.status === 'rejected') {
+      sub.dataset.orig = sub.dataset.orig || sub.textContent;
+      sub.textContent = s.docName + ' was not accepted: ' + (s.reason || 'send a clearer copy');
     } else if (k === 'assessment' && s.status === 'done') {
       sub.dataset.orig = sub.dataset.orig || sub.textContent;
       sub.textContent = s.result === 'ok' ? 'Completed ' + s.date + ' · real-money trading is open'
@@ -159,7 +210,7 @@
             '<span class="vf-name">' + esc(s.file.name) + '</span>' +
             '<div class="vf-bar"><i style="width:' + s.pct + '%"></i></div>' +
             '<span class="vf-meta">' + (s.done
-              ? ic('check', 'i-sm') + 'Uploaded · ' + mb(s.file.size)
+              ? ic('check', 'i-sm') + 'Ready to send · ' + mb(s.file.size)
               : mb(s.file.size * s.pct / 100) + ' of ' + mb(s.file.size) + ' · ' + Math.floor(s.pct) + '%') +
             '</span>' +
           '</div>';
@@ -183,21 +234,9 @@
       s.url = /^image\//.test(file.type) ? URL.createObjectURL(file) : null;
       drawSlot(i);
 
-      /* a believable upload: 0.6 to 1.8 MB/s with jitter, never under a
-         second so a small photo still visibly travels */
-      var speed = (0.6 + Math.random() * 1.2) * 1048576;
-      var secs = Math.min(7, Math.max(1.1, file.size / speed));
-      var step = 100 / (secs * 10);
-      var t = setInterval(function () {
-        s.pct = Math.min(100, s.pct + step * (0.5 + Math.random()));
-        if (s.pct >= 100) { clearInterval(t); s.done = true; drawSlot(i); return; }
-        var el = slotEl(i);
-        if (!el) return clearInterval(t);
-        el.querySelector('.vf-bar i').style.width = s.pct + '%';
-        el.querySelector('.vf-meta').textContent =
-          mb(file.size * s.pct / 100) + ' of ' + mb(file.size) + ' · ' + Math.floor(s.pct) + '%';
-      }, 100);
-      timers.push(t);
+      /* the file is ready as soon as it is picked; it is sent on Submit */
+      s.pct = 100; s.done = true;
+      drawSlot(i);
     }
 
     function reset(i) {
@@ -212,21 +251,59 @@
       if (btn) btn.disabled = !slots.every(function (s) { return s.done; });
     }
 
+    /* a photo shrunk to 1600 px on its long side, as a JPEG data URL; a PDF as it is */
+    function prepare(file) {
+      return new Promise(function (resolve, reject) {
+        var reader = new FileReader();
+        reader.onerror = function () { reject(new Error('That file could not be read. Choose it again.')); };
+        if (!/^image\/(jpeg|png|webp)/.test(file.type)) {
+          if (file.type !== 'application/pdf') return reject(new Error('Use a JPG, PNG or PDF. ' + file.name + ' cannot be read here.'));
+          reader.onload = function () { resolve(reader.result); };
+          return reader.readAsDataURL(file);
+        }
+        reader.onload = function () {
+          var img = new Image();
+          img.onerror = function () { reject(new Error('That photo could not be read. Choose it again.')); };
+          img.onload = function () {
+            var scale = Math.min(1, 1600 / Math.max(img.width, img.height));
+            var c = document.createElement('canvas');
+            c.width = Math.round(img.width * scale); c.height = Math.round(img.height * scale);
+            var g = c.getContext('2d');
+            g.fillStyle = '#fff'; g.fillRect(0, 0, c.width, c.height);
+            g.drawImage(img, 0, 0, c.width, c.height);
+            resolve(c.toDataURL('image/jpeg', 0.85));
+          };
+          img.src = reader.result;
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
     function submit() {
       var btn = panel.querySelector('[data-vf-submit]');
-      var done = window.orbisBusy ? window.orbisBusy(btn, 'Submitting your documents') : function () {};
-      setTimeout(function () {
+      var done = window.orbisBusy ? window.orbisBusy(btn, 'Sending your documents') : function () {};
+      if (!live) {
         done();
-        var d = new Date();
-        state[k] = {
-          status: 'review', doc: doc.k, docName: doc.name,
-          date: d.getDate() + ' ' + d.toLocaleString('en-GB', { month: 'short' }),
-          files: slots.map(function (s) { return s.file.name; })
-        };
-        save();
-        closePanel();
-        toast(doc.name + ' submitted for review', 'check-circle-2');
-      }, 1300);
+        toast('Sign in to send your documents', 'triangle-alert');
+        return;
+      }
+      Promise.all(slots.map(function (s) { return prepare(s.file); }))
+        .then(function (urls) {
+          return API.post('/verification', {
+            kind: k, doc_type: DOC_KEY[doc.name] || doc.k,
+            files: slots.map(function (s, i) { return { side: s.side, data: urls[i] }; })
+          });
+        })
+        .then(function (v) {
+          done();
+          fromServer(v);
+          closePanel();
+          toast(doc.name + ' sent for review', 'check-circle-2');
+        })
+        .catch(function (err) {
+          done();
+          toast(err.message || 'That did not go through. Try again.', 'triangle-alert');
+        });
     }
 
     function closePanel() {
@@ -409,6 +486,12 @@
 
   /* ============================================================= wire == */
   var items = document.querySelectorAll('.vf-item[data-vf]');
+  if (live) {
+    API.get('/verification').then(function (v) {
+      fromServer(v);
+      items.forEach(function (item) { if (!item.classList.contains('vf-open')) renderState(item); });
+    }).catch(function () { /* offline: the saved state stands */ });
+  }
   items.forEach(function (item) {
     renderState(item);
     item.addEventListener('click', function (e) {
