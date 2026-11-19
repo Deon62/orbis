@@ -39,7 +39,7 @@
     return d.map(function (t, i) {
       var won = t.result === 'won';
       return '<div class="row-line conf-row">' +
-        '<div><b>' + t.id + '</b>' + (t.staged ? ' <i class="tag-demo">DEMO</i>' : '') +
+        '<div><b>' + t.id + '</b>' +
           '<span>' + t.sym + ' · ' + (t.dir === 'Rise' ? 'Buy' : 'Sell') + ' · ' + money(t.stake) + ' · settled ' + settledAt(t).full + '</span></div>' +
         '<span class="conf-pl mono ' + (won ? 'up' : 'down') + '">' + (won ? '+' : '') + money(t.pl) + '</span>' +
         '<button class="conf-dl" data-i="' + i + '" aria-label="Download confirmation ' + t.id + '">' +
