@@ -1416,10 +1416,13 @@
         Promise.all([API.post('/payments/deposit/card', { amount_usd: Number(amt.value) }), paystackInline()])
           .then(function (out) {
             var r = out[0], Pop = out[1];
-            if (!Pop || !r.access_code) { location.href = r.authorization_url; return; }   /* no popup: the hosted page */
+            /* the checkout link is checkout.paystack.com/<access_code>, so the code is there even
+               from an API that does not send it separately */
+            var code = r.access_code || String(r.authorization_url || '').split('?')[0].split('/').pop();
+            if (!Pop || !code) { location.href = r.authorization_url; return; }   /* no popup: the hosted page */
             done();
             var settled = false;
-            new Pop().resumeTransaction(r.access_code, {
+            new Pop().resumeTransaction(code, {
               onSuccess: function () { settled = true; confirmCard(r); },
               onCancel: function () {
                 if (settled) return;
