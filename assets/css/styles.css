@@ -2465,3 +2465,7 @@ a.contact-way:hover{ border-color:var(--line-strong); }
 /* the loader at the size of a line of text, for a wait that runs while you
    carry on (a USDT transfer on its way) rather than one that holds the screen */
 .loader-sm{ --size:.4px; flex:none; margin-top:2px; }
+
+/* card deposit: the secure-window note */
+.pay-secure{ display:flex; align-items:center; justify-content:center; gap:6px; margin-top:10px; }
+.pay-secure svg{ flex:none; color:var(--up); }

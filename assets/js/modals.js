@@ -1394,8 +1394,8 @@
         '<div class="kv"><span>Credited</span><b class="mono" id="mNet"></b></div>' +
       '</div>' +
       '<div class="modal-ft"><button class="btn btn-primary btn-block btn-lg" id="mGo"></button>' +
-        '<p class="hint center" style="margin-top:10px">Paystack takes the card details on its own secure page. ' +
-        'They never reach obisflow, and the card is saved for next time.</p></div>';
+        '<p class="hint center pay-secure">' + ic('lock', 'i-sm') + 'Card details go straight to Paystack in a secure ' +
+        'window. They never reach obisflow.</p></div>';
     open('Deposit by card', html, function (root) {
       var amt = root.querySelector('#mAmt'), go = root.querySelector('#mGo');
       function sync() {
@@ -1405,21 +1405,81 @@
         root.querySelector('#mMin').classList.toggle('hint-err', low && amt.value !== '');
         root.querySelectorAll('[data-amt]').forEach(function (c) { c.classList.toggle('active', Number(c.dataset.amt) === v); });
         go.disabled = low;
-        go.textContent = low ? 'Minimum deposit is ' + money(MIN_DEPOSIT) : 'Continue to Paystack · ' + money(v);
+        go.textContent = low ? 'Minimum deposit is ' + money(MIN_DEPOSIT) : 'Pay ' + money(v) + ' by card';
       }
       amt.addEventListener('input', sync);
       root.querySelectorAll('[data-amt]').forEach(function (c) {
         c.addEventListener('click', function () { amt.value = c.dataset.amt; sync(); });
       });
       go.addEventListener('click', function () {
-        /* the loader stays up through the redirect to Paystack */
-        var done = busy(go, 'Opening Paystack checkout');
-        API.post('/payments/deposit/card', { amount_usd: Number(amt.value) }).then(function (r) {
-          location.href = r.authorization_url;
-        }).catch(function (err) { done(); sync(); toast(err.message, 'triangle-alert'); });
+        var done = busy(go, 'Opening secure card form');
+        Promise.all([API.post('/payments/deposit/card', { amount_usd: Number(amt.value) }), paystackInline()])
+          .then(function (out) {
+            var r = out[0], Pop = out[1];
+            if (!Pop || !r.access_code) { location.href = r.authorization_url; return; }   /* no popup: the hosted page */
+            done();
+            var settled = false;
+            new Pop().resumeTransaction(r.access_code, {
+              onSuccess: function () { settled = true; confirmCard(r); },
+              onCancel: function () {
+                if (settled) return;
+                resultScreen('Deposit by card', false, 'Payment cancelled',
+                  'Nothing was charged. You can try again whenever you are ready.', [], liveCardDeposit);
+              },
+              onError: function (e) {
+                resultScreen('Deposit by card', false, 'The card form did not open',
+                  esc((e && e.message) || 'Paystack could not start the payment.'), [], liveCardDeposit);
+              }
+            });
+          })
+          .catch(function (err) { done(); sync(); toast(err.message, 'triangle-alert'); });
       });
       sync();
     }, depositStep1);
+  }
+
+  /* Paystack's inline script, loaded the first time a card payment starts.
+     Resolves to PaystackPop, or null if it cannot load (then we redirect). */
+  var paystackJs = null;
+  function paystackInline() {
+    if (window.PaystackPop) return Promise.resolve(window.PaystackPop);
+    if (!paystackJs) paystackJs = new Promise(function (resolve) {
+      var s = document.createElement('script');
+      s.src = 'https://js.paystack.co/v2/inline.js';
+      s.async = true;
+      s.onload = function () { resolve(window.PaystackPop || null); };
+      s.onerror = function () { paystackJs = null; resolve(null); };
+      setTimeout(function () { resolve(window.PaystackPop || null); }, 12000);
+      document.head.appendChild(s);
+    });
+    return paystackJs;
+  }
+
+  /* Paystack says the card went through; our API confirms it with Paystack
+     before the balance moves, so this waits on that, not on the popup */
+  function confirmCard(r) {
+    open('Deposit by card',
+      '<div class="modal-bd fa-working"><span class="loader"></span><p>Confirming your payment</p></div>');
+    var tries = 0;
+    (function check() {
+      API.get('/payments/' + r.reference).then(function (t) {
+        if (t && t.state === 'completed') {
+          if (window.orbisRefreshAccount) window.orbisRefreshAccount();
+          return resultScreen('Deposit by card', true, money(t.netUsd) + ' received',
+            'Your real account is ready to trade.',
+            [['Paid', (t.localCurrency === 'USD' ? money(t.localAmount) : 'KSh ' + Number(t.localAmount).toLocaleString('en-US'))],
+             ['Credited', money(t.netUsd)], ['New balance', money(t.balance)], ['Reference', t.reference]]);
+        }
+        if (t && t.state === 'failed') {
+          return resultScreen('Deposit by card', false, 'Payment not completed',
+            esc(t.failureReason || 'The card was not charged.'), [], liveCardDeposit);
+        }
+        if (++tries < 30) return setTimeout(check, 3000);
+        resultScreen('Deposit by card', true, 'Payment received, still confirming',
+          'Paystack has your payment. Your balance updates the moment it is confirmed, usually within a few minutes.',
+          [['Reference', r.reference]]);
+      }).catch(function () { if (++tries < 30) setTimeout(check, 3000); });
+    })();
   }
 
 
