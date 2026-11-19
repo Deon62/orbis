@@ -27,7 +27,7 @@
   };
 
   var WITHDRAW_FEE = 1;          /* flat platform fee, charged on top of the amount */
-  var MIN_DEPOSIT = 5;
+  var MIN_DEPOSIT = 1;
   var MIN_WITHDRAW = 5;          /* what arrives, before the fee is added */
 
   /* M-Pesa moves shillings, so every M-Pesa amount is shown in KSh too.
